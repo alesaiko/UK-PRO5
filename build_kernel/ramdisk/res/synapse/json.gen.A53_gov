@@ -1,0 +1,103 @@
+#!/sbin/sh
+
+cat << CTAG
+{
+    name:"A53 GOV",
+    elements:[
+	{ SPane:{
+		title:"A53 LITTLE Cores CPU Governor",
+		description:" The CPU governor determines how the CPU behaves in response to changes in workload."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SDescription:{
+		description:" WARNING: If you select INTERACTIVE governor, apply it to BOTH A57 & A53 clusters to prevent scaling or other unintended issues !!"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		title:"Current governor",
+		description:" Default is interactive.\n",
+		default:`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor`,
+		action:"governor /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor",
+		values:[
+`
+                        for GOVERNOR in \`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors\` ; do
+                                echo "\"$GOVERNOR\","
+                        done
+`
+                ],
+		notify:[
+			{
+				on:APPLY,
+				do:[ REFRESH, CANCEL ],
+				to:"/sys/devices/system/cpu/cpu0/cpufreq"
+			},
+			{
+				on:REFRESH,
+				do:REFRESH,
+				to:"/sys/devices/system/cpu/cpu0/cpufreq"
+			}
+		]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"Governor tunables",
+		description:" The various configuration items which are governor-dependent."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ STreeDescriptor:{
+		path:"/sys/devices/system/cpu/cpu0/cpufreq",
+		generic: {
+			directory: {
+				STreeDescriptor:{
+					generic: {
+						directory: {},
+						element: {
+							SGeneric: { title:"@BASENAME" }
+						}
+					},
+					exclude: [
+						"above_hispeed_delay",
+						"boostpulse",
+						"cpu_util",
+						"enforced_mode",
+						"go_hispeed_load",
+						"hispeed_freq",
+						"mode",
+						"sampling_rate_min",
+						"single_cluster0_min_freq",
+						"target_loads"
+					]
+				},
+			}
+		},
+		exclude: [
+			"affected_cpus",
+			"cpuinfo_cur_freq",
+			"cpuinfo_max_freq",
+			"cpuinfo_min_freq",
+			"cpuinfo_transition_latency",
+			"related_cpus",
+			"scaling_available_governors",
+			"scaling_cur_freq",
+			"scaling_driver",
+			"scaling_governor",
+			"scaling_max_freq",
+			"scaling_min_freq",
+			"scaling_setspeed",
+			"stats"
+		]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+    ]
+}
+CTAG

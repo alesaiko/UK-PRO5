@@ -379,7 +379,9 @@ static int fpc_irq_probe(struct platform_device *plat_dev)
 	if (error)
 		goto err_9;
 
+#ifdef CONFIG_EXYNOS_CPU_CORE_NUM_PM_QOS
 	pm_qos_add_request(&fp_cpu_num_min_qos, PM_QOS_CLUSTER0_NUM_MIN, 0); /*request new qos*/
+#endif
 	pm_qos_add_request(&fp_cpu_freq_qos, PM_QOS_CLUSTER0_FREQ_MIN, 0);	/*request new qos*/
 	pm_qos_add_request(&fp_cpu_mif_qos, PM_QOS_BUS_THROUGHPUT, 0);
 	pm_qos_add_request(&fp_cpu_int_qos, PM_QOS_DEVICE_THROUGHPUT, 0);

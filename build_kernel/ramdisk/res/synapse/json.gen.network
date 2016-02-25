@@ -1,0 +1,306 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:NETWORK,
+    elements:[
+    	{ SPane:{
+		title:"TCP Congestion Control",
+		description:" Select your preferred WIFI TCP algorithm. Regulates upload and download affecting throughput in various ways."
+    	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		description:" Default is Westwood+.\n",
+		default:`cat proc/sys/net/ipv4/tcp_congestion_control`,
+		action:"generic proc/sys/net/ipv4/tcp_congestion_control",
+		values:[`while read values; do busybox printf "%s, \n" $values; done < proc/sys/net/ipv4/tcp_available_congestion_control`]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ STitleBar:{
+		title:"Screen mirroring / AllShare Cast fix",
+		description:" Possible screen mirroring / AllShare Cast fix for rooted devices, works for some. Turn OFF WIFI first."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		description:" Default is Enabled.\n",
+		default:`echo $(/res/synapse/actions/mirror mirror_fix)`,
+		action:"mirror mirror_fix",
+		values:[Disabled, Enabled,]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ STitleBar:{
+		title:"Clean WIFI Lease"
+	}},
+	{ SDescription:{
+		description:" Clean WIFI DHCP IP Lease. Push the button to activate!"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SButton:{
+		label:"Clean WIFI Lease",
+		action:"devtools fix_wifi"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"WiFi Passwords",
+		description:" Save or restore your WiFi Passwords in /sdcard/SkyHigh/wifi/ folder."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SButton:{
+		label:"Save WiFi Passwords",
+		action:"network wifi_passwords_save"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SButton:{
+		label:"Restore WiFi Passwords",
+		action:"network wifi_passwords_restore"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"WiFi Power Mode",
+		description:" Control the WiFi power mode during screen ON & OFF.\n\nMax = Maximum power savings, but reduced throughput & increased AP latency.\n\nFast = Good power savings & throughput with a slightly reduced AP latency.\n\nOff = No power savings and normal throughput/AP latency (may help with HD video streaming performance).\n\nForce Off = No power savings and normal AP latency. (force off even if bt is active).\n\n ** Note: You MUST suspend and resume display for changes to take effect!\n"
+        }},
+	{ SSpacer:{
+		height:1
+	}},
+        { SOptionList:{
+		title:"WiFi Power Mode While Screen-ON",
+		description:" Default is Fast.\n",
+		default:"2",
+		unit:"",
+		action:"generic /sys/module/dhd/parameters/wifi_pm_awake",
+		values:{
+		   	"0":"Off",
+		   	"1":"Max",
+		   	"2":"Fast",
+		   	"3":"Force Off"
+		}
+	}},
+	{ SSpacer:{
+		   height:1
+	}},
+	{ SOptionList:{
+		title:"WiFi Power Mode While Screen-OFF",
+		description:" Default is Max.\n",
+		default:"1",
+		unit:"",
+		action:"generic /sys/module/dhd/parameters/wifi_pm_suspended",
+		values:{
+			"0":"Off",
+		   	"1":"Max",
+		   	"2":"Fast",
+		   	"3":"Force Off"
+		}
+	}},
+	{ SSpacer:{
+		   height:1
+	}},
+	{ SPane:{
+		title:"WiFi DTIM Interval",
+		description:" The Delivery Traffic Indication Message (DTIM) corresponds to every beacon sent by the WiFi access point, and lets clients know data is about to be exchanged. This interval allows your WiFi chip to sleep longer before it has to wake up and listen for broadcasts and multicasts. By default the driver uses a value of 0, which means it defaults to what the WiFi access point defaults to. Often times that default is 1 (as frequently as possible). The higher this number, the less power the WiFi radio will use, but the longer it will take before it knows data has arrived (aka push notifications may be slow)."
+        }},
+	{ SSpacer:{
+		   height:1
+	}},
+	{ SDescription:{
+		description:" ** Note: You MUST suspend and resume display for changes to take effect!"
+	}},
+	{ SSpacer:{
+		   height:1
+	}},
+	{ SDescription:{
+		description:" 0 = use access point's default value.\n 1:1 = every time (as fast as possible).\n 1:2 = every other one."
+	}},
+	{ SSpacer:{
+		   height:1
+	}},
+        { SSeekBar:{
+       		title:"WiFi DTIM Interval While Screen-ON",
+		description:" Sets the ratio of how many DTIMs the driver will skip while the screen is ON.\n",
+		default:0,
+		max:100,
+		min:0,
+		step:1,
+		unit:"",
+		action:"generic /sys/module/dhd/parameters/dtim_awake",
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+       		title:"WiFi DTIM Interval While Screen-OFF",
+		description:" Sets the ratio of how many DTIMs the driver will skip while the screen is OFF.\n",
+		default:0,
+		max:100,
+		min:0,
+		step:1,
+		unit:"",
+		action:"generic /sys/module/dhd/parameters/dtim_suspended",
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+        { SPane:{
+                title:"Wakelock control",
+                description:"Enter 1 to 8 (1 = stock, higher = lower wake time) for wlan_rx and wlan_ctrl wakelock control."
+        }},
+	{ SSpacer:{
+		height:1
+	}},
+        { SSeekBar:{
+                title:"Wireless wakelock timeout control",
+                description:"",
+                unit:"",
+                min:1,
+                max:8,
+                step:1,
+                default:`cat /sys/module/dhd/parameters/wl_divide`,
+                action:"generic /sys/module/dhd/parameters/wl_divide"
+        }},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"TCP/IP Network Security Tweak",
+		description:" Protect against SYN & DoS attack etc."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		description:" Default is Disabled.\n",
+		default:`echo $(/res/synapse/actions/network tcp_security)`,
+		action:"network tcp_security",
+		values:[Disabled, Enabled,]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"3G DNS Tweaks",
+		description:" Allows you to set the default DNS (Domain Name System) for 3G connections. Use this to potentially speed up your browsing experience (depending on DNS location) and improve your security.",
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SDescription:{
+		description:" * You must have a mobile data network connection before applying new DNS *"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+		title:"Current DNS",
+		refresh:3000,
+		action:"live dns"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		description:" Default is Disabled.\n",
+		default:`echo $(/res/synapse/actions/network dns)`,
+		action:"network dns",
+		values:[Disabled, Google, OpenDNS, Comodo, Level3, Norton_DNS, Smart_Viper,]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"GPS Region",
+		description:" Select GPS-Time-Zone for faster GPS lock! Use your region!\n A backup is automatically generated as /system/etc/gps.conf.bak, so by selecting Original will revert to original gps.conf."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SDescription:{
+		description:" Note: No_Action will automatically be set so Synapse will load chosen gps.conf on next boot."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+                title:"Current region",
+		refresh:3000,
+		action:"live gps"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		default:`echo $(/res/synapse/actions/network gps_zone)`,
+		action:"network gps_zone",
+		values:[No_Action, Original, Asia, Europe, Oceania, North_America, South_America, Africa,]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"IPv6-protocol",
+		description:" Test IPv6 connectivity before Disabling to ensure it's actually supported. After Enabling, allow up to 30s for IPv6 addresses to be added before testing."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SButton:{
+		label:"Test IPv6 connectivity",
+		action:"am start -a android.intent.action.VIEW -d http://test-ipv6.com/ > /dev/null;
+		echo Opening browser...;"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		title:"IPv6",
+		description:" Enable or disable IPv6. Default is Enabled.\n",
+		default:`echo $(/res/synapse/actions/network IPv6)`,
+		action:"network IPv6",
+		values:[Disabled, Enabled,]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		title:"IPv6 optimistic_dad",
+		description:" Perform Optimistic Duplicate Address Detection. Default is Enabled.\n",
+		default:1,
+		action:"generic /proc/sys/net/ipv6/conf/all/optimistic_dad",
+		values:{
+			0:"Disabled", 1:"Enabled"
+		}
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		title:"IPv6 use_optimistic",
+		description:" Default is Enabled.\n",
+		default:1,
+		action:"generic /proc/sys/net/ipv6/conf/all/use_optimistic",
+		values:{
+			0:"Disabled", 1:"Enabled"
+		}
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+    ]
+}
+CTAG

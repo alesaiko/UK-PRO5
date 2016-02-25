@@ -67,7 +67,7 @@ static long ratelimit_pages = 32;
 /*
  * Start background writeback (via writeback threads) at this percentage
  */
-int dirty_background_ratio = 10;
+int dirty_background_ratio = 20;
 
 /*
  * dirty_background_bytes starts at 0 (disabled) so that it is a function of
@@ -84,7 +84,7 @@ int vm_highmem_is_dirtyable;
 /*
  * The generator of dirty data starts writeback at this percentage
  */
-int vm_dirty_ratio = 20;
+int vm_dirty_ratio = 40;
 
 /*
  * vm_dirty_bytes starts at 0 (disabled) so that it is a function of
@@ -215,9 +215,18 @@ static unsigned long highmem_dirtyable_memory(unsigned long total)
 	unsigned long x = 0;
 
 	for_each_node_state(node, N_HIGH_MEMORY) {
-		struct zone *z = &NODE_DATA(node)->node_zones[ZONE_HIGHMEM];
+		unsigned long nr_pages;
+		struct zone *z =
+			&NODE_DATA(node)->node_zones[ZONE_HIGHMEM];
 
-		x += zone_dirtyable_memory(z);
+		nr_pages = zone_page_state(z, NR_FREE_PAGES) +
+		  zone_reclaimable_pages(z);
+		/*
+		 * make sure that the number of pages for this node
+		 * is never "negative".
+		 */
+		nr_pages -= min(nr_pages, z->dirty_balance_reserve);
+		x += nr_pages;
 	}
 	/*
 	 * Unreclaimable memory (kernel memory or anonymous memory
@@ -260,7 +269,7 @@ static unsigned long global_dirtyable_memory(void)
 	x += global_page_state(NR_ACTIVE_FILE);
 
 	if (!vm_highmem_is_dirtyable)
-		x -= highmem_dirtyable_memory(x);
+		x -= min(x, highmem_dirtyable_memory(x));
 
 	/* Subtract min_free_kbytes */
 	x -= min_t(unsigned long, x, min_free_kbytes >> (PAGE_SHIFT - 10));

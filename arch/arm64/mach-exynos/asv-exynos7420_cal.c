@@ -10,6 +10,11 @@
 * published by the Free Software Foundation.
 */
 
+#ifdef CONFIG_SEC_FACTORY
+#include <linux/kernel.h>
+#include <linux/i2c.h>
+#endif
+
 #include <mach/asv-exynos_cal.h>
 #include <mach/asv-exynos7420.h>
 #define EXYNOS_MAILBOX_RCC_MIN_MAX(x)		(S5P_VA_APM_SRAM + (0x3700) + (x * 0x4))
@@ -193,11 +198,45 @@ static void cal_print_asv_info(void)
 	pr_info("(ASV_TBL_BASE+0x3C)[31:22]  reserved16              	= %d\n", gasv_table_info.reserved16);
 }
 
+#ifdef CONFIG_SEC_FACTORY
+u32 set_table_ver2, table_ver2_1st, table_ver2_2nd;
+static int __init asv_table_ver2_setup(char *str)
+{
+	set_table_ver2 = (u32)simple_strtoul(str,NULL,0);
+	table_ver2_1st = set_table_ver2 & 0x000000FF;
+	table_ver2_2nd = (set_table_ver2 & 0x0000FF00) >> 8;
+	return 1;
+}
+__setup("asv_table_version2=", asv_table_ver2_setup);
+
+static ssize_t exynos7420_show_asv_info(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+	int count = 0;
+
+	/* Set asv group info to buf */
+	count += sprintf(&buf[count], "%u ", gasv_table_info.dvfs_asv_table_version);
+	count += sprintf(&buf[count], "%03x ", gasv_table_info.bigcpu_asv_group);
+	count += sprintf(&buf[count], "%03x ", gasv_table_info.g3d_asv_group);
+	count += sprintf(&buf[count], "%u ", table_ver2_1st);
+	count += sprintf(&buf[count], "%u ", table_ver2_2nd);
+	count += sprintf(&buf[count], "\n");
+
+	return count;
+}
+
+static DEVICE_ATTR(asv_info, 0664, exynos7420_show_asv_info, NULL);
+#endif
+
 static void asv_table_init(void)
 {
 	int i;
 	u32 *pasv_table;
 	unsigned long tmp;
+#ifdef CONFIG_SEC_FACTORY
+	int ret = 0;
+#endif
 
 	pasv_table = (u32 *)&gasv_table_info;
 	for(i = 0; i < ASV_TBL_ADDR_CNT + ASV_RCC_ADDR_CNT + ASV_EMA_ADDR_CNT; i++) {
@@ -210,10 +249,19 @@ static void asv_table_init(void)
 		gasv_table_info.dvfs_asv_table_version = MAX_ASV_TABLE;
 	}
 
-	if (gasv_table_info.dvfs_asv_table_version > 11 && gasv_table_info.dvfs_asv_table_version < 15) {
+	if (gasv_table_info.dvfs_asv_table_version == 13 || gasv_table_info.dvfs_asv_table_version == 14) {
 		pr_info("(ASV_TBL_VERSION %d ---> %d\n", gasv_table_info.dvfs_asv_table_version, 15);
 		gasv_table_info.dvfs_asv_table_version = 15;
 	}
+
+#ifdef CONFIG_SEC_FACTORY
+	/* create sysfs group */
+	ret = sysfs_create_file(power_kobj, &dev_attr_asv_info.attr);
+	if (ret) {
+		pr_err("%s: failed to create exynos7420 asv attribute file\n",
+				__func__);
+	}
+#endif
 }
 
 bool cal_is_fused_speed_grp(void)
@@ -233,12 +281,12 @@ u32 cal_get_table_ver(void)
 
 u32 cal_get_ids(void)
 {
-	return __raw_readl(CHIPID_ASV_INFO + 0x01C0) & 0xff;;
+	return 0;
 }
 
 u32 cal_get_hpm(void)
 {
-	return (__raw_readl(CHIPID_ASV_INFO + 0x01C4) >> 24) & 0xff;
+	return 0;
 }
 
 void cal_init(void)
@@ -438,7 +486,7 @@ u32 cal_get_ssa0_volt(u32 id)
 }
 u32 cal_get_ssa1_volt(u32 id, u32 subgrp,u32 volt)
 {
-	u32 ssa1_volt = 0, ssa1_value = 0;
+	u32 ssa1_volt, ssa1_value;
 
 	ssa1_value = gasv_table_info.ssa1_enable;
 	if (ssa1_value == 0)
@@ -648,6 +696,14 @@ u32 cal_get_volt(u32 id, s32 level)
 				(id == SYSC_DVFS_INT) ? volt_table_int_asv_v11[idx] :
 				(id == SYSC_DVFS_CAM) ? volt_table_cam_asv_v11[idx] :
 				NULL);
+	} else if(table_ver == 12) {
+		p_table = ((id == SYSC_DVFS_BIG) ? volt_table_big_asv_v12[idx] :
+				(id == SYSC_DVFS_LIT) ? volt_table_lit_asv_v12[idx] :
+				(id == SYSC_DVFS_G3D) ? volt_table_g3d_asv_v12[idx] :
+				(id == SYSC_DVFS_MIF) ? volt_table_mif_asv_v12[idx] :
+				(id == SYSC_DVFS_INT) ? volt_table_int_asv_v12[idx] :
+				(id == SYSC_DVFS_CAM) ? volt_table_cam_asv_v12[idx] :
+				NULL);
 	} else if(table_ver == 15) {
 		p_table = ((id == SYSC_DVFS_BIG) ? volt_table_big_asv_v15[idx] :
 				(id == SYSC_DVFS_LIT) ? volt_table_lit_asv_v15[idx] :
@@ -833,6 +889,12 @@ u32 cal_get_rcc(u32 id, s32 level)
 				(id == SYSC_DVFS_LIT) ? rcc_table_lit_asv_v11[idx] :
 				(id == SYSC_DVFS_G3D) ? rcc_table_g3d_asv_v11[idx] :
 				(id == SYSC_DVFS_MIF) ? rcc_table_mif_asv_v11[idx] :
+				NULL);
+	} else if (table_ver == 12) {
+		p_table = ((id == SYSC_DVFS_BIG) ? rcc_table_big_asv_v12[idx] :
+				(id == SYSC_DVFS_LIT) ? rcc_table_lit_asv_v12[idx] :
+				(id == SYSC_DVFS_G3D) ? rcc_table_g3d_asv_v12[idx] :
+				(id == SYSC_DVFS_MIF) ? rcc_table_mif_asv_v12[idx] :
 				NULL);
 	} else if (table_ver == 15) {
 		p_table = ((id == SYSC_DVFS_BIG) ? rcc_table_big_asv_v15[idx] :

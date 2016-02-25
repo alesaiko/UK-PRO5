@@ -6259,6 +6259,7 @@ static const struct trace_print_flags pageflag_names[] = {
 #if defined(CONFIG_MMC_DW_FMP_ECRYPT_FS) || defined(CONFIG_MMC_DW_FMP_DM_CRYPT) || defined(CONFIG_UFS_FMP_ECRYPT_FS) || defined(CONFIG_UFS_FMP_DM_CRYPT)
 	{1UL << PG_sensitive_data,	"sensitive_data"},
 #endif
+	{1UL << PG_readahead,           "PG_readahead"  },
 };
 
 static void dump_page_flags(unsigned long flags)

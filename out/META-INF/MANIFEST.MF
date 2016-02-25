@@ -1,0 +1,60 @@
+Manifest-Version: 1.0
+Created-By: 1.0 (Android SignApk)
+
+Name: system/build.prop
+SHA1-Digest: aCP/y40P1pYd6XdqWz4/INK+zj8=
+
+Name: file_contexts
+SHA1-Digest: +grcJNtt40qdwQd5h4TNnSVeKC8=
+
+Name: boot.img
+SHA1-Digest: mJoVXpVSrv92RWWvd0woNfs5CYg=
+
+Name: META-INF/machine_match
+SHA1-Digest: UVRm9ZQ4j1C/N5KvVjEP3rAUH7Q=
+
+Name: recovery.img
+SHA1-Digest: U2CS0YK+/iFZqkVPay38uqxYpDM=
+
+Name: bootloader
+SHA1-Digest: seQFFcZtWybSo36Espgcb7b9R5M=
+
+Name: ldfw
+SHA1-Digest: +4KDoEv1NJjrLDMs7Bl28itVcGg=
+
+Name: META-INF/com/google/android/update-binary
+SHA1-Digest: TUZN54VtN/m1YaH6v2t6kggzmvQ=
+
+Name: system.transfer.list
+SHA1-Digest: VsOiZNAd+eD5DxMS4RGCA/wL/qk=
+
+Name: system.patch.dat
+SHA1-Digest: 2jmj7l5rSw0yVb/vlWAYkK/YBwk=
+
+Name: logo.bin
+SHA1-Digest: gqSP3/Bvbkra8de3hAsfObGmJjo=
+
+Name: META-INF/com/google/android/updater-script
+SHA1-Digest: avCfueZR5niYu1XoTKiOepGp9mE=
+
+Name: META-INF/com/android/metadata
+SHA1-Digest: rjbviSu2cEZi6y0uNc+dlHij2oo=
+
+Name: META-INF/com/android/otacert
+SHA1-Digest: aTAN05ukTZLANkjA5ca7AKC7W4k=
+
+Name: custom/3rd-party/apk/TouchPal.apk
+SHA1-Digest: 4c/Tg7Zi86Z/vIxXJW9CBStJLbA=
+
+Name: META-INF/firmware_type
+SHA1-Digest: HD/QpHJPAO+2np65XoXygq1eCBc=
+
+Name: dtb
+SHA1-Digest: SpVFtDf82DFuzDamj8zXYX1t3xU=
+
+Name: system.new.dat
+SHA1-Digest: kCXnqpbzPE6+GqalwR/cYVnr58w=
+
+Name: META-INF/imei.dat
+SHA1-Digest: xE3eQMaMGOsiroUOw0C6LEP3LJI=
+

@@ -432,7 +432,7 @@ static int __init exynos7_devfreq_int_qos_init(void)
 	pm_qos_add_request(&min_int_thermal_qos, PM_QOS_DEVICE_THROUGHPUT, exynos7420_qos_int.default_qos);
 	pm_qos_add_request(&boot_int_qos, PM_QOS_DEVICE_THROUGHPUT, exynos7420_qos_int.default_qos);
 	pm_qos_update_request_timeout(&exynos7_int_qos,
-					exynos7_devfreq_int_profile.initial_freq, PM_BOOT_TIME_LEN * USEC_PER_SEC);
+					exynos7_devfreq_int_profile.initial_freq, 40000 * 1000);
 
 	return 0;
 }

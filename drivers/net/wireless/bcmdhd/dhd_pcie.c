@@ -826,9 +826,11 @@ static struct pm_qos_request cl1_max_num_req;
 static struct pm_qos_request cl0_min_num_req;
 static struct pm_qos_request cl0_max_num_req;
 
+#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
 extern bool lcd_is_on;
 extern void wifi_cl1_get(void);
 extern void wifi_cl1_release(void);
+#endif
 static void qos_unlock(void)
 {
 	REMOVE_PM_QOS(&cl1_min_qos_req);
@@ -912,7 +914,7 @@ static void qos_lock(int level)
 	} else {
 		REMOVE_PM_QOS(&int_qos_req);
 	}
-
+#ifdef CONFIG_EXYNOS_CPU_CORE_NUM_PM_QOS
 	if (cl1_min_num) {
 		UPDATE_PM_QOS(&cl1_min_num_req,
 			PM_QOS_CLUSTER1_NUM_MIN, cl1_min_num);
@@ -939,6 +941,7 @@ static void qos_lock(int level)
 	} else {
 		REMOVE_PM_QOS(&cl0_max_num_req);
 	}
+#endif
 }
 
 static unsigned long dhd_last_txbytes = 0;
@@ -989,7 +992,7 @@ bool dhd_bus_watchdog(dhd_pub_t *dhd)
         } else {
             current_level = 100;
         }
-
+#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
 	if(current_level < 3 && false == status_bl1 && false == lcd_is_on){
 		wifi_cl1_get();
 		status_bl1 = true;
@@ -997,7 +1000,7 @@ bool dhd_bus_watchdog(dhd_pub_t *dhd)
 		wifi_cl1_release();
 		status_bl1 = false;
 	}
-
+#endif
 	//printk("******level:%d,%s\n",current_level,__FUNCTION__);
 	if(old_level != current_level){
 		if(100 == current_level) 

@@ -68,6 +68,8 @@ enum exynos7420_clks {
 	disp_last = 299,
 
 	/* number for ccore 300 */
+	aclk_lh_g3d0 = 300, aclk_lh_g3d1,
+
 	/* number for audio starts from 400 */
 	aclk_dmac = 400, aclk_sramc, aclk_audnp_133,
 	aclk_acel_lh_async_si_top_133, aclk_smmu_aud,
@@ -636,6 +638,11 @@ struct samsung_pll_rate_table table_apollo[] = {
 };
 struct samsung_pll_rate_table table_aud[] = {
 	{491520000U,	1, 20,	0, 31457},
+	{479232000U,    2, 40, 0, -4194},
+	{442368000U,    2, 37, 0, -8913},
+	{393216000U,    3, 98, 1, 19923},
+	{351000000U,    2, 59, 1, -32768},
+	{320000000U,    3, 80, 1, 0},
 	{196608000U,	1, 33,	2, -15204},
 	{0,		0, 0, 0, 0},
 };
@@ -663,6 +670,7 @@ struct samsung_pll_rate_table table_mfc[] = {
 };
 
 struct samsung_pll_rate_table table_g3d[] = {
+	{852000000U,	2, 71, 0, 0},
 	{772000000U,	6, 193, 0, 0},
 	{700000000U,	6, 175, 0, 0},
 	{600000000U,	3, 75, 0, 0},
@@ -670,6 +678,8 @@ struct samsung_pll_rate_table table_g3d[] = {
 	{420000000U,	3, 105, 1, 0},
 	{350000000U,	6, 175, 1, 0},
 	{266000000U,	6, 133, 1, 0},
+	{160000000U,	6, 320,	3, 0},
+	{100000000U,   	6, 400, 4, 0},
 	{0,		0, 0, 0, 0},
 };
 
@@ -677,6 +687,7 @@ struct samsung_pll_rate_table table_disp[] = {
 	{266000000U,	3, 67, 1, -32768},
 	{252000000U,	2, 42, 1, 0},
 	{240000000U,	1, 20, 1, 0},
+	{142000000U,	3, 71, 2, 0},
 	{133000000U,	3, 67, 2, -32768},
 	{126000000U,	1, 21, 2, 0},
 	{96000000U,	1, 32, 3, 0},
@@ -701,16 +712,21 @@ struct samsung_pll_rate_table table_cam[] = {
 
 struct samsung_pll_rate_table table_mif[] = {
 	{3104000000U,	3, 388, 0, 0},
+	{2928000000U,	2, 244, 0, 0},
 	{2912000000U,	3, 364, 0, 0},
 	{2528000000U,	3, 316, 0, 0},
 	{2136000000U,	2, 178, 0, 0},
 	{2052000000U, 	2, 171, 0, 0},
+	{1672000000U,	3, 209, 0, 0},
 	{1656000000U,	3, 207, 0, 0},
+	{1270000000U,	6, 635, 1, 0},
 	{1264000000U,	3, 316, 1, 0},
 	{1086000000U,	2, 181, 1, 0},
+	{836000000U,	3, 209, 1, 0},
 	{832000000U,	3, 208, 1, 0},
 	{696000000U,	3, 348, 2, 0},
 	{552000000U,	3, 276, 2, 0},
+	{518000000U,	3, 259, 2, 0},
 	{334000000U,	3, 334, 3, 0},
 	{266000000U,	3, 266, 3, 0},
 	{200000000U,	3, 200, 3, 0},
@@ -2745,6 +2761,10 @@ static struct samsung_gate exynos7420_gate_clks[] __initdata = {
 	/* ccore */
 	GATE(none, "aclk_cci", "usermux_aclk_ccore_532", \
 			EXYNOS7420_ENABLE_ACLK_CCORE0, 0, CLK_GATE_ENABLE, NULL),
+	GATE(aclk_lh_g3d0, "aclk_lh_g3d0", "usermux_aclk_ccore_532", \
+			EXYNOS7420_ENABLE_ACLK_CCORE0, 22, CLK_IGNORE_UNUSED, NULL),
+	GATE(aclk_lh_g3d1, "aclk_lh_g3d1", "usermux_aclk_ccore_532", \
+			EXYNOS7420_ENABLE_ACLK_CCORE0, 23, CLK_IGNORE_UNUSED, NULL),
 	GATE(rtc, "pclk_rtc", "usermux_aclk_ccore_133", \
 			EXYNOS7420_ENABLE_PCLK_CCORE, 8, 0, NULL),
 	GATE(none, "aclk_noc_p_ccore", "usermux_aclk_ccore_133", \

@@ -65,9 +65,9 @@ enum pm_qos_flags_status {
 #define PM_QOS_CLUSTER0_FREQ_MIN_DEFAULT_VALUE	0
 #define PM_QOS_CLUSTER0_FREQ_MAX_DEFAULT_VALUE	INT_MAX
 #ifdef CONFIG_EXYNOS_CPU_CORE_NUM_PM_QOS
-#define PM_QOS_CLUSTER1_NUM_MIN_DEFAULT_VALUE  0
+#define PM_QOS_CLUSTER1_NUM_MIN_DEFAULT_VALUE  4
 #define PM_QOS_CLUSTER1_NUM_MAX_DEFAULT_VALUE  4
-#define PM_QOS_CLUSTER0_NUM_MIN_DEFAULT_VALUE  0
+#define PM_QOS_CLUSTER0_NUM_MIN_DEFAULT_VALUE  4
 #define PM_QOS_CLUSTER0_NUM_MAX_DEFAULT_VALUE  4
 #endif
 #ifdef CONFIG_EXYNOS_GPU_PM_QOS
@@ -78,7 +78,7 @@ enum pm_qos_flags_status {
 #define PM_QOS_FLAG_NO_POWER_OFF	(1 << 0)
 #define PM_QOS_FLAG_REMOTE_WAKEUP	(1 << 1)
 
-#define PM_BOOT_TIME_LEN                30
+//#define PM_BOOT_TIME_LEN                30
 
 
 #define pm_qos_add_request(arg...)	do {				\

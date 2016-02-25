@@ -1,0 +1,60 @@
+#!/sbin/sh
+
+cat << CTAG
+{
+    name:"A57 CPU",
+    elements:[
+        { STitleBar:{
+                title:"A57 big Cores Frequency Scaling"
+        }},
+	{ SDescription:{
+		description:" Note: Settings may automatically change due to Samsung DVFS. For better control, suggest to disable DVFS using Xposed DVFS Disabler app. WARNING: Not all frequencies outside defaults may be stable for your device!"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+                  title:"A57 big Cores live frequency",
+                  refresh:500,
+                  action:"live LiveCPUFrequency_big"
+        }},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+       		title:"A57 big Cores MAX frequency",
+		description:" Set the maximum frequency the CPU scales up to.\n",
+		default:2100000,
+		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/ren_max_freq",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster1_freq_table); do
+				LABEL=$(expr $FREQ / 1000)
+				echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+       		title:"A57 big Cores MIN frequency",
+		description:" Set the minimum frequency the CPU scales down to.\n",
+		default:800000,
+		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq",
+		values:{
+`
+			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster1_freq_table); do
+				LABEL=$(expr $FREQ / 1000)
+				echo "$FREQ:\"${LABEL} MHz\", "
+			done
+`
+		}
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+    ]
+}
+CTAG

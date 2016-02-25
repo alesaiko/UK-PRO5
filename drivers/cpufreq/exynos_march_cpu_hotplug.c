@@ -1597,8 +1597,8 @@ static int __init march_cpu_hotplug_init(void)
 	pm_qos_add_request(&cluster1_num_booster_min_qos, PM_QOS_CLUSTER1_NUM_MIN, 0);
 	pm_qos_add_request(&cluster1_num_boot_min_qos, PM_QOS_CLUSTER1_NUM_MIN, 0);
 	pm_qos_add_request(&cluster0_num_boot_min_qos, PM_QOS_CLUSTER0_NUM_MIN, 0);
-	pm_qos_update_request_timeout(&cluster1_num_boot_min_qos, NR_CLUST1_CPUS, PM_BOOT_TIME_LEN * USEC_PER_SEC);
-	pm_qos_update_request_timeout(&cluster0_num_boot_min_qos, NR_CLUST0_CPUS, PM_BOOT_TIME_LEN * USEC_PER_SEC);
+	pm_qos_update_request_timeout(&cluster1_num_boot_min_qos, NR_CLUST1_CPUS, 40 * USEC_PER_SEC);
+	pm_qos_update_request_timeout(&cluster0_num_boot_min_qos, NR_CLUST0_CPUS, 40 * USEC_PER_SEC);
 
 	pm_qos_add_request(&sys_cluster1_num_max_qos, PM_QOS_CLUSTER1_NUM_MAX, NR_CLUST1_CPUS);
 	pm_qos_add_request(&sys_cluster1_num_min_qos, PM_QOS_CLUSTER1_NUM_MIN, 0);

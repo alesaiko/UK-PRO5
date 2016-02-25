@@ -296,8 +296,6 @@ struct exynos_context {
 	bool hwcnt_bt_clk;
 #endif
 
-	int target_lock_type;
-
 	int polling_speed;
 	int runtime_pm_delay_time;
 	bool pmqos_int_disable;

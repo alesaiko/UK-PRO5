@@ -1,9 +1,8 @@
-/* linux/arch/arm/mach-exynos4/include/mach/hardware.h
+/* linux/arch/arm/mach-exynos/include/mach/hardware.h
  *
- * Copyright (c) 2010-2011 Samsung Electronics Co., Ltd.
- *		http://www.samsung.com
+ * Copyright (c) 2014 MEIZU Technology Co., Ltd.
  *
- * EXYNOS4 - Hardware support
+ * Meizu Mobilephone Hardware information support
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -13,7 +12,11 @@
 #ifndef __ASM_ARCH_HARDWARE_H
 #define __ASM_ARCH_HARDWARE_H __FILE__
 
-/* currently nothing here, placeholder */
 u32 meizu_board_version(void);
 
+/*fp supplier*/
+#define FP_IDEX 	1
+#define FP_GOODIX	2
+
+extern void fp_get(int fp);
 #endif /* __ASM_ARCH_HARDWARE_H */

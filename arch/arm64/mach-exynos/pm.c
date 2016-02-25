@@ -18,6 +18,7 @@
 
 #include <mach/regs-clock.h>
 #include <mach/regs-pmu.h>
+#include <mach/pmu.h>
 #ifndef CONFIG_SOC_EXYNOS7580
 #include <mach/exynos-powermode.h>
 #else
@@ -182,6 +183,29 @@ static struct sfr_save save_rcg[] = {
 };
 #endif
 
+static int check_powerstate_nonbootcpus(void)
+{
+	extern struct exynos_cpu_power_ops exynos_cpu;
+	extern struct cpumask hmp_slow_cpu_mask;
+	int cpu;
+	int ret = false;
+
+	for_each_cpu_and(cpu, cpu_possible_mask, &hmp_slow_cpu_mask) {
+		if (cpu == 0)
+			continue;
+		ret |= exynos_cpu.power_state(cpu);
+	}
+
+	return ret;
+}
+
+extern unsigned long *reference_current_freq;
+
+void print_current_clock(void)
+{
+	pr_info("[MIF] %luKhz\n", *reference_current_freq);
+}
+
 static int exynos_pm_enter(suspend_state_t state)
 {
 	int ret;
@@ -194,6 +218,12 @@ static int exynos_pm_enter(suspend_state_t state)
 	/* Save SFR list for RCG */
 	exynos_save_sfr(save_rcg, ARRAY_SIZE(save_rcg));
 #endif
+	do {
+		if (!check_powerstate_nonbootcpus())
+			break;
+	} while (true);
+
+	print_current_clock();
 
 	/* This will also act as our return point when
 	 * we resume as it saves its own register state and restores it

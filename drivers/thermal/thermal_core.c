@@ -1567,8 +1567,8 @@ struct thermal_zone_device *thermal_zone_device_register(const char *type,
 
 	/* Bind cooling devices for this zone */
 	bind_tz(tz);
-        
-  	INIT_DELAYED_WORK(&(tz->poll_queue), thermal_zone_device_check);
+
+	INIT_DELAYED_WORK(&(tz->poll_queue), thermal_zone_device_check);
 
 	if (!tz->ops->get_temp)
 		thermal_zone_device_set_polling(tz, 0);

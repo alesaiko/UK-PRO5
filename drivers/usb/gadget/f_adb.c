@@ -687,7 +687,9 @@ static int adb_setup(void)
 		goto err;
 
 	pm_qos_add_request(&adb_cluster0_qos, PM_QOS_CLUSTER0_FREQ_MIN, 0);
+#ifdef CONFIG_EXYNOS_CPU_CORE_NUM_PM_QOS
 	pm_qos_add_request(&adb_cluster1_num_qos, PM_QOS_CLUSTER1_NUM_MIN, 0);
+#endif
 	pm_qos_add_request(&adb_cluster1_qos, PM_QOS_CLUSTER1_FREQ_MIN, 0);
 	pm_qos_add_request(&adb_bus_qos, PM_QOS_BUS_THROUGHPUT, 0);
 	pm_qos_add_request(&adb_device_qos, PM_QOS_DEVICE_THROUGHPUT, 0);

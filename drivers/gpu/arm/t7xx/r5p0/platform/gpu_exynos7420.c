@@ -52,7 +52,8 @@ void __iomem *g3d1_outstanding_regs;
 
 /*  clk,vol,abb,min,max,down stay, pm_qos mem, pm_qos int, pm_qos cpu_kfc_min, pm_qos cpu_egl_max */
 static gpu_dvfs_info gpu_dvfs_table_default[] = {
-	{772, 900000, 0, 98, 100, 1, 0, 1552000, 400000, 1500000, 1300000},
+	{852, 900000, 0, 98, 100, 1, 0, 1552000, 400000, 1500000, 1300000},
+	{772, 900000, 0, 98,  99, 1, 0, 1552000, 400000, 1500000, 1300000},
 	{700, 900000, 0, 98,  99, 1, 0, 1552000, 400000, 1500000, 1300000},
 	{600, 900000, 0, 78,  85, 1, 0, 1552000, 413000, 1500000, 1300000},
 	{544, 900000, 0, 78,  85, 1, 0, 1026000, 413000, 1500000, 1800000},
@@ -70,13 +71,13 @@ static int mif_min_table[] = {
 };
 
 static int hpm_freq_table[] = {
-	/* 772, 700, 600, 544, 420, 350, 266 */
-	3, 3, 3, 3, 2, 2, 2,
+	/* 852, 772, 700, 600, 544, 420, 350, 266 */
+	3, 3, 3, 3, 3, 2, 2, 2,
 };
 
 static gpu_attribute gpu_config_attributes[] = {
-	{GPU_MAX_CLOCK, 772},
-	{GPU_MAX_CLOCK_LIMIT, 700},
+	{GPU_MAX_CLOCK, 852},
+	{GPU_MAX_CLOCK_LIMIT, 852},
 	{GPU_MIN_CLOCK, 266},
 	{GPU_DVFS_START_CLOCK, 266},
 	{GPU_DVFS_BL_CONFIG_CLOCK, 266},
@@ -100,10 +101,10 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_COLD_MINIMUM_VOL, 0},
 	{GPU_VOLTAGE_OFFSET_MARGIN, 37500},
 	{GPU_TMU_CONTROL, 1},
-	{GPU_TEMP_THROTTLING1, 544},
-	{GPU_TEMP_THROTTLING2, 350},
-	{GPU_TEMP_THROTTLING3, 266},
-	{GPU_TEMP_THROTTLING4, 266},
+	{GPU_TEMP_THROTTLING1, 600},
+	{GPU_TEMP_THROTTLING2, 544},
+	{GPU_TEMP_THROTTLING3, 420},
+	{GPU_TEMP_THROTTLING4, 350},
 	{GPU_TEMP_TRIPPING, 266},
 	{GPU_POWER_COEFF, 443}, /* all core on param */
 	{GPU_DVFS_TIME_INTERVAL, 5},
@@ -129,9 +130,9 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_RUNTIME_PM_DELAY_TIME, 50},
 	{GPU_DVFS_POLLING_TIME, 30},
 	{GPU_PMQOS_INT_DISABLE, 1},
-	{GPU_PMQOS_MIF_MAX_CLOCK, 1456000},
-	{GPU_PMQOS_MIF_MAX_CLOCK_BASE, 700},
-	{GPU_CL_DVFS_START_BASE, 700},
+	{GPU_PMQOS_MIF_MAX_CLOCK, 1552000},
+	{GPU_PMQOS_MIF_MAX_CLOCK_BASE, 852},
+	{GPU_CL_DVFS_START_BASE, 350},
 	{GPU_DEBUG_LEVEL, DVFS_WARNING},
 	{GPU_TRACE_LEVEL, TRACE_ALL},
 };
@@ -164,6 +165,8 @@ struct clk *fout_g3d_pll;
 struct clk *aclk_g3d;
 struct clk *mout_g3d;
 struct clk *sclk_hpm_g3d;
+struct clk *aclk_lh_g3d0;
+struct clk *aclk_lh_g3d1;
 #ifdef CONFIG_REGULATOR
 struct regulator *g3d_regulator;
 #endif /* CONFIG_REGULATOR */
@@ -347,6 +350,26 @@ err:
 	return ret;
 }
 
+static int gpu_enable_clock(struct exynos_context *platform)
+{
+	int ret = 0;
+	ret = clk_prepare_enable(aclk_lh_g3d0);
+	if (ret)
+		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "%s: g3d aclk lh g3d0 enable fail.\n", __func__);
+
+	ret = clk_prepare_enable(aclk_lh_g3d1);
+	if (ret)
+		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "%s: g3d aclk lh g3d1 enable fail.\n", __func__);
+
+	return 0;
+}
+static int gpu_disable_clock(struct exynos_context *platform)
+{
+	clk_disable_unprepare(aclk_lh_g3d0);
+	clk_disable_unprepare(aclk_lh_g3d1);
+
+	return 0;
+}
 static int gpu_get_clock(struct kbase_device *kbdev)
 {
 	struct exynos_context *platform = (struct exynos_context *) kbdev->platform_context;
@@ -385,7 +408,21 @@ static int gpu_get_clock(struct kbase_device *kbdev)
 		return -1;
 	}
 
+	aclk_lh_g3d0 = clk_get(kbdev->dev, "aclk_lh_g3d0");
+	if (IS_ERR(aclk_lh_g3d0)) {
+		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "%s: failed to clk_get [aclk_lh_g3d0]\n", __func__);
+		return -1;
+	}
+
+	aclk_lh_g3d1 = clk_get(kbdev->dev, "aclk_lh_g3d1");
+	if (IS_ERR(aclk_lh_g3d1)) {
+		GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "%s: failed to clk_get [aclk_lh_g3d1]\n", __func__);
+		return -1;
+	}
+
 	__raw_writel(0x1, EXYNOS7420_MUX_SEL_G3D);
+
+	gpu_enable_clock(platform);
 
 	return 0;
 }
@@ -488,8 +525,8 @@ static struct gpu_control_ops ctr_ops = {
 	.set_clock = gpu_set_clock,
 	.set_clock_pre = NULL,
 	.set_clock_post = NULL,
-	.enable_clock = NULL,
-	.disable_clock = NULL,
+	.enable_clock = gpu_enable_clock,
+	.disable_clock = gpu_disable_clock,
 };
 
 struct gpu_control_ops *gpu_get_control_ops(void)

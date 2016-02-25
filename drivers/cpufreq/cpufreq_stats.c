@@ -26,6 +26,7 @@
 #ifdef CONFIG_BL_SWITCHER
 #include <asm/bL_switcher.h>
 #endif
+#include <mach/cpufreq.h>
 
 static spinlock_t cpufreq_stats_lock;
 
@@ -54,16 +55,19 @@ struct all_freq_table {
 	unsigned int table_size;
 };
 
+struct bL_freq_table {
+	unsigned int *freq_table;
+	u64 *time_in_state;
+	unsigned int table_size;
+};
+
+static struct bL_freq_table *bL_freq_table;
+
 static struct all_freq_table *all_freq_table;
 
 static DEFINE_PER_CPU(struct all_cpufreq_stats *, all_cpufreq_stats);
 static DEFINE_PER_CPU(struct cpufreq_stats *, cpufreq_stats_table);
 static DEFINE_PER_CPU(struct cpufreq_stats *, prev_cpufreq_stats_table);
-
-#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-struct time_in_state_info cl0_time_in_state;
-struct time_in_state_info cl1_time_in_state;
-#endif
 
 struct cpufreq_stats_attribute {
 	struct attribute attr;
@@ -90,18 +94,12 @@ static int cpufreq_stats_update(unsigned int cpu)
 		if (all_stat)
 			all_stat->time_in_state[stat->last_index] +=
 					cur_time - stat->last_time;
+		if (bL_freq_table && cpu == NR_CLUST0_CPUS)
+			bL_freq_table->time_in_state[stat->last_index] +=
+					cur_time - stat->last_time;
 	}
 	stat->last_time = cur_time;
-
-#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if (cpu == 0)
-		cl0_time_in_state.time_in_state[stat->last_index] = stat->time_in_state[stat->last_index];
-	else if (cpu == 4)
-		cl1_time_in_state.time_in_state[stat->last_index] = stat->time_in_state[stat->last_index];
-#endif
-
 	spin_unlock(&cpufreq_stats_lock);
-
 	return 0;
 }
 
@@ -141,6 +139,37 @@ static int get_index_all_cpufreq_stat(struct all_cpufreq_stats *all_stat,
 			return i;
 	}
 	return -1;
+}
+
+static ssize_t show_bL_all_time_in_state(struct kobject *kobj,
+		struct kobj_attribute *attr, char *buf)
+{
+	ssize_t len = 0;
+	unsigned int cpu = 0;
+	int i;
+	struct cpufreq_stats *stat;
+
+	stat = per_cpu(cpufreq_stats_table, cpu);
+	if (!stat)
+		return 0;
+
+	cpufreq_stats_update(stat->cpu);
+	for (i = 0; i < stat->state_num; i++) {
+		len += sprintf(buf + len, "%u %llu\n", stat->freq_table[i],
+			(unsigned long long)
+			cputime64_to_clock_t(stat->time_in_state[i]));
+	}
+
+	if (!bL_freq_table) {
+		pr_info("%s: bL_freq_table is null!\n", __func__);
+		return len;
+	}
+	for (i = 0; i < bL_freq_table->table_size; i++) {
+		len += sprintf(buf + len, "%u %llu\n", bL_freq_table->freq_table[i],
+			(unsigned long long) cputime64_to_clock_t(bL_freq_table->time_in_state[i]));
+	}
+
+	return len;
 }
 
 static ssize_t show_all_time_in_state(struct kobject *kobj,
@@ -249,6 +278,9 @@ static struct attribute_group stats_attr_group = {
 	.name = "stats"
 };
 
+static struct kobj_attribute _attr_bL_all_time_in_state = __ATTR(bL_all_time_in_state,
+		0444, show_bL_all_time_in_state, NULL);
+
 static struct kobj_attribute _attr_all_time_in_state = __ATTR(all_time_in_state,
 		0444, show_all_time_in_state, NULL);
 
@@ -268,7 +300,7 @@ static void cpufreq_stats_free_table(unsigned int cpu)
 {
 	struct cpufreq_stats *stat = per_cpu(cpufreq_stats_table, cpu);
 	struct cpufreq_stats *prev_stat = per_cpu(prev_cpufreq_stats_table, cpu);
-	unsigned int alloc_size;
+	size_t alloc_size;
 
 	if (stat) {
 		prev_stat = kzalloc(sizeof(*stat), GFP_KERNEL);
@@ -344,13 +376,26 @@ static void cpufreq_allstats_free(void)
 	}
 }
 
+static void cpufreq_bL_allstats_free(void)
+{
+    sysfs_remove_file(cpufreq_global_kobject,
+                      &_attr_bL_all_time_in_state.attr);
+
+    if (bL_freq_table) {
+        kfree(bL_freq_table->freq_table);
+        kfree(bL_freq_table->time_in_state);
+        kfree(bL_freq_table);
+        bL_freq_table = NULL;
+    }
+}
+
 static int cpufreq_stats_create_table(struct cpufreq_policy *policy,
 		struct cpufreq_frequency_table *table)
 {
 	unsigned int i, j, count = 0, ret = 0;
 	struct cpufreq_stats *stat;
 	struct cpufreq_policy *data;
-	unsigned int alloc_size;
+	size_t alloc_size;
 	unsigned int cpu = policy->cpu;
 	struct cpufreq_stats *prev_stat = per_cpu(prev_cpufreq_stats_table, cpu);
 
@@ -396,17 +441,6 @@ static int cpufreq_stats_create_table(struct cpufreq_policy *policy,
 	}
 	stat->freq_table = (unsigned int *)(stat->time_in_state + count);
 
-#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if (cpu == 0 && cl0_time_in_state.init_complete ==0) {
-		cl0_time_in_state.time_in_state = kzalloc(alloc_size, GFP_KERNEL);
-		cl0_time_in_state.freq_table = (unsigned int *)(cl0_time_in_state.time_in_state + count);
-	}
-	else if (cpu == 4 && cl1_time_in_state.init_complete == 0) {
-		cl1_time_in_state.time_in_state = kzalloc(alloc_size, GFP_KERNEL);
-		cl1_time_in_state.freq_table = (unsigned int *)(cl1_time_in_state.time_in_state + count);
-	}
-#endif
-
 #ifdef CONFIG_CPU_FREQ_STAT_DETAILS
 	stat->trans_table = stat->freq_table + count;
 #endif
@@ -415,30 +449,10 @@ static int cpufreq_stats_create_table(struct cpufreq_policy *policy,
 		unsigned int freq = table[i].frequency;
 		if (freq == CPUFREQ_ENTRY_INVALID)
 			continue;
-		if (freq_table_get_index(stat, freq) == -1) {
-#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-			if(cpu == 0 && cl0_time_in_state.init_complete == 0) {
-				cl0_time_in_state.freq_table[j] = freq;
-			}
-			else if (cpu == 4 && cl1_time_in_state.init_complete == 0) {
-				cl1_time_in_state.freq_table[j] = freq;
-			}
-#endif
+		if (freq_table_get_index(stat, freq) == -1)
 			stat->freq_table[j++] = freq;
-		}
 	}
 	stat->state_num = j;
-
-#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if (cpu == 0 && cl0_time_in_state.init_complete == 0) {
-		cl0_time_in_state.state_num = stat->state_num;
-		cl0_time_in_state.init_complete = 1;
-	}
-	else if (cpu == 4 && cl1_time_in_state.init_complete == 0) {
-		cl1_time_in_state.state_num = stat->state_num;
-		cl1_time_in_state.init_complete = 1;
-	}
-#endif
 
 	if (prev_stat) {
 		memcpy(stat->time_in_state, prev_stat->time_in_state, alloc_size);
@@ -506,9 +520,40 @@ static void create_all_freq_table(void)
 	return;
 }
 
+static void create_bL_freq_table(void)
+{
+	bL_freq_table = kzalloc(sizeof(struct bL_freq_table), GFP_KERNEL);
+	if (!bL_freq_table)
+		pr_warn("could not allocate memory for bL_freq_table \n");
+	return;
+}
+
+static void add_bL_freq_table(unsigned int freq)
+{
+	size_t size;
+	size = sizeof(unsigned int) * (bL_freq_table->table_size + 1);
+	bL_freq_table->freq_table = krealloc(bL_freq_table->freq_table,
+			size, GFP_ATOMIC);
+	if (IS_ERR(bL_freq_table->freq_table)) {
+		pr_warn("Could not reallocate memory for freq_table\n");
+		bL_freq_table->freq_table = NULL;
+		return;
+	}
+	size = sizeof(unsigned long long) * (bL_freq_table->table_size + 1);
+	bL_freq_table->time_in_state = krealloc(bL_freq_table->time_in_state,
+			size, GFP_ATOMIC);
+	if (IS_ERR(bL_freq_table->time_in_state)) {
+		pr_warn("Could not reallocate memory for freq_table\n");
+		bL_freq_table->time_in_state = NULL;
+		return;
+	}
+	bL_freq_table->freq_table[bL_freq_table->table_size] = freq;
+	bL_freq_table->time_in_state[bL_freq_table->table_size++] = 0ULL;
+}
+
 static void add_all_freq_table(unsigned int freq)
 {
-	unsigned int size;
+	size_t size;
 	size = sizeof(unsigned int) * (all_freq_table->table_size + 1);
 	all_freq_table->freq_table = krealloc(all_freq_table->freq_table,
 			size, GFP_ATOMIC);
@@ -523,7 +568,8 @@ static void add_all_freq_table(unsigned int freq)
 static void cpufreq_allstats_create(unsigned int cpu)
 {
 	int i , j = 0;
-	unsigned int alloc_size, count = 0;
+	size_t alloc_size;
+	unsigned int count = 0;
 	struct cpufreq_frequency_table *table = cpufreq_frequency_get_table(cpu);
 	struct all_cpufreq_stats *all_stat;
 	bool sort_needed = false;
@@ -567,6 +613,8 @@ static void cpufreq_allstats_create(unsigned int cpu)
 			add_all_freq_table(freq);
 			sort_needed = true;
 		}
+		if (cpu == NR_CLUST0_CPUS)
+			add_bL_freq_table(freq);
 	}
 	if (sort_needed)
 		sort(all_freq_table->freq_table, all_freq_table->table_size,
@@ -737,6 +785,12 @@ static int cpufreq_stats_setup(void)
 	if (ret)
 		pr_warn("Error creating sysfs file for cpufreq stats\n");
 
+	create_bL_freq_table();
+	ret = sysfs_create_file(cpufreq_global_kobject,
+		&_attr_bL_all_time_in_state.attr);
+	if (ret)
+		pr_warn("Error creating sysfs file for bL cpufreq stats\n");
+
 	return 0;
 }
 
@@ -754,6 +808,7 @@ static void cpufreq_stats_cleanup(void)
 		cpufreq_stats_free_sysfs(cpu);
 	}
 	cpufreq_allstats_free();
+	cpufreq_bL_allstats_free();
 }
 
 #ifdef CONFIG_BL_SWITCHER

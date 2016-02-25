@@ -3,6 +3,11 @@
 #
 config MOBICORE_DRIVER
     tristate "MobiCore Driver"
+		##################################
+		#mobicore_security_team_add
+		##################################
+		depends on ARM_TRUSTZONE
+		##################################
     ---help---
       Enable Linux Kernel MobiCore Support
 

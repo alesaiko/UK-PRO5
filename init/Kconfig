@@ -54,10 +54,10 @@ config CROSS_COMPILE
 	  directory to select the cross-compiler automatically.
 
 config LOCALVERSION
-	string
-	#string "Local version - append to kernel release"
+	#string
+	string "Local version - append to kernel release"
 	default "-eng"  if ENG_KERNEL
-	default "-user" if USER_KERNEL
+	default "-Ultimate-Kernel-Pro5-v.1"  if USER_KERNEL
 	default "-unicom" if UNICOM_KERNEL
 	default "-overseas" if OVERSEAS_KERNEL
 	default "-recovery" if RECOVERY_KERNEL

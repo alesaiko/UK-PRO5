@@ -31,30 +31,13 @@ struct cpu_load
 	unsigned int load;
 	u64 last_update;
 };
-
-#define PEAK_CRITERIA		99
-
-static DEFINE_PER_CPU(u64, peak_occupied);
 static DEFINE_PER_CPU(struct cpu_load, cpuload);
 
 void update_cpu_metric(int cpu, u64 now, u64 delta_idle, u64 delta_time,
 		       struct cpufreq_policy *policy)
 {
-	static bool isInitialized = false;
 	struct cpu_load *pcpuload = &per_cpu(cpuload, cpu);
 	unsigned int load;
-
-	if(isInitialized) {
-		int i = 0;
-		struct cpumask cpu_poss_msk;
-
-		cpumask_copy(&cpu_poss_msk, cpu_possible_mask);
-
-		isInitialized = true;
-		for_each_cpu_mask(i, cpu_poss_msk) {
-			per_cpu(peak_occupied, i) = 0;
-		}
-	}
 
 	/*
 	 * Calculate the active time in the previous time window

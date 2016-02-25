@@ -1139,8 +1139,8 @@
         compatible = "arm,mali";
         reg = <0x14AC0000 0x5000>;
         interrupts = <0 241 0>, <0 242 0>, <0 240 0>;
-        clocks = <&clock 1>, <&clock 10>, <&clock 160>, <&clock 161>, <&clock 162>, <&clock 163>;
-        clock-names = "fin_pll", "fout_g3d_pll", "aclk_g3d", "dout_aclk_g3d", "mout_g3d", "sclk_hpm_g3d";
+        clocks = <&clock 1>, <&clock 10>, <&clock 160>, <&clock 161>, <&clock 162>, <&clock 163>, <&clock 300>, <&clock 301>;
+        clock-names = "fin_pll", "fout_g3d_pll", "aclk_g3d", "dout_aclk_g3d", "mout_g3d", "sclk_hpm_g3d", "aclk_lh_g3d0", "aclk_lh_g3d1";
         samsung,power-domain = <&pd_g3d>;
     };
 
@@ -3038,17 +3038,17 @@
 		throttle_table {
 			throttle_tab_0 {
 				temp = <75>;
-				freq_max_cluster1 = <1704000>;
+				freq_max_cluster1 = <1896000>;
 				freq_max_cluster0 = <1500000>;
 			};
 			throttle_tab_1 {
 				temp = <80>;
-				freq_max_cluster1 = <1300000>;
-				freq_max_cluster0 = <1400000>;
+				freq_max_cluster1 = <1500000>;
+				freq_max_cluster0 = <1500000>;
 			};
 			throttle_tab_2 {
 				temp = <85>;
-				freq_max_cluster1 = <800000>;
+				freq_max_cluster1 = <1100000>;
 				freq_max_cluster0 = <1200000>;
 			};
 			throttle_tab_3 {

@@ -1,0 +1,28 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:A53 STATS,
+    elements:[
+	{ SPane:{
+		title:"Device State"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+		title:"A53 LITTLE Cores time in state",
+		description:" CPU0",
+		refresh:2500,
+		action:"live Live_A53_Time 0 9"
+	}},
+	{ SLiveLabel:{
+		refresh:2500,
+		action:"live Live_A53_Time 10 14"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+    ]
+}
+CTAG

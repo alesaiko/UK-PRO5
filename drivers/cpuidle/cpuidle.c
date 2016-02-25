@@ -522,6 +522,13 @@ int cpuidle_register(struct cpuidle_driver *drv,
 
 		pr_err("Failed to register cpuidle device for cpu%d\n", cpu);
 
+#if defined(CONFIG_SOC_EXYNOS5433) || defined(CONFIG_SOC_EXYNOS7420)
+		if (cpu & 0x4)
+			device->skip_idle_correlation = true;
+		else
+			device->skip_idle_correlation = false;
+#endif
+
 		cpuidle_unregister(drv);
 		break;
 	}

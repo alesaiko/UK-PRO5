@@ -1530,7 +1530,7 @@ config SENSORS_MC13783_ADC
 
 config SENSORS_SEC_THERMISTOR
 	tristate "SEC Thermistor support"
-	depends on S3C_ADC
+	depends on EXYNOS_ADC
 	default n
 	help
 	  This driver supports SEC Thermistor sensor reading and its

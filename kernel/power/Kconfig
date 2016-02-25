@@ -26,6 +26,19 @@ config WAKELOCK
 	bool
 	default y
 
+config POWERSUSPEND
+	bool "Power suspend"
+	default y
+	---help---
+	  Call early suspend handlers when the user requested sleep state
+	  changes.
+
+config POWERSUSPEND_DEBUG
+	bool "Powersuspend driver debugging code"
+	depends on POWERSUSPEND
+	help
+	  Output debugging info in dmesg [POWERSUSPEND] (Yank555.lu)
+
 config POWER_MODE
 	bool
 	depends on !CHARGE_KERNEL
@@ -35,7 +48,6 @@ config PERF_MODE
 	bool
 	depends on !CHARGE_KERNEL && !RECOVERY_KERNEL
 	default n
-
 
 config HIBERNATE_CALLBACKS
 	bool

@@ -36,6 +36,10 @@
 #include <linux/debugfs.h>
 #include <linux/init.h>
 
+#ifdef CONFIG_POWERSUSPEND
+#include <linux/powersuspend.h>
+#endif
+
 #include <linux/list.h>
 
 #include <mach/regs-clock.h>
@@ -1812,6 +1816,9 @@ static int decon_blank(int blank_mode, struct fb_info *info)
 	case FB_BLANK_NORMAL:
 		DISP_SS_EVENT_LOG(DISP_EVT_BLANK, &decon->sd, ktime_set(0, 0));
 		ret = decon_disable(decon);
+#ifdef CONFIG_POWERSUSPEND
+		set_power_suspend_state_panel_hook(POWER_SUSPEND_ACTIVE);
+#endif
 		if (ret) {
 			decon_err("failed to disable decon\n");
 			goto blank_exit;
@@ -1820,6 +1827,9 @@ static int decon_blank(int blank_mode, struct fb_info *info)
 	case FB_BLANK_UNBLANK:
 		DISP_SS_EVENT_LOG(DISP_EVT_UNBLANK, &decon->sd, ktime_set(0, 0));
 		ret = decon_enable(decon);
+#ifdef CONFIG_POWERSUSPEND
+		set_power_suspend_state_panel_hook(POWER_SUSPEND_INACTIVE);
+#endif
 		if (ret) {
 			decon_err("failed to enable decon\n");
 			goto blank_exit;
@@ -2562,16 +2572,16 @@ static void decon_modulate_overlap_cnt(struct decon_device *decon,
 	* If VPP layer is present and the layer's width is over 10%
 	* of LCD_WIDTH, original overlap count must be used.
 	* - If overlap count is 1:
-	* => width < 0.8 * LCD_WIDTH  ===> overlap count 1 ¡æ 0.
-	* => (width > 0.8 * LCD_WIDTH) && (height <= 60) => overlap count 1 ¡æ 0
+	* => width < 0.8 * LCD_WIDTH  ===> overlap count 1 \A1\E6 0.
+	* => (width > 0.8 * LCD_WIDTH) && (height <= 60) => overlap count 1 \A1\E6 0
 	* - If overlap count is 2:
-	* => width < 0.4 * LCD_WIDTH  ===> overlap count 2 ¡æ 0.
-	* => (width < 0.6 * LCD_WIDTH) && (height <= 30) => overlap count 2 ¡æ 0
-	* => (width < 0.8 * LCD_WIDTH) && (height <= 10) => overlap count 2 ¡æ 0
+	* => width < 0.4 * LCD_WIDTH  ===> overlap count 2 \A1\E6 0.
+	* => (width < 0.6 * LCD_WIDTH) && (height <= 30) => overlap count 2 \A1\E6 0
+	* => (width < 0.8 * LCD_WIDTH) && (height <= 10) => overlap count 2 \A1\E6 0
 	* - If overlap count is 3:
-	* => width < 0.2 * LCD_WIDTH  ===> overlap count 3 ¡æ 0.
-	* => (width < 0.4 * LCD_WIDTH) && (height <= 15) => overlap count 3 ¡æ 0
-	* => (width < 0.6 * LCD_WIDTH) && (height <= 8) => overlap count 3 ¡æ 0
+	* => width < 0.2 * LCD_WIDTH  ===> overlap count 3 \A1\E6 0.
+	* => (width < 0.4 * LCD_WIDTH) && (height <= 15) => overlap count 3 \A1\E6 0
+	* => (width < 0.6 * LCD_WIDTH) && (height <= 8) => overlap count 3 \A1\E6 0
 	*/
 
 	if (regs->need_update) {

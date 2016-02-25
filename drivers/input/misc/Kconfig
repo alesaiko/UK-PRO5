@@ -233,7 +233,7 @@ config INPUT_ISL
       module will be called isl29125.
 
 config INPUT_PS
-    tristate "TXC pa12200002 ps sensor driver"                                                                                                                                                               
+    tristate "TXC pa12200002 ps sensor driver"
     depends on I2C 
     help
       Say Y here if you have a TXC pa12200002 combo-chip
@@ -683,6 +683,23 @@ config STMVL6180
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called stmvl6180.
+
+config JANUARY_BOOSTER
+	tristate "Specific input booster"
+	default n
+
+config KEY_BOOSTER
+	tristate "Specific key booster"
+	default n
+
+config INPUT_BOOSTER
+	tristate "Input booster device to support frequency min lock"
+	help
+	  Say Y here if you want to support input booster for the input device such
+	  as key, touch, pen, toucheky.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called input_booster.
 
 source "drivers/input/misc/fpc-fingerprint/Kconfig"
 

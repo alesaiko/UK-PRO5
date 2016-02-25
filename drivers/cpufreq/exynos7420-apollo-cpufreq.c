@@ -72,12 +72,12 @@ static struct apll_freq exynos7420_apll_freq_CA53[] = {
 	 * PLL M, P, S values are NOT used, Instead CCF clk_set_rate is used
 	 */
 	APLL_FREQ(2000, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0,   0, 0, 0),  /* ARM L0: 2.0GHz   */
-	APLL_FREQ(1900, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0,   0, 0, 0),  /* ARM L1: 1.9GMHz  */
-	APLL_FREQ(1800, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0, 150, 2, 0),  /* ARM L2: 1.8GMHz  */
+	APLL_FREQ(1900, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0,   0, 0, 0),  /* ARM L1: 1.9GHz  */
+	APLL_FREQ(1800, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0, 150, 2, 0),  /* ARM L2: 1.8GHz  */
 	APLL_FREQ(1704, 0, 0, 2, 5, 5, 5, 5, 0, 1, 4, 0, 142, 2, 0),  /* ARM L3: 1.7GHz   */
 	APLL_FREQ(1600, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 200, 3, 0),  /* ARM L4: 1.6GHz   */
-	APLL_FREQ(1500, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 250, 4, 0),  /* ARM L5: 1.5GMHz  */
-	APLL_FREQ(1400, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 175, 3, 0),  /* ARM L6: 1.4GMHz  */
+	APLL_FREQ(1500, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 250, 4, 0),  /* ARM L5: 1.5GHz  */
+	APLL_FREQ(1400, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 175, 3, 0),  /* ARM L6: 1.4GHz  */
 	APLL_FREQ(1296, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 108, 2, 0),  /* ARM L7: 1.3GHz   */
 	APLL_FREQ(1200, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0, 100, 2, 0),  /* ARM L8: 1.2GHz   */
 	APLL_FREQ(1104, 0, 0, 2, 5, 5, 5, 5, 0, 1, 3, 0,  92, 2, 0),  /* ARM L9: 1.1GHz   */
@@ -118,6 +118,29 @@ static const unsigned int asv_voltage_7420_CA53[CPUFREQ_LEVEL_END_CA53] = {
 };
 
 /* Minimum memory throughput in megabytes per second */
+#if defined(CONFIG_PMU_COREMEM_RATIO)
+static int exynos7420_region_bus_table_CA53[CPUFREQ_LEVEL_END_CA53][6] = {
+	{ 0,  828000,  828000,  828000, 1264000, 1264000 },		/* 2.0 GHz */
+	{ 0,  828000,  828000,  828000, 1264000, 1264000 },		/* 1.9 GHz */
+	{ 0,  828000,  828000,  828000, 1264000, 1264000 },		/* 1.8 GHz */
+	{ 0,  828000,  828000,  828000, 1264000, 1264000 },		/* 1.7 GHz */
+	{ 0,  828000,  828000,  828000, 1264000, 1264000 },		/* 1.6 GHz */
+	{ 0,  828000,  828000,  828000, 1264000, 1264000 },		/* 1.5 GHz */
+	{ 0,  632000,  632000,  828000, 1264000, 1264000 },		/* 1.4 GHz */
+	{ 0,  543000,  632000,  828000, 1026000, 1264000 },		/* 1.3 GHz */
+	{ 0,  543000,  632000,  828000, 1026000, 1264000 },		/* 1.2 GHz */
+	{ 0,  543000,  632000,  828000,  828000, 1026000 },		/* 1.1 GHz */
+	{ 0,  416000,  632000,  828000,  828000, 1026000 },		/* 1.0 GHz */
+	{ 0,  348000,  543000,  632000,  828000, 1026000 },		/* 900 MHz */
+	{ 0,  348000,  543000,  632000,  828000, 1026000 },		/* 800 MHz */
+	{ 0,  276000,  416000,  632000,  828000, 1026000 },		/* 700 MHz */
+	{ 0,  167000,  348000,  543000,  632000,  828000 },		/* 600 MHz */
+	{ 0,  133000,  276000,  543000,  543000,  828000 },		/* 500 MHz */
+	{ 0,  133000,  167000,  348000,  543000,  632000 },		/* 400 MHz */
+	{ 0,  100000,  167000,  348000,  543000,  543000 },		/* 300 MHz */
+	{ 0,  100000,  133000,  276000,  416000,  543000 },		/* 200 MHz */
+};
+#else
 static int exynos7420_bus_table_CA53[CPUFREQ_LEVEL_END_CA53] = {
 	1026000,		/* 2.0 GHz */
 	1026000,		/* 1.9 GHz */
@@ -125,20 +148,21 @@ static int exynos7420_bus_table_CA53[CPUFREQ_LEVEL_END_CA53] = {
 	1026000,		/* 1.7 GHz */
 	1026000,		/* 1.6 GHz */
 	1026000,		/* 1.5 GHz */
-	 828000,		/* 1.4 GHz */
-	 828000,		/* 1.3 GHz */
+	1026000,		/* 1.4 GHz */
+	1026000,		/* 1.3 GHz */
 	 828000,		/* 1.2 GHz */
 	 828000,		/* 1.1 GHz */
-	 828000,		/* 1.0 GHz */
-	 828000,		/* 900 MHz */
-	 632000,		/* 800 MHz */
+	 632000,		/* 1.0 GHz */
+	 632000,		/* 900 MHz */
+	 543000,		/* 800 MHz */
 	 543000,		/* 700 MHz */
 	 416000,		/* 600 MHz */
 	 416000,		/* 500 MHz */
-	 348000,		/* 400 MHz */
-	      0,		/* 300 MHz */
-	      0,		/* 200 MHz */
+	 416000,		/* 400 MHz */
+	 416000,		/* 300 MHz */
+	 416000,		/* 200 MHz */
 };
+#endif
 
 static void exynos7420_set_clkdiv_CA53(unsigned int div_index)
 {
@@ -274,11 +298,13 @@ static void __init set_volt_table_CA53(void)
 		max_support_idx_CA53 = L6; break;	/* 1.4GHz */
 	case 5 :
 		max_support_idx_CA53 = L8; break;	/* 1.2GHz */
+	case 12 :
+		max_support_idx_CA53 = L7; break;	/* 1.3GHz */
 	default :
-		max_support_idx_CA53 = L5;	/* 1.5GHz */
+		max_support_idx_CA53 = L2;	/* 1.8GHz */
 	}
 
-	min_support_idx_CA53 = L16;	/* 400MHz */
+	min_support_idx_CA53 = L18;	/* 200MHz */
 	pr_info("CPUFREQ of CA53 max_freq : L%d %u khz\n", max_support_idx_CA53,
 		exynos7420_freq_table_CA53[max_support_idx_CA53].frequency);
 	pr_info("CPUFREQ of CA53 min_freq : L%d %u khz\n", min_support_idx_CA53,
@@ -343,10 +369,14 @@ int __init exynos_cpufreq_cluster0_init(struct exynos_dvfs_info *info)
 	info->max_support_idx = max_support_idx_CA53;
 	info->min_support_idx = min_support_idx_CA53;
 	info->boost_freq = exynos7420_freq_table_CA53[L10].frequency;
-	/* booting frequency is 1.4GHz */
-	info->boot_cpu_min_qos = exynos7420_freq_table_CA53[L6].frequency;
-	info->boot_cpu_max_qos = exynos7420_freq_table_CA53[L6].frequency;
-	info->bus_table = exynos7420_bus_table_CA53;
+	/* booting frequency is 1.5GHz */
+	info->boot_cpu_min_qos = exynos7420_freq_table_CA53[L5].frequency;
+	info->boot_cpu_max_qos = exynos7420_freq_table_CA53[L5].frequency;
+#if defined(CONFIG_PMU_COREMEM_RATIO)
+	info->region_bus_table = exynos7420_region_bus_table_CA53;
+#else
+ 	info->bus_table = exynos7420_bus_table_CA53;
+#endif
 	info->cpu_clk = mout_apollo_pll;
 
 	info->volt_table = exynos7420_volt_table_CA53;

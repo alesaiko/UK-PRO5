@@ -387,10 +387,6 @@ static void dump_tasks(const struct mem_cgroup *memcg, const nodemask_t *nodemas
 extern void show_ion_buffer_size(void);
 #endif
 
-#ifdef CONFIG_MOBICORE_DRIVER
-extern void show_mobicore_buffer(void);
-#endif
-
 static void dump_header(struct task_struct *p, gfp_t gfp_mask, int order,
 			struct mem_cgroup *memcg, const nodemask_t *nodemask)
 {
@@ -411,10 +407,6 @@ static void dump_header(struct task_struct *p, gfp_t gfp_mask, int order,
 #ifdef CONFIG_ION_EXYNOS_STAT_LOG
 	pr_warning("ION BUFF:\n");
 	show_ion_buffer_size();//show ion buffer info.
-#endif
-#ifdef CONFIG_MOBICORE_DRIVER
-	pr_warning("MOBICORE BUFF:\n");
-	show_mobicore_buffer();
 #endif
 }
 

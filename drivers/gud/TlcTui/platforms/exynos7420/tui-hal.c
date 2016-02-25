@@ -22,11 +22,17 @@
 #include <linux/exynos_ion.h>
 #include <linux/dma-buf.h>
 #include <linux/ion.h>
-#include "../../../../video/exynos/decon/decon.h"
 #include <t-base-tui.h>
+#include <linux/ktime.h>
+#include <linux/switch.h>
+#include "../../../../video/exynos/decon/decon.h"
+#include "tui_ioctl.h"
 #include "dciTui.h"
 #include "tlcTui.h"
 #include "tui-hal.h"
+#if defined(CONFIG_TOUCHSCREEN_FTS) || defined(CONFIG_TOUCHSCREEN_FTS5AD56)
+#include <linux/i2c/fts.h>
+#endif
 
 /* I2C register for reset */
 #define HSI2C7_PA_BASE_ADDRESS	0x14E10000
@@ -46,12 +52,32 @@
 #define HSI2C_FIFO_EMPTY	(HSI2C_RX_FIFO_EMPTY | HSI2C_TX_FIFO_EMPTY)
 #define TUI_MEMPOOL_SIZE	0
 
+extern struct switch_dev tui_switch;
+
 extern phys_addr_t hal_tui_video_space_alloc(void);
 extern int decon_lpd_block_exit(struct decon_device *decon);
 
 /* for ion_map mapping on smmu */
 extern struct ion_device *ion_exynos;
 /* ------------end ---------- */
+
+#ifdef CONFIG_TRUSTED_UI_TOUCH_ENABLE
+static int tsp_irq_num = 11; // default value
+
+static void tui_delay(unsigned int ms)
+{
+	if (ms < 20)
+		usleep_range(ms * 1000, ms * 1000);
+	else
+		msleep(ms);
+}
+
+void trustedui_set_tsp_irq(int irq_num)
+{
+	tsp_irq_num = irq_num;
+	pr_info("%s called![%d]\n",__func__, irq_num);
+}
+#endif
 
 static struct decon_dma_buf_data dma;
 
@@ -61,7 +87,7 @@ struct tui_mempool {
 	size_t size;
 };
 
-extern struct tui_mempool g_tuiMemPool;
+static struct tui_mempool g_tuiMemPool;
 
 static u32 va;
 static struct ion_client *client;
@@ -102,6 +128,35 @@ static void freeTuiMemoryPool(struct tui_mempool *pool)
 		kfree(pool->va);
 		memset(pool, 0, sizeof(*pool));
 	}
+}
+
+void hold_i2c_clock(void)
+{
+	struct clk *touch_i2c_pclk;
+	touch_i2c_pclk = clk_get(NULL, "pclk-hsi2c7");
+	if (IS_ERR(touch_i2c_pclk)) {
+		pr_err("Can't get [pclk-hsi2c7]\n");
+	}
+
+	clk_prepare_enable(touch_i2c_pclk);
+
+	pr_info("[pclk-hsi2c7] will be enabled\n");
+	clk_put(touch_i2c_pclk);
+}
+
+void release_i2c_clock(void)
+{
+	struct clk *touch_i2c_pclk;
+	touch_i2c_pclk = clk_get(NULL, "pclk-hsi2c7");
+	if (IS_ERR(touch_i2c_pclk)) {
+		pr_err("Can't get [pclk-hsi2c7]\n");
+	}
+
+	clk_disable_unprepare(touch_i2c_pclk);
+
+	pr_info("[pclk-hsi2c7] will be disabled\n");
+
+	clk_put(touch_i2c_pclk);
 }
 
 #ifdef CONFIG_TRUSTONIC_TRUSTED_UI_FB_BLANK
@@ -152,23 +207,24 @@ static struct fb_info *get_fb_info(struct device *fbdev)
 #endif
 
 #ifdef CONFIG_TRUSTONIC_TRUSTED_UI_FB_BLANK
-static void fb_tui_protection(void)
+static int fb_tui_protection(void)
 {
 	struct device *fbdev = NULL;
 	struct fb_info *fb_info;
 	struct decon_win *win;
 	struct decon_device *decon;
+	int ret = -ENODEV;
 
 	fbdev = get_fb_dev();
 	if (!fbdev) {
 		pr_debug("get_fb_dev failed\n");
-		return;
+		return ret;
 	}
 
 	fb_info = get_fb_info(fbdev);
 	if (!fb_info) {
 		pr_debug("get_fb_info failed\n");
-		return;
+		return ret;
 	}
 
 	win = fb_info->par;
@@ -178,7 +234,24 @@ static void fb_tui_protection(void)
 	pm_runtime_get_sync(decon->dev);
 #endif
 
-	decon_tui_protection(decon, true);
+	lock_fb_info(fb_info);	
+	ret = decon_tui_protection(decon, true);
+	unlock_fb_info(fb_info);
+	return ret;
+
+#if 0 // time check
+	ktime_t start, end;
+	long long ns;
+
+	start = ktime_get();            /* get time stamp before execution */
+#endif
+//	decon_tui_protection(decon, true);
+#if 0 // time check
+	end = ktime_get();              /* get time stamp after execution */
+
+	ns = ktime_to_ns( ktime_sub(end, start) ); /* get the elapsed time in nano-seconds */
+	printk(KERN_INFO "[TIME_CHECK] blank -> Elapsed time %lld ns\n", ns); /* print it on the console */
+#endif
 }
 
 static void set_va_to_decon(u32 va)
@@ -188,37 +261,37 @@ static void set_va_to_decon(u32 va)
 #endif
 
 #ifdef CONFIG_TRUSTONIC_TRUSTED_UI_FB_BLANK
-static void fb_tui_unprotection(void)
+static int fb_tui_unprotection(void)
 {
 	struct device *fbdev = NULL;
 	struct fb_info *fb_info;
 	struct decon_win *win;
 	struct decon_device *decon;
+	int ret = -ENODEV;
 
 	fbdev = get_fb_dev();
 	if (!fbdev) {
 		pr_debug("get_fb_dev failed\n");
-		return;
+		return ret;
 	}
 
 	fb_info = get_fb_info(fbdev);
 	if (!fb_info) {
 		printk("get_fb_info failed\n");
-		return;
+		return ret;
 	}
 
 	win = fb_info->par;
 	decon = win->decon;
 
-	if (decon->pdata->trig_mode == DECON_HW_TRIG)
-		decon_reg_set_trigger(decon->id, decon->pdata->dsi_mode,
-					decon->pdata->trig_mode, DECON_TRIG_ENABLE);
-
 #ifdef CONFIG_PM_RUNTIME
 	pm_runtime_put_sync(decon->dev);
 #endif
-
-	decon_tui_protection(decon, false);
+	lock_fb_info(fb_info);
+	ret = decon_tui_protection(decon, false);
+	unlock_fb_info(fb_info);
+	return ret; 
+//	decon_tui_protection(decon, false);
 }
 #endif
 
@@ -291,13 +364,14 @@ err_buf_map_attach:
         return 0;
 }
 
-uint32_t hal_tui_alloc(tuiAllocBuffer_t *allocbuffer, size_t allocsize, uint32_t count)
+uint32_t hal_tui_alloc(tuiAllocBuffer_t allocbuffer[MAX_DCI_BUFFER_NUMBER],
+		size_t allocsize, uint32_t count)
 {
 	int ret = TUI_DCI_ERR_INTERNAL_ERROR;
 	dma_addr_t buf_addr;
 	ion_phys_addr_t phys_addr;
 	unsigned long offset = 0;
-	unsigned int size;
+	size_t size;
 
 	size=allocsize*(count+1);
 
@@ -319,6 +393,15 @@ uint32_t hal_tui_alloc(tuiAllocBuffer_t *allocbuffer, size_t allocsize, uint32_t
 	va = buf_addr + offset;
 	printk("buf_addr : %x\n",va);
 	printk("phys_addr : %lx\n",phys_addr);
+#if 0 // this is testing. MUST BE REMOVE
+	void *kernel_addr;
+	//kernel_addr = (void*)ion_map_kernel(client, handle);
+	kernel_addr = phys_to_virt(phys_addr+0x2000000);
+	*((u32*)kernel_addr) = va;
+	printk("DATA ON phys_addr : addr[%lx] val[%x]\n"
+			,phys_addr+0x2000000
+			,*((u32*)kernel_addr));
+#endif
 
         g_tuiMemPool.pa = phys_addr;
         g_tuiMemPool.size = allocsize*count;
@@ -333,7 +416,6 @@ uint32_t hal_tui_alloc(tuiAllocBuffer_t *allocbuffer, size_t allocsize, uint32_t
                 ret = TUI_DCI_ERR_INTERNAL_ERROR;
 		return ret;
 	}
-
         ret = TUI_DCI_OK;
 
         return ret;
@@ -398,33 +480,61 @@ void hal_tui_free(void)
 
 uint32_t hal_tui_deactivate(void)
 {
+	int ret;
+	switch_set_state(&tui_switch, TRUSTEDUI_MODE_VIDEO_SECURED);
+	pr_info(KERN_ERR "Disable touch!\n");
+	disable_irq(tsp_irq_num);
+#if defined(CONFIG_TOUCHSCREEN_FTS) || defined(CONFIG_TOUCHSCREEN_FTS5AD56)
+	tui_delay(5);
+	trustedui_mode_on();
+	tui_delay(95);
+#else
+	tui_delay(100);
+#endif
 	/* Set linux TUI flag */
 	trustedui_set_mask(TRUSTEDUI_MODE_TUI_SESSION);
 	trustedui_blank_set_counter(0);
 #ifdef CONFIG_TRUSTONIC_TRUSTED_UI_FB_BLANK
 	pr_info(KERN_ERR "blanking!\n");
 
-	fb_tui_protection();
+	hold_i2c_clock();
+
+	ret = fb_tui_protection();
+	if(ret < 0){
+		pr_info(KERN_ERR "Decon state disable!, ret = %d\n", ret);
+		goto err;
+	}
 	set_va_to_decon(va);
 #endif
 	trustedui_set_mask(TRUSTEDUI_MODE_VIDEO_SECURED|TRUSTEDUI_MODE_INPUT_SECURED);
+	pr_info(KERN_ERR "blanking!\n");
 
 	return TUI_DCI_OK;
+
+err:	
+	/* Clear linux TUI flag */
+//	trustedui_blank_get_counter();
+	trustedui_clear_mask(TRUSTEDUI_MODE_OFF);
+	enable_irq(tsp_irq_num);
+	switch_set_state(&tui_switch, TRUSTEDUI_MODE_OFF);
+	return TUI_DCI_ERR_INTERNAL_ERROR;
 }
 
 uint32_t hal_tui_activate(void)
 {
+	int ret;
 	// Protect NWd
 	trustedui_clear_mask(TRUSTEDUI_MODE_VIDEO_SECURED|TRUSTEDUI_MODE_INPUT_SECURED);
 
 #ifdef CONFIG_TRUSTONIC_TRUSTED_UI_FB_BLANK
 	pr_info("Unblanking\n");
 
-	fb_tui_unprotection();
+	ret = fb_tui_unprotection();
+	if(ret < 0){
+		pr_info(KERN_ERR "Decon state disable!, ret = %d\n", ret);
+		goto err;
+	}
 #endif
-
-	/* Clear linux TUI flag */
-	trustedui_set_mode(TRUSTEDUI_MODE_OFF);
 
 #ifdef CONFIG_TRUSTONIC_TRUSTED_UI_FB_BLANK
 	pr_info("Unsetting TUI flag (blank counter=%d)", trustedui_blank_get_counter());
@@ -432,6 +542,21 @@ uint32_t hal_tui_activate(void)
 //		blank_framebuffer(0);
 	}
 #endif
+	switch_set_state(&tui_switch, TRUSTEDUI_MODE_OFF);
+	tui_i2c_reset();
+	enable_irq(tsp_irq_num);
+	release_i2c_clock();
+
+	/* Clear linux TUI flag */
+	trustedui_set_mode(TRUSTEDUI_MODE_OFF);
+	pr_info("Enable touch! & Clear TUI MASK\n");
 
 	return TUI_DCI_OK;
+
+err:
+	/* Clear linux TUI flag */
+	trustedui_set_mode(TRUSTEDUI_MODE_OFF);
+	switch_set_state(&tui_switch, TRUSTEDUI_MODE_OFF);
+	enable_irq(tsp_irq_num);
+	return TUI_DCI_ERR_INTERNAL_ERROR;
 }

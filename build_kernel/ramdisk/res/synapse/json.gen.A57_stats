@@ -1,0 +1,28 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:A57 STATS,
+    elements:[
+	{ SPane:{
+		title:"Device State"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+		title:"A57 big Cores time in state",
+		description:" CPU4",
+		refresh:2500,
+		action:"live Live_A57_Time 0 9"
+	}},
+	{ SLiveLabel:{
+		refresh:2500,
+		action:"live Live_A57_Time 10 19"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+    ]
+}
+CTAG

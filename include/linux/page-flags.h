@@ -112,6 +112,7 @@ enum pageflags {
 #if defined(CONFIG_MMC_DW_FMP_ECRYPT_FS) || defined(CONFIG_MMC_DW_FMP_DM_CRYPT) || defined(CONFIG_UFS_FMP_ECRYPT_FS) || defined(CONFIG_UFS_FMP_DM_CRYPT)
 	PG_sensitive_data,	/* This page has sensitive data. */
 #endif
+	PG_readahead,		/* page in a readahead window */
 	__NR_PAGEFLAGS,
 
 	/* Filesystems */

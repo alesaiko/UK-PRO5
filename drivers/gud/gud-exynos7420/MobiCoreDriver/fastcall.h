@@ -147,10 +147,10 @@ static inline long _smc(void *data)
 		return -EPERM;
 
 	{
-		union fc_generic *fc_generic = data;
-		/* SMC expect values in x0-x3 */
-		register u64 reg0 __asm__("x0") = fc_generic->as_in.cmd;
-		register u64 reg1 __asm__("x1") = fc_generic->as_in.param[0];
+        union fc_generic *fc_generic = data;
+        /* SMC expect values in x0-x3 */
+        register u64 reg0 __asm__("x0") = fc_generic->as_in.cmd;
+        register u64 reg1 __asm__("x1") = fc_generic->as_in.param[0];
 		register u64 reg2 __asm__("x2") = fc_generic->as_in.param[1];
 		register u64 reg3 __asm__("x3") = fc_generic->as_in.param[2];
 

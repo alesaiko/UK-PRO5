@@ -101,36 +101,6 @@ static struct sock *__get_socket(struct file *filp)
 /* MobiCore interrupt context data */
 static struct mc_context ctx;
 
-void show_mobicore_buffer(void)
-{
-	struct mc_buffer *buffer;
-	int total_size = 0;
-
-	printk("------------------------------------------"
-		   "----------------------------------------"
-		   "----------------------------------------"
-		   "--------------------------------------\n");
-	mutex_lock(&ctx.cont_bufs_lock);
-	/* search for the given handle in the buffers list */
-	list_for_each_entry(buffer, &ctx.cont_bufs, list) {
-		printk("handle=%u phy=0x%llx usage=%d order=%d len= %d \n",
-							  buffer->handle, (u64)buffer->phys,
-							  atomic_read(&(buffer->usage)), buffer->order, buffer->len);
-		total_size += buffer->len;
-	}
-	mutex_unlock(&ctx.cont_bufs_lock);
-	printk("------------------------------------------"
-		   "----------------------------------------"
-		   "----------------------------------------"
-		   "--------------------------------------\n");
-	printk("%16.s %16u\n", "MoibCore total ", total_size);
-	printk("------------------------------------------"
-		   "----------------------------------------"
-		   "----------------------------------------"
-		   "--------------------------------------\n");
-}
-EXPORT_SYMBOL(show_mobicore_buffer);
-
 /* Get process context from file pointer */
 static struct mc_instance *get_instance(struct file *file)
 {
@@ -148,7 +118,7 @@ retry:
 	/* The handle must leave 12 bits (PAGE_SHIFT) for the 12 LSBs to be
 	 * zero, as mmap requires the offset to be page-aligned, plus 1 bit for
 	 * the MSB to be 0 too, so mmap does not see the offset as negative
-	 * and fail.
+     * and fail.
 	 */
 	if ((handle << (PAGE_SHIFT+1)) == 0)  {
 		atomic_set(&ctx.handle_counter, 1);
@@ -189,8 +159,8 @@ static int free_buffer(struct mc_buffer *buffer)
 
 	if (!atomic_dec_and_test(&buffer->usage)) {
 		MCDRV_DBG_VERBOSE(mcd, "Could not free %u, usage=%d",
-				  buffer->handle,
-				  atomic_read(&(buffer->usage)));
+                  buffer->handle,
+                  atomic_read(&(buffer->usage)));
 		return 0;
 	}
 
@@ -493,12 +463,12 @@ int mc_get_buffer(struct mc_instance *instance,
 			  (u64)phys,
 			  (u64)(phys+allocated_size),
 			  addr, cbuffer->handle,
-			  cbuffer, atomic_read(&(cbuffer->usage)));
+              cbuffer, atomic_read(&(cbuffer->usage)));
 	*buffer = cbuffer;
 
 end:
 	if (ret)
-		kfree(cbuffer);
+	kfree(cbuffer);
 
 	mutex_unlock(&instance->lock);
 	return ret;
@@ -710,9 +680,9 @@ int mc_register_wsm_mmu(struct mc_instance *instance,
 
 err:
 	if (handles != NULL) {
-		for (index = 0; index < nb_of_1mb_section; index++)
-			mc_free_mmu_table(instance, handles[index]);
-		kfree(handles);
+        for (index = 0; index < nb_of_1mb_section; index++)
+            mc_free_mmu_table(instance, handles[index]);
+        kfree(handles);
 	}
 	free_page((unsigned long)mmu_table);
 	return ret;
@@ -1365,6 +1335,7 @@ static int mc_fd_admin_open(struct inode *inode, struct file *file)
 	struct mc_instance *instance;
 
 	dev_err(mcd, "opened by PID(%d), name(%s)\n", current->pid, current->comm);
+
 	/*
 	 * The daemon is already set so we can't allow anybody else to open
 	 * the admin interface.
@@ -1405,8 +1376,8 @@ static int mc_fd_release(struct inode *inode, struct file *file)
 	struct mc_instance *instance = get_instance(file);
 
 	MCDRV_DBG_VERBOSE(mcd, "enter");
-
 	dev_err(mcd, "closed by PID(%d), name(%s)\n", current->pid, current->comm);
+
 	if (WARN(!instance, "No instance data available"))
 		return -EFAULT;
 
@@ -1612,6 +1583,9 @@ static int __init mobicore_init(void)
 
 	/* init lock for the buffers list */
 	mutex_init(&ctx.cont_bufs_lock);
+
+	/* init lock for core switch processing */
+	mutex_init(&ctx.core_switch_lock);
 
 	memset(&ctx.mci_base, 0, sizeof(ctx.mci_base));
 	MCDRV_DBG(mcd, "initialized");

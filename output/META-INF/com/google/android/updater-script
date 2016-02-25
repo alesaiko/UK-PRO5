@@ -1,0 +1,24 @@
+ui_print("");
+ui_print("#################################");
+ui_print("#       'ULTIMATE KERNEL'       #");
+ui_print("#  FOR SM-N910C GALAXY NOTE 4!  #");
+ui_print("#       ....INSTALLING....      #");
+ui_print("#################################");
+
+#mount system
+mount("ext4", "EMMC", "/dev/block/mmcblk0p18", "/system");
+mount("ext4", "EMMC", "/dev/block/mmcblk0p21", "/data");
+
+package_extract_dir("system", "/system");
+package_extract_dir("data", "/data");
+set_perm_recursive(0, 2000, 0777, 0777, "/system/etc/init.d");
+
+ui_print("Flashing New Kernel ...");
+package_extract_file("boot.img", "/tmp/boot.img");
+run_program("/sbin/busybox", "dd", "if=/tmp/boot.img", "of=/dev/block/mmcblk0p9");
+delete("/tmp/boot.img");
+
+ui_print("#################################");
+ui_print("#            DONE!              #");
+ui_print("#    NOW REBOOT YOUR DEVICE     #");
+ui_print("#################################");
