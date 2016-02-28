@@ -1,3 +1,5 @@
+#!/sbin/busybox sh
+
 cat << CTAG
 {
     name:BACKUP RESTORE,
@@ -18,7 +20,7 @@ cat << CTAG
 		height:1
 	}},
 	{ SDescription:{
-		description:" First set a name above and [APPLY] your choice in Synapse before pressing the [Backup Current Profile] button below."
+		description:"First set a name above and [APPLY] your choice in Synapse before pressing the [Backup Current Profile] button below."
 	}},
 	{ SSpacer:{
 		height:1
@@ -39,7 +41,7 @@ cat << CTAG
 	}},
 	{ SOptionList:{
 		title:"Selected Profile",
-		description:" Choose the settings you want and [APPLY] your choice in Synapse before using the action buttons below.\n",
+		description:"Choose the settings you want and [APPLY] your choice in Synapse before using the action buttons below.\n",
 		action:"restorebackup pickconfig",
 		default:"None",
 		values:[ "None",
@@ -59,7 +61,7 @@ cat << CTAG
 		height:1
 	}},
 	{ SDescription:{
-		description:" NOTE: After you restore a profile and press the [Restart Synapse] button, you MUST also press the [X] (Cancel) button on top to load the new settings!"
+		description:"NOTE: After you restore a profile and press the [Restart Synapse] button, you MUST also press the [X] (Cancel) button on top to load the new settings!"
 	}},
 	{ SSpacer:{
 		height:1
@@ -108,7 +110,7 @@ cat << CTAG
 		height:1
 	}},
 	{ SDescription:{
-		description:" First set a name above and [APPLY] your choice in Synapse before pressing the [Backup Current Kernel] button below."
+		description:"First set a name above and [APPLY] your choice in Synapse before pressing the [Backup Current Kernel] button below."
 	}},
 	{ SSpacer:{
 		height:1
@@ -129,9 +131,9 @@ cat << CTAG
 	}},
 	{ SOptionList:{
 		title:"Selected Image",
-		description:" Choose the settings you want and [APPLY] your choice in Synapse before using the action buttons below.\n",
+		description:"Choose the settings you want and [APPLY] your choice in Synapse before using the action buttons below.\n",
 		action:"restorebackup pickboot",
-       		default:"None",
+		default:"None",
 		values:[ "None",
 `
 			for IMG in \`/res/synapse/actions/restorebackup listboot\`; do
@@ -143,14 +145,14 @@ cat << CTAG
 	{ SSpacer:{
 		height:1
 	}},
-    	{ SButton:{
+	{ SButton:{
 		label:"Restore Selected Kernel",
 		action:"restorebackup flashboot /dev/block/platform/15570000.ufs/by-name/BOOT"
 	}},
 	{ SSpacer:{
 		height:1
 	}},
-    	{ SButton:{
+	{ SButton:{
 		label:"Delete Selected Kernel",
 		action:"restorebackup delboot",
 		notify:[
@@ -166,7 +168,7 @@ cat << CTAG
 	}},
 	{ SPane:{
 		title:"General Actions",
-		description:" To update/refresh lists, press the [Restart Synapse] button below."
+		description:"To update/refresh lists, press the [Restart Synapse] button below."
 	}},
 	{ SSpacer:{
 		height:1

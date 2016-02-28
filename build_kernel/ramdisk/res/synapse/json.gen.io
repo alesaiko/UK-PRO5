@@ -35,7 +35,7 @@ cat << CTAG
 	}},
 	{ SSeekBar:{
 		title:"Storage Read-Ahead",
-		description:" Default is 256.\n",
+		description:" Default is 512.\n",
 		max:4096,
 		min:64,
 		unit:" KB",
@@ -47,15 +47,21 @@ cat << CTAG
 		height:1
 	}},
 	{ SPane:{
-		title:"FSync On/Off toggle",
-		description:"Enabling/Disabling FSync. Disable for better file system performance at the risk of data lost when phone crashes. Default Enabled."
+		title:"Dynamic FSYNC",
+		description:"While screen is on file sync is disabled, when screen is off a file sync is called to flush all outstanding writes and restore file sync operation as normal. Increases speed, but a possible decrease in data integrity, also could create reboot and kernel panic. Requires PowerSuspend driver ENABLED."
+	}},
+	{ SSpacer:{
+		height:1
 	}},
 	{ SOptionList:{
-		default:`$BB cat /sys/module/sync/parameters/fsync_enabled`,
-		action:"generic /sys/module/sync/parameters/fsync_enabled",
-		values:{N:"Disabled FSync", Y:"Enabled FSync(Default)"}
+		description:"Default is Enabled.\n",
+		default:1,
+		action:"generic /sys/kernel/dyn_fsync/Dyn_fsync_active",
+		values:{
+			0:"Disabled", 1:"Enabled"
+		}
 	}},
-      	{ SSpacer:{
+	{ SSpacer:{
 		height:1
 	}},
 	{ SPane:{

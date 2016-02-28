@@ -12,7 +12,7 @@ cat << CTAG
 	}},
 	{ SLiveLabel:{
 		title:"A57 big Cores time in state",
-		description:" CPU4",
+		description:"CPU4",
 		refresh:2500,
 		action:"live Live_A57_Time 0 9"
 	}},

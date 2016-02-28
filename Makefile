@@ -1,6 +1,6 @@
 VERSION = 3
 PATCHLEVEL = 10
-SUBLEVEL = 61
+SUBLEVEL = 98
 EXTRAVERSION =
 NAME = TOSSUG Baby Fish
 
@@ -243,8 +243,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = $(CCACHE) gcc
 HOSTCXX      = $(CCACHE) g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer
-HOSTCXXFLAGS = -Ofast
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89 -floop-nest-optimize
+HOSTCXXFLAGS = -Ofast -floop-nest-optimize
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -350,12 +350,13 @@ endif
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
 
-GRAPHITE = -fgraphite-identity -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -floop-flatten -floop-nest-optimize
-CFLAGS_MODULE   =
-AFLAGS_MODULE   =
-LDFLAGS_MODULE  =
-CFLAGS_KERNEL	=
-AFLAGS_KERNEL	=
+GRAPHITE = -fgraphite-identity -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -floop-flatten -floop-nest-optimize
+
+CFLAGS_MODULE   = -DNDEBUG $(GRAPHITE)
+AFLAGS_MODULE   = -DNDEBUG $(GRAPHITE) 
+LDFLAGS_MODULE  = -DNDEBUG $(GRAPHITE)
+CFLAGS_KERNEL	= -DNDEBUG $(GRAPHITE)
+AFLAGS_KERNEL	= -DNDEBUG $(GRAPHITE)
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -378,15 +379,15 @@ LINUXINCLUDE    := \
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
-KBUILD_CFLAGS   := $(GRAPHITE) -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+KBUILD_CFLAGS   := -DNDEBUG $(GRAPHITE) -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
+		   -fivopts -funswitch-loops -fpredictive-commoning \
+		   -Werror-implicit-function-declaration -funsafe-loop-optimizations \
+		   -Wno-format-security -pipe -fno-pic \
+		   -fweb -ftree-loop-im -ftree-loop-ivcanon \
+		   -fno-delete-null-pointer-checks -fsingle-precision-constant \
 		   -fmodulo-sched -fmodulo-sched-allow-regmoves \
-		   -Wno-format-security \
-		   -fivopts -funswitch-loops -fpredictive-commoning -fgcse-after-reload \
-		   -fbranch-target-load-optimize -fsingle-precision-constant \
-		   -Wno-array-bounds \
-		   -fno-delete-null-pointer-checks \
 		   -Wno-error=declaration-after-statement \
 		   -march=armv8-a+crc \
 		   -mtune=cortex-a57.cortex-a53
@@ -589,7 +590,7 @@ all: vmlinux
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS	+= -Ofast $(call cc-disable-warning,maybe-uninitialized,)
+KBUILD_CFLAGS	+= -Ofast
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile

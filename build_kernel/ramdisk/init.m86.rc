@@ -1,7 +1,7 @@
 import init.m86.usb.rc
 
 on init
-    #start watchdogd
+    start watchdogd
 
     # See storage config details at http://source.android.com/tech/storage/
     mkdir /mnt/shell/emulated 0700 shell shell
@@ -94,7 +94,59 @@ on boot
     chmod 0660 /sys/devices/13930000.decon_fb/adreg
     chown system system /sys/devices/13930000.decon_fb/adreg
 
+    # PMS DVFS
+    chown radio system /sys/power/enable_dm_hotplug
+    chmod 0664 /sys/power/enable_dm_hotplug
+    chown bluetooth system /sys/power/cluster0_core_hotplug_in
+    chmod 0664 /sys/power/cluster0_core_hotplug_in
+
+    chown radio system /sys/power/ipa/control_temp
+    chmod 0664 /sys/power/ipa/control_temp
+    chown radio system /sys/power/ipa/hotplug_out_threshold
+    chmod 0664 /sys/power/ipa/hotplug_out_threshold
+
+    chown radio system /sys/devices/platform/exynos7-devfreq-mif/devfreq/exynos7-devfreq-mif/available_frequencies
+    chmod 0664 /sys/devices/platform/exynos7-devfreq-mif/devfreq/exynos7-devfreq-mif/available_frequencies
+    chown radio system /sys/devices/platform/exynos7-devfreq-mif/devfreq/exynos7-devfreq-mif/min_freq
+    chmod 0664 /sys/devices/platform/exynos7-devfreq-mif/devfreq/exynos7-devfreq-mif/min_freq
+    chown radio system /sys/devices/platform/exynos7-devfreq-mif/devfreq/exynos7-devfreq-mif/max_freq
+    chmod 0664 /sys/devices/platform/exynos7-devfreq-mif/devfreq/exynos7-devfreq-mif/max_freq
+    chown radio system /sys/devices/platform/exynos7-devfreq-int/devfreq/exynos7-devfreq-int/available_frequencies
+    chmod 0664 /sys/devices/platform/exynos7-devfreq-int/devfreq/exynos7-devfreq-int/available_frequencies
+    chown radio system /sys/devices/platform/exynos7-devfreq-int/devfreq/exynos7-devfreq-int/min_freq
+    chmod 0664 /sys/devices/platform/exynos7-devfreq-int/devfreq/exynos7-devfreq-int/min_freq
+    chown radio system /sys/devices/platform/exynos7-devfreq-int/devfreq/exynos7-devfreq-int/max_freq
+    chmod 0664 /sys/devices/platform/exynos7-devfreq-int/devfreq/exynos7-devfreq-int/max_freq
+    chown radio system /sys/devices/platform/exynos7-devfreq-isp/devfreq/exynos7-devfreq-isp/available_frequencies
+    chmod 664 /sys/devices/platform/exynos7-devfreq-isp/devfreq/exynos7-devfreq-isp/available_frequencies
+    chown radio system /sys/devices/platform/exynos7-devfreq-isp/devfreq/exynos7-devfreq-isp/min_freq
+    chmod 664 /sys/devices/platform/exynos7-devfreq-isp/devfreq/exynos7-devfreq-isp/min_freq
+    chown radio system /sys/devices/platform/exynos7-devfreq-isp/devfreq/exynos7-devfreq-isp/max_freq
+    chmod 664 /sys/devices/platform/exynos7-devfreq-isp/devfreq/exynos7-devfreq-isp/max_freq
+
+    chown radio system /sys/devices/14ac0000.mali/dvfs_table
+    chmod 664 /sys/devices/14ac0000.mali/dvfs_table
+    chown radio system /sys/devices/14ac0000.mali/dvfs_min_lock
+    chmod 664 /sys/devices/14ac0000.mali/dvfs_min_lock
+    chown radio system /sys/devices/14ac0000.mali/dvfs_max_lock
+    chmod 664 /sys/devices/14ac0000.mali/dvfs_max_lock
+
+    chown radio system /sys/devices/system/sec_os_ctrl/migrate_os
+    chmod 664 /sys/devices/system/sec_os_ctrl/migrate_os
+
+    chown radio system /sys/module/cpuidle/parameters/off
+    chmod 0664 /sys/module/cpuidle/parameters/off
+
+    # HMP Status
+    chown system system /sys/kernel/hmp/load_avg_period_ms
+    chmod 0660 /sys/kernel/hmp/load_avg_period_ms
+    chown system system /sys/kernel/hmp/up_threshold
+    chmod 0660 /sys/kernel/hmp/up_threshold
+    chown system system /sys/kernel/hmp/down_threshold
+    chmod 0660 /sys/kernel/hmp/down_threshold
+
     # Change permission for interactive governor
+    # Cluster0 (Apollo)
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate
     chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_rate
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/timer_slack
@@ -104,11 +156,14 @@ on boot
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/hispeed_freq
     chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/hispeed_freq
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/target_loads 75
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/go_hispeed_load 85
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay
+    chmod 0664 /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay
+    write /sys/devices/system/cpu/cpu0/cpufreq/interactive/above_hispeed_delay 19000
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost
     chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/boost
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/boostpulse
@@ -118,7 +173,45 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/boostpulse_duration
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/io_is_busy
     chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/io_is_busy
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/cpu_util
+    chmod 0440 /sys/devices/system/cpu/cpu0/cpufreq/interactive/cpu_util
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/enforced_mode
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/enforced_mode
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/mode
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/mode
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_load
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_load
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_time
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_time
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_load
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_load
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_time
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_time
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/param_index
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/param_index
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_load
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_load
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_time
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_time
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_load
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_load
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_time
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_time
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_cluster0_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_cluster0_min_freq
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_cluster0_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_cluster0_min_freq
 
+    # Assume HMP uses shared cpufreq policy for all LITTLE CPUs
+    chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
+
+    chown system system sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster0_max_freq
+    chmod 0660 sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster0_max_freq
+    chown system system sys/devices/system/cpu/cpufreq/mp-cpufreq/boot_low_freq
+    chmod 0660 sys/devices/system/cpu/cpufreq/mp-cpufreq/boot_low_freq
+
+    # Cluster1 (Atlas)
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate
     chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_rate
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/timer_slack
@@ -128,11 +221,14 @@ on boot
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/hispeed_freq
     chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/hispeed_freq
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads
+    chmod 0664 /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads
+    write /sys/devices/system/cpu/cpu4/cpufreq/interactive/target_loads 65 1500000:75
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load
+    chmod 0664 /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load
+    write /sys/devices/system/cpu/cpu4/cpufreq/interactive/go_hispeed_load 89
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay
+    chmod 0664 /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay
+    write /sys/devices/system/cpu/cpu4/cpufreq/interactive/above_hispeed_delay 59000 1300000:39000 1704000:19000
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/boost
     chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/boost
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/boostpulse
@@ -142,6 +238,60 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/boostpulse_duration
     chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/io_is_busy
     chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/io_is_busy
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/cpu_util
+    chmod 0440 /sys/devices/system/cpu/cpu4/cpufreq/interactive/cpu_util
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/mode
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/mode
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_load
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_load
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_time
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_time
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_load
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_load
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_time
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_time
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/param_index
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/param_index
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_load
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_load
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_time
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_time
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_load
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_load
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_time
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_time
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_cluster0_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_cluster0_min_freq
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_cluster0_min_freq
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_cluster0_min_freq
+
+    # Assume HMP uses shared cpufreq policy for big CPUs
+    chown system system /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq
+
+    # MSP Core Status
+    chown system system /sys/devices/system/cpu/cpu1/online
+    chown system system /sys/devices/system/cpu/cpu2/online
+    chown system system /sys/devices/system/cpu/cpu3/online
+    chown system system /sys/devices/system/cpu/cpu4/online
+    chown system system /sys/devices/system/cpu/cpu5/online
+    chown system system /sys/devices/system/cpu/cpu6/online
+    chown system system /sys/devices/system/cpu/cpu7/online
+
+    # Turn on CPU cores
+    write /sys/power/enable_dm_hotplug 0
+    write /sys/devices/system/cpu/cpu1/online 1
+    write /sys/devices/system/cpu/cpu2/online 1
+    write /sys/devices/system/cpu/cpu3/online 1
+    write /sys/devices/system/cpu/cpu4/online 1
+    write /sys/devices/system/cpu/cpu5/online 1
+    write /sys/devices/system/cpu/cpu6/online 1
+    write /sys/devices/system/cpu/cpu7/online 1
+
+    # CPU Idle
+    chown system system /sys/module/cpuidle_exynos64/parameters/enable_mask
 
 # Permission for USB SELECT
     chown system system /sys/class/android_usb/android0/enable
@@ -572,6 +722,11 @@ on fs
     write /sys/block/sda/queue/rq_affinity  2
     write /sys/block/sda/queue/iosched/slice_idle 0
 
+# Permissions for input_booster
+    chown system radio /sys/class/input_booster/level
+    chown system radio /sys/class/input_booster/head
+    chown system radio /sys/class/input_booster/tail
+
 # Permissions for ION
     chmod 0660 /sys/class/ion_cma/ion_video_ext/isolated
     chown system system /sys/class/ion_cma/ion_video_ext/isolated
@@ -613,9 +768,9 @@ service fuse_sdcard1 /system/bin/sdcard -u 1023 -g 1023 -w 1023 -d /mnt/media_rw
     disabled
 
 # Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
-#service watchdogd /sbin/watchdogd 10 20
-#    class core
-#    seclabel u:r:watchdogd:s0
+service watchdogd /sbin/watchdogd 10 20
+    class core
+    seclabel u:r:watchdogd:s0
 
 # BRCM GPS
 service gpsd /system/bin/gpsd /system/etc/gpsconfig.xml
@@ -723,12 +878,12 @@ service ad_daemon /system/bin/ad_daemon
     socket ad stream 666 system system
 
 # logkit tools
-service logkit /system/bin/logkit /sdcard/Android/log/  50  /mnt/shell/emulated
-    class main
-    user root
-    group log system sdcard_r
-    disabled
-    oneshot
+#service logkit /system/bin/logkit /sdcard/Android/log/  50  /mnt/shell/emulated
+#    class main
+#    user root
+#    group log system sdcard_r
+#    disabled
+#    oneshot
 
 #on boot
     #start logkit
@@ -736,16 +891,27 @@ service logkit /system/bin/logkit /sdcard/Android/log/  50  /mnt/shell/emulated
 #on charger
 #    start logkit
 
-# service january_booster /system/bin/january_booster
+# Disable Booster -- BOBO
+#service january_booster /system/bin/january_booster
 #    class late_start
 
-service march_hotplug /system/bin/march_hotplug
-    class late_start
+#service march_hotplug /system/bin/march_hotplug
+#    class late_start
 
 # on userdebug and eng builds, enable kgdb on the serial console
 on property:ro.debuggable=1
     write /sys/module/kgdboc/parameters/kgdboc ttyFIQ1
     write /sys/module/fiq_debugger/parameters/kgdb_enable 1
+
+on property:sys.boot_completed=1
+    write /sys/devices/system/cpu/cpu1/online 1
+    write /sys/devices/system/cpu/cpu2/online 1
+    write /sys/devices/system/cpu/cpu3/online 1
+    write /sys/devices/system/cpu/cpu4/online 1
+    write /sys/devices/system/cpu/cpu5/online 1
+    write /sys/devices/system/cpu/cpu6/online 1
+    write /sys/devices/system/cpu/cpu7/online 1
+    write /sys/power/enable_dm_hotplug 1
 
 on property:sys.make_bakdir=1
     chown radio system /mnv
@@ -823,10 +989,10 @@ service setkeydaemon /system/bin/setkeydaemon
 
 on property:persist.radio.aplog=1
     #start ro_log
-    start logkit
+    #start logkit
 on property:persist.radio.aplog=0
     #stop ro_log
-    stop logkit
+    #stop logkit
 #@}
 
 #FLYME:fanjun@SHELL.HapticFeedback.Feature {@

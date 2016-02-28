@@ -1,53 +1,12 @@
-#!/sbin/sh
+#!/sbin/busybox sh
 
 cat << CTAG
 {
     name:"A57 GOV",
     elements:[
 	{ SPane:{
-		title:"A57 big Cores CPU Governor",
-		description:" The CPU governor determines how the CPU behaves in response to changes in workload."
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SDescription:{
-		description:" WARNING: If you select INTERACTIVE governor, apply it to BOTH A57 & A53 clusters to prevent scaling or other unintended issues !!"
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SOptionList:{
-		title:"Current governor",
-		description:" Default is interactive.\n",
-		default:`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor`,
-		action:"governor /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor",
-		values:[
-`
-                        for GOVERNOR in \`cat /sys/devices/system/cpu/cpu4/cpufreq/scaling_available_governors\` ; do
-                                echo "\"$GOVERNOR\","
-                        done
-`
-                ],
-		notify:[
-			{
-				on:APPLY,
-				do:[ REFRESH, CANCEL ],
-				to:"/sys/devices/system/cpu/cpu4/cpufreq"
-			},
-			{
-				on:REFRESH,
-				do:REFRESH,
-				to:"/sys/devices/system/cpu/cpu4/cpufreq"
-			}
-		]
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SPane:{
-		title:"Governor tunables",
-		description:" The various configuration items which are governor-dependent."
+		title:"A57 Governor tunables",
+		description:"The various configuration items which are governor-dependent. These values won't be reset by Synapse, but will backup and restore from profiles fine."
 	}},
 	{ SSpacer:{
 		height:1
@@ -63,6 +22,325 @@ cat << CTAG
 							SGeneric: { title:"@BASENAME" }
 						}
 					},
+					matched: {
+						elements: [
+							{ "block_cycles_offline_screen_off" : {
+								SSeekBar: {
+									title:"block_cycles_offline_screen_off",
+									description:"How many sampling_rate cycles need to occur before a core is allowed to go OFFLINE while the screen is OFF.",
+									min:1, max:20, step:1, unit:""
+								}
+							}},
+							{ "block_cycles_offline_screen_on" : {
+								SSeekBar: {
+									title:"block_cycles_offline_screen_on",
+									description:"How many sampling_rate cycles need to occur before a core is allowed to go OFFLINE while the screen is ON.",
+									min:1, max:60, step:1, unit:""
+								}
+							}},
+							{ "block_cycles_online_screen_off" : {
+								SSeekBar: {
+									title:"block_cycles_online_screen_off",
+									description:"How many sampling_rate cycles need to occur before a core is allowed to go ONLINE while the screen is OFF.",
+									min:1, max:20, step:1, unit:""
+								}
+							}},
+							{ "block_cycles_online_screen_on" : {
+								SSeekBar: {
+									title:"block_cycles_online_screen_on",
+									description:"How many sampling_rate cycles need to occur before a core is allowed to go ONLINE while the screen is ON.",
+									min:1, max:20, step:1, unit:""
+								}
+							}},
+							{ "block_cycles_raise_screen_off" : {
+								SSeekBar: {
+									title:"block_cycles_raise_screen_off",
+									description:"How many sampling_rate cycles need to occur before the current MHz is allowed to be raised while the screen is OFF.",
+									min:1, max:20, step:1, unit:""
+								}
+							}},
+							{ "block_cycles_raise_screen_on" : {
+								SSeekBar: {
+									title:"block_cycles_raise_screen_on",
+									description:"How many sampling_rate cycles need to occur before the current MHz is allowed to be raised while the screen is ON.",
+									min:1, max:20, step:1, unit:""
+								}
+							}},
+							{ "disable_hotplug" : {
+								SSeekBar: {
+									title:"disable_hotplug",
+									description:"1 = disables hotplugging so all cores stay on full time. 0 = all cores turn on and off when needed.",
+									min:0, max:1, step:1, unit:""
+								}
+							}},
+							{ "down_threshold_screen_off" : {
+								SSeekBar: {
+									title:"down_threshold_screen_off",
+									description:"A percentage of CPU utilization that needs to occur before the current MHz begins to lower while screen is OFF",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_off_hotplug_4" : {
+								SSeekBar: {
+									title:"down_threshold_screen_off_hotplug_4",
+									description:"A percentage of CPU utilization that needs to occur before core 4 is taken offline while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_off_hotplug_5" : {
+								SSeekBar: {
+									title:"down_threshold_screen_off_hotplug_5",
+									description:"A percentage of CPU utilization that needs to occur before core 5 is taken offline while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_off_hotplug_6" : {
+								SSeekBar: {
+									title:"down_threshold_screen_off_hotplug_6",
+									description:"A percentage of CPU utilization that needs to occur before core 6 is taken offline while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_off_hotplug_7" : {
+								SSeekBar: {
+									title:"down_threshold_screen_off_hotplug_7",
+									description:"A percentage of CPU utilization that needs to occur before core 7 is taken offline while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_on" : {
+								SSeekBar: {
+									title:"down_threshold_screen_on",
+									description:"A percentage of CPU utilization that needs to occur before the current MHz begins to lower while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_on_hotplug_4" : {
+								SSeekBar: {
+									title:"down_threshold_screen_on_hotplug_4",
+									description:"A percentage of CPU utilization that needs to occur before core 4 is taken offline while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_on_hotplug_5" : {
+								SSeekBar: {
+									title:"down_threshold_screen_on_hotplug_5",
+									description:"A percentage of CPU utilization that needs to occur before core 5 is taken offline while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_on_hotplug_6" : {
+								SSeekBar: {
+									title:"down_threshold_screen_on_hotplug_6",
+									description:"A percentage of CPU utilization that needs to occur before core 6 is taken offline while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "down_threshold_screen_on_hotplug_7" : {
+								SSeekBar: {
+									title:"down_threshold_screen_on_hotplug_7",
+									description:"A percentage of CPU utilization that needs to occur before core 7 is taken offline while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "freq_step_lower_screen_off" : {
+								SSeekBar: {
+									title:"freq_lower_lower_screen_off",
+									description:"How many steps from the MHz table it skips when lowering the current MHz while the screen is OFF.",
+									min:1, max:10, step:1, unit:""
+								}
+							}},
+							{ "freq_step_lower_screen_on" : {
+								SSeekBar: {
+									title:"freq_step_lower_screen_on",
+									description:"How many steps from the MHz table it skips when lowering the current MHz while the screen is ON.",
+									min:1, max:10, step:1, unit:""
+								}
+							}},
+							{ "freq_step_raise_screen_off" : {
+								SSeekBar: {
+									title:"freq_step_raise_screen_off",
+									description:"How many steps from the MHz table it skips when raising the current MHz while the screen is OFF.",
+									min:1, max:10, step:1, unit:""
+								}
+							}},
+							{ "freq_step_raise_screen_on" : {
+								SSeekBar: {
+									title:"freq_step_raise_screen_on",
+									description:"How many steps from the MHz table it skips when raising the current MHz while the screen is ON.",
+									min:1, max:10, step:1, unit:""
+								}
+							}},
+							{ "ignore_nice_load" : {
+								SSeekBar: {
+									title:"ignore_nice_load",
+									description:"1 = the system will ignore Nice processes when deciding to scale up or down. Nice processes are used by the IO scheduler to designate a low-priority process. Ignore nice load basically tells a governor to disregard processes with higher nice values.",
+									min:0, max:1, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_off_core_4" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_off_core_4",
+									description:"While the screen is OFF: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_off_core_5" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_off_core_5",
+									description:"While the screen is OFF: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_off_core_6" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_off_core_6",
+									description:"While the screen is OFF: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_off_core_7" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_off_core_7",
+									description:"While the screen is OFF: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_on_core_4" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_on_core_4",
+									description:"While the screen is ON: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_on_core_5" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_on_core_5",
+									description:"While the screen is ON: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_on_core_6" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_on_core_6",
+									description:"While the screen is ON: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "lockout_hotplug_screen_on_core_7" : {
+								SSeekBar: {
+									title:"lockout_hotplug_screen_on_core_7",
+									description:"While the screen is ON: 0 = Hotplug Normal so the core will go on and off as needed, 1 = Lock this core always ON, 2 = Lock this core always OFF.",
+									min:0, max:2, step:1, unit:""
+								}
+							}},
+							{ "no_extra_cores_screen_off" : {
+								SSeekBar: {
+									title:"no_extra_cores_screen_off",
+									description:"1 = keeps all extra CPU cores offline while the screen is OFF. 0 = hotplug them on and off as needed",
+									min:0, max:1, step:1, unit:""
+								}
+							}},
+							{ "sampling_rate" : {
+								SSeekBar: {
+									title:"sampling_rate",
+									description:"Sets the interval for which the governor polls frequency changes in load while the screen is ON.",
+									min:10000, max:100000, step:1000, unit:" ms"
+								}
+							}},
+							{ "sampling_rate_screen_off" : {
+								SSeekBar: {
+									title:"sampling_rate_screen_off",
+									description:"Sets the interval for which the governor polls frequency changes in load while the screen is OFF.",
+									min:10000, max:100000, step:1000, unit:" ms"
+								}
+							}},
+							{ "super_conservative_screen_off" : {
+								SSeekBar: {
+									title:"super_conservative_screen_off",
+									description:"With the screen OFF: 1 = will explicitly obey your block cycles settings to be a super battery saver (Setting a 1 will slow down the UI a little bit). 0 = uses fuzzy logic on the block cycle items.",
+									min:0, max:1, step:1, unit:""
+								}
+							}},
+							{ "super_conservative_screen_on" : {
+								SSeekBar: {
+									title:"super_conservative_screen_on",
+									description:"With the screen ON: 1 = will explicitly obey your block cycles settings to be a super battery saver (Setting a 1 will slow down the UI a little bit). 0 = uses fuzzy logic on the block cycle items.",
+									min:0, max:1, step:1, unit:""
+								}
+							}},
+							{ "up_threshold_screen_off" : {
+								SSeekBar: {
+									title:"up_threshold_screen_off",
+									description:"A percentage of CPU utilization that needs to occur before the current Mhz begins to raise while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_off_hotplug_4" : {
+								SSeekBar: {
+									title:"up_threshold_screen_off_hotplug_4",
+									description:"A percentage of CPU utilization that needs to occur before core 4 is put online while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_off_hotplug_5" : {
+								SSeekBar: {
+									title:"up_threshold_screen_off_hotplug_5",
+									description:"A percentage of CPU utilization that needs to occur before core 5 is put online while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_off_hotplug_6" : {
+								SSeekBar: {
+									title:"up_threshold_screen_off_hotplug_6",
+									description:"A percentage of CPU utilization that needs to occur before core 6 is put online while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_off_hotplug_7" : {
+								SSeekBar: {
+									title:"up_threshold_screen_off_hotplug_7",
+									description:"A percentage of CPU utilization that needs to occur before core 7 is put online while screen is OFF.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_on" : {
+								SSeekBar: {
+									title:"up_threshold_screen_on",
+									description:"A percentage of CPU utilization that needs to occur before the current MHz begins to raise while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_on_hotplug_4" : {
+								SSeekBar: {
+									title:"up_threshold_screen_on_hotplug_4",
+									description:"A percentage of CPU utilization that needs to occur before core 4 is put online while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_on_hotplug_5" : {
+								SSeekBar: {
+									title:"up_threshold_screen_on_hotplug_5",
+									description:"A percentage of CPU utilization that needs to occur before core 5 is put online while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_on_hotplug_6" : {
+								SSeekBar: {
+									title:"up_threshold_screen_on_hotplug_6",
+									description:"A percentage of CPU utilization that needs to occur before core 6 is put online while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}},
+							{ "up_threshold_screen_on_hotplug_7" : {
+								SSeekBar: {
+									title:"up_threshold_screen_on_hotplug_7",
+									description:"A percentage of CPU utilization that needs to occur before core 7 is put online while screen is ON.",
+									min:0, max:100, step:1, unit:" %"
+								}
+							}}
+						]
+					},
 					exclude: [
 						"above_hispeed_delay",
 						"boostpulse",
@@ -73,7 +351,59 @@ cat << CTAG
 						"mode",
 						"sampling_rate_min",
 						"single_cluster0_min_freq",
-						"target_loads"
+						"target_loads",
+						"debug_enabled",
+						"disable_hotplug_media",
+						"lockout_changes_when_boosting",
+						"cpu_load_adder_at_max_gpu",
+						"cpu_load_adder_at_max_gpu_ignore_tb",
+						"up_threshold_screen_off_hotplug_1",
+						"up_threshold_screen_off_hotplug_2",
+						"up_threshold_screen_off_hotplug_3",
+						"up_threshold_screen_on_hotplug_1",
+						"up_threshold_screen_on_hotplug_2",
+						"up_threshold_screen_on_hotplug_3",
+						"down_threshold_screen_off_hotplug_1",
+						"down_threshold_screen_off_hotplug_2",
+						"down_threshold_screen_off_hotplug_3",
+						"down_threshold_screen_on_hotplug_1",
+						"down_threshold_screen_on_hotplug_2",
+						"down_threshold_screen_on_hotplug_3",
+						"touch_boost_gpu",
+						"touch_boost_core_1",
+						"touch_boost_core_2",
+						"touch_boost_core_3",
+						"touch_boost_core_4",
+						"touch_boost_core_5",
+						"touch_boost_core_6",
+						"touch_boost_core_7",
+						"touch_boost_core_cpu_cl0",
+						"touch_boost_core_cpu_cl1",
+						"touch_boost_cpu_cl0",
+						"touch_boost_cpu_cl1",
+						"button_boost_screen_off_core_1",
+						"button_boost_screen_off_core_2",
+						"button_boost_screen_off_core_3",
+						"button_boost_screen_off_core_4",
+						"button_boost_screen_off_core_5",
+						"button_boost_screen_off_core_6",
+						"button_boost_screen_off_core_7",
+						"button_boost_screen_on_core_1",
+						"button_boost_screen_on_core_2",
+						"button_boost_screen_on_core_3",
+						"button_boost_screen_on_core_4",
+						"button_boost_screen_on_core_5",
+						"button_boost_screen_on_core_6",
+						"button_boost_screen_on_core_7",
+						"boost_hold_cycles",
+						"disable_hotplug_bt",
+						"disable_hotplug_chrg",
+						"lockout_hotplug_screen_on_core_1",
+						"lockout_hotplug_screen_on_core_2",
+						"lockout_hotplug_screen_on_core_3",
+						"lockout_hotplug_screen_off_core_1",
+						"lockout_hotplug_screen_off_core_2",
+						"lockout_hotplug_screen_off_core_3"
 					]
 				},
 			}
@@ -94,9 +424,6 @@ cat << CTAG
 			"scaling_setspeed",
 			"stats"
 		]
-	}},
-	{ SSpacer:{
-		height:1
 	}},
     ]
 }

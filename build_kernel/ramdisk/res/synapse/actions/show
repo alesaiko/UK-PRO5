@@ -7,4 +7,7 @@ susp)
 asv)
   $BB echo "$(cat /sys/kernel/debug/asv_summary)"
   ;;
+bootloader)
+  $BB echo "$(cat /proc/bootloader_unlock)"
+  ;;
 esac

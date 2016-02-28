@@ -40,7 +40,7 @@ cat << CTAG
 	}},
 	{ SPane:{
 		title:"General Actions",
-		description:" To clear data, select Clear Synapse Data (fixes most common issues)."
+		description:"To clear data, select Clear Synapse Data (fixes most common issues)."
 	}},
 	{ SSpacer:{
 		height:1

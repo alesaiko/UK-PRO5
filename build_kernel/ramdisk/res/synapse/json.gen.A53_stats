@@ -12,7 +12,7 @@ cat << CTAG
 	}},
 	{ SLiveLabel:{
 		title:"A53 LITTLE Cores time in state",
-		description:" CPU0",
+		description:"CPU0",
 		refresh:2500,
 		action:"live Live_A53_Time 0 9"
 	}},

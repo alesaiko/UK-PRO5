@@ -1,0 +1,52 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:"ABOUT",
+    elements:[
+	{ SLiveLabel:{
+		description:"\n",
+		refresh:10000000,
+		action:"echo Ultimate Kernel"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		style:"bold",
+		action:"echo for Meizu Pro5"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		action:"echo by"
+	}},
+	{ SLiveLabel:{
+		refresh:10000000,
+		style:"bold",
+		action:"echo mcaserg@4PDA.RU"
+	}},
+	{ SSpacer:{
+		height:2
+	}},
+	{ SPane:{
+		title:"Bootloader Lock/Unlock Info",
+		description:"Values: 0 - Locked Bootloader, 1 - Unlocked Bootloader.\n"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+		refresh:10000,
+		action:"show bootloader"
+	}},
+	{ SPane:{
+		title:"Up Time:"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SLiveLabel:{
+		refresh:1500,
+		action:"live LiveUpTime"
+	}},
+    ]
+}
+CTAG

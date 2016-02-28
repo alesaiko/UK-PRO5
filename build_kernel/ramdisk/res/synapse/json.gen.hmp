@@ -6,15 +6,15 @@ cat << CTAG
     elements:[
 	{ SPane:{
 		title:"HMP Thresholds up/down ratios for task migrating",
-		description:" Adjust HMP ratios for up/down scaling for tasks migrating from LITTLE > big domain and from big > LITTLE domain. Higher up-threshold values use less battery because use more Little domain."
+		description:"Adjust HMP ratios for up/down scaling for tasks migrating from LITTLE > big domain and from big > LITTLE domain. Higher up-threshold values use less battery because use more Little domain."
 	}},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SOptionList:{
 		title:"Profile",
-		description:" Select your profile for HMP thresholds.\n",
-		default:`echo $(/res/synapse/actions/tuning hmp)`,
+		description:"Select your profile for HMP thresholds.\n",
+		default:$(echo "$(/res/synapse/actions/tuning hmp)"),
 		action:"tuning hmp",
 		values:[Default, Performance, Battery,],
 		notify:[
@@ -22,8 +22,8 @@ cat << CTAG
 				on:APPLY,
 				do:[ REFRESH, APPLY ],
 				to:[
-					"hmp_up /sys/kernel/hmp/up_threshold",
-					"hmp_down /sys/kernel/hmp/down_threshold"
+					"hmp /sys/kernel/hmp/up_threshold",
+					"hmp /sys/kernel/hmp/down_threshold"
 				],
 			}
 		]
@@ -35,8 +35,8 @@ cat << CTAG
 		title:"HMP UP Thresholds",
 		description:"",
 		min:1, max:1000, unit:"", step:1,
-		default:`cat /sys/kernel/hmp/up_threshold`,
-		action:"hmp_up /sys/kernel/hmp/up_threshold"
+		default:$(cat /sys/kernel/hmp/up_threshold),
+		action:"hmp /sys/kernel/hmp/up_threshold"
 	}},
 	{ SSpacer:{
 		height:1
@@ -45,21 +45,21 @@ cat << CTAG
 		title:"HMP DOWN Thresholds",
 		description:"",
 		min:1, max:512, unit:"", step:1,
-		default:`cat /sys/kernel/hmp/down_threshold`,
-		action:"hmp_down /sys/kernel/hmp/down_threshold"
+		default:$(cat /sys/kernel/hmp/down_threshold),
+		action:"hmp /sys/kernel/hmp/down_threshold"
 	}},
 	{ SSpacer:{
 		height:1
 	}},
-        { SPane:{
+	{ SPane:{
                 title:"Power Aware Scheduling",
-                description:" Power aware scheduling is a CPU capacity managing 'power scheduler' which lives by the side of the existing process scheduler. Its role is to monitor the system load and decide which CPUs that should be available to the process scheduler. It will basically attempt to “pack” small tasks into the “leftmost” CPU cores (ie. starting cpu0) to keep the other CPU cores as idle as possible, instead of spreading them evenly across all online cores. Theoretically this should increase power efficiency, with a very small cost to performance."
+                description:"Power aware scheduling is a CPU capacity managing 'power scheduler' which lives by the side of the existing process scheduler. Its role is to monitor the system load and decide which CPUs that should be available to the process scheduler. It will basically attempt to “pack” small tasks into the “leftmost” CPU cores (ie. starting cpu0) to keep the other CPU cores as idle as possible, instead of spreading them evenly across all online cores. Theoretically this should increase power efficiency, with a very small cost to performance."
         }},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SOptionList:{
-		description:" Default is Disabled.\n",
+		description:"Default is Disabled.\n",
 		default:0,
 		action:"generic /sys/kernel/hmp/power_migration",
 		values:{
@@ -71,56 +71,17 @@ cat << CTAG
 	}},
         { SPane:{
                 title:"HMP LITTLE Packing",
-                description:" Allows the HMP Scheduler to pack small tasks into CPUs in the smallest HMP domain. Power savings at a slight cost to performance."
+                description:"Allows the HMP Scheduler to pack small tasks into CPUs in the smallest HMP domain. Power savings at a slight cost to performance."
         }},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SOptionList:{
-		description:" Default is Disabled.\n",
+		description:"Default is Disabled.\n",
 		default:0,
 		action:"generic /sys/kernel/hmp/packing_enable",
 		values:{
 			0:"Disabled", 1:"Enabled"
-		}
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SPane:{
-		title:"PEWQ (Power-efficient Workqueues)",
-		description:" Enable or disable PEWQ will help to reduce power consumption at the cost of slight performance overhead. By enabling this, PEWQ are used for unbound scheduled work to save load on sibling CPU cores and queuing work on CPU 0."
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SOptionList:{
-		description:" Default is Disabled.\n",
-		default:N,
-		action:"generic /sys/module/workqueue/parameters/power_efficient",
-		values:{
-			N:"Disabled", Y:"Enabled"
-		}
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SPane:{
-		title:"Exynos Core Control Interface"
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SSeekBar:{
-		title:"MAX CPU Cores",
-		description:" Maximum number of online CPU Cores when screen is on.\n",
-		default:`cat /sys/power/cpucore_max_num_limit`,
-		action:"generic /sys/power/cpucore_max_num_limit",
-		values:{
-			"5":"5 Cores",
-			"6":"6 Cores",
-			"7":"7 Cores",
-			"8":"8 Cores"
 		}
 	}},
 	{ SSpacer:{

@@ -6,38 +6,38 @@ cat << CTAG
     elements:[
 	{ SPane:{
 		title:"USB Mode",
-		description:" You require a supported PC OS with appropriate USB drivers installed."
+		description:"You require a supported PC OS with appropriate USB drivers installed."
 	}},
 	{ SSpacer:{
 		height:2
 	}},
         { SLiveLabel:{
 		title:"DEFAULT",
-		description:" Does NOTHING, so Synapse will allow your ROM to auto mount MTP or PTP on next boot.",
+		description:"Does NOTHING, so Synapse will allow your ROM to auto mount MTP or PTP on next boot.",
 		refresh:10000000,
 		action:"echo "
         }},
         { SLiveLabel:{
 		title:"MTP",
-		description:" Media Transfer Protocol Mode allows you to mount both device internal & external storage to transfer files to PC.",
+		description:"Media Transfer Protocol Mode allows you to mount both device internal & external storage to transfer files to PC.",
 		refresh:10000000,
 		action:"echo "
         }},
         { SLiveLabel:{
 		title:"PTP",
-		description:" Photo Transfer Protocol Mode allows you to mount both device internal & external storage to transfer photos and other files to PC that don't support MTP.",
+		description:"Photo Transfer Protocol Mode allows you to mount both device internal & external storage to transfer photos and other files to PC that don't support MTP.",
 		refresh:10000000,
 		action:"echo "
         }},
         { SLiveLabel:{
 		title:"CD_ROM",
-		description:" CD ROM emulation to mount iso images from device storage to PC.",
+		description:"CD ROM emulation to mount iso images from device storage to PC.",
 		refresh:10000000,
 		action:"echo "
         }},
         { SLiveLabel:{
 		title:"USB_KEYBOARD-MOUSE",
-		description:" Enable or Disable USB HID Device driver to control PC with keyboard and mouse from phone!",
+		description:"Enable or Disable USB HID Device driver to control PC with keyboard and mouse from phone!",
 		refresh:10000000,
 		action:"echo "
         }},
@@ -54,7 +54,7 @@ cat << CTAG
 		height:2
 	}},
 	{ SLiveLabel:{
-                title:"Status",
+		title:"Status",
 		description:"",
 		refresh:3000,
 		action:"live usb_status"
@@ -65,7 +65,7 @@ cat << CTAG
 	{ SOptionList:{
 		title:"USB Mode Selection",
 		description:"",
-		default:`echo $(/res/synapse/actions/storage usb_mode)`,
+		default:$(echo "$(/res/synapse/actions/storage usb_mode)"),
 		action:"storage usb_mode",
 		values:[DEFAULT, MTP, PTP, CD_ROM, USB_KEYBOARD-MOUSE,]
 	}},

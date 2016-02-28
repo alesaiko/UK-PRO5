@@ -29,7 +29,19 @@ battcapa)
   echo "Capacity: $(cat /sys/devices/battery.54/power_supply/battery/capacity) %"
   ;;
 battstatus)
-  echo "Status: $(cat /sys/devices/battery.54/power_supply/battery/status)"
+  TIME=$(cat /sys/devices/battery.54/power_supply/battery/time_to_full_now);
+  STATUS=$(cat /sys/devices/battery.54/power_supply/battery/status);
+	if [ "$STATUS" == Charging ]; then
+		if [ "$TIME" == -1 ]; then
+			echo Status: $STATUS;
+		else
+			TTF=$($BB awk "BEGIN { print ($TIME / 60) }");
+			TTF="$($BB printf "%.0f" $TTF)";
+			echo Status: $STATUS@n@nTime to Full: $TTF min;
+		fi;
+	else
+		echo Status: $STATUS;
+	fi;
   ;;
 batthealth)
   echo "Health: $(cat /sys/devices/battery.54/power_supply/battery/health)"
@@ -105,38 +117,59 @@ LiveCPUFrequency_big)
 
 $BB echo "Core 4: $CPU4@nCore 5: $CPU5@nCore 6: $CPU6@nCore 7: $CPU7";
 ;;
-Live_A53_interactive)
+Live_interactive)
 if [ -d /sys/devices/system/cpu/cpu0/cpufreq/interactive ]; then
   while read -r C0 C1 C2 C3; do
   done < /sys/devices/system/cpu/cpu0/cpufreq/interactive/cpu_util 2> /dev/null;
-  $BB echo "Core 0: $C0@nCore 1: $C1@nCore 2: $C2@nCore 3: $C3";
+  $BB echo "Core 0: $C0@nCore 1: $C1@nCore 2: $C2@nCore 3: $C3@n";
 else
-  $BB echo "Interactive Offline";
+  $BB echo "A53 Interactive Offline@n";
 fi;
-;;
-Live_A57_interactive)
 if [ -d /sys/devices/system/cpu/cpu4/cpufreq/interactive ]; then
   while read -r C4 C5 C6 C7; do
   done < /sys/devices/system/cpu/cpu4/cpufreq/interactive/cpu_util 2> /dev/null;
   $BB echo "Core 4: $C4@nCore 5: $C5@nCore 6: $C6@nCore 7: $C7";
 else
-  $BB echo "Interactive Offline";
+  $BB echo "A57 Interactive Offline";
 fi;
 ;;
 LiveMemory)
   while read -r TYPE MEM KB; do
 	export KB
 	if [ "$TYPE" = "MemTotal:" ]; then
-		TOTAL="$((MEM / 1024)) MB";
+		TOTAL=$((MEM / 1024));
 	elif [ "$TYPE" = "MemFree:" ]; then
-		CACHED=$((MEM / 1024));
-	elif [ "$TYPE" = "Cached:" ]; then
 		FREE=$((MEM / 1024));
+	elif [ "$TYPE" = "Cached:" ]; then
+		CACHED=$((MEM / 1024));
 	fi;
   done < /proc/meminfo;
-		
-  FREE="$((FREE + CACHED)) MB";
-  $BB echo "Total: $TOTAL@nFree: $FREE";
+
+  FREE="$((FREE + CACHED))";
+  USED="$((TOTAL - FREE))";
+
+  $BB echo "Total: $TOTAL MB@nUsed: $USED MB@nFree: $FREE MB";
+;;
+LiveSwap)
+  while read -r TYPE MEM KB; do
+	export KB
+	if [ "$TYPE" = "SwapTotal:" ]; then
+		TOTAL=$((MEM / 1024));
+	elif [ "$TYPE" = "SwapFree:" ]; then
+		FREE=$((MEM / 1024));
+	elif [ "$TYPE" = "SwapCached:" ]; then
+		CACHED=$((MEM / 1024));
+	fi;
+  done < /proc/meminfo;
+
+  FREE="$((FREE + CACHED))";
+  USED="$((TOTAL - FREE))";
+
+  if [ "$TOTAL" == 0 ]; then
+	$BB echo "Swap: disabled";
+  else
+	$BB echo "Total: $TOTAL MB@nUsed: $USED MB@nFree: $FREE MB";
+  fi;
 ;;
 LiveUpTime)
   TOTAL=$($BB awk '{ print $1 }' /proc/uptime);
@@ -237,5 +270,10 @@ check_cron)
 	else
 		echo "SERVICE OFFLINE";
 	fi;
+  ;;
+Live_modules)
+  for i in $(lsmod | awk '{print $1}'); do
+	echo "$i@n";
+  done;
   ;;
 esac

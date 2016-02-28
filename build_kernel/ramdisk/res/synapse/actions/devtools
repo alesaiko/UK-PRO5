@@ -20,16 +20,15 @@ case $1 in
   cleardata)
 	echo "0" > /sys/kernel/dyn_fsync/Dyn_fsync_active;
 	am force-stop com.af.synapse 2> /dev/null;
-	$BB sleep 1;
-	$BB rm -R /data/data/com.af.synapse/databases;
-	$BB rm -R /data/data/com.af.synapse/cache;
+	$BB rm -R /data/data/com.af.synapse/*;
+	$BB rm -f /data/dalvik-cache/arm64/data@app@com.af.synapse*;
+	$BB rm -f /data/dalvik-cache/profiles/com.af.synapse;
 	$BB sync;
 	$BB sleep 1;
 	/system/bin/reboot;
   ;;
   restart)
     	am force-stop com.af.synapse 2> /dev/null;
-    	$BB sleep 1;
     	reset_uci;
 	$BB sync;
     	$BB sleep 1;
@@ -174,6 +173,32 @@ spcm_service)
   elif [ "$2" == Disabled ]; then
     echo Disabled > $P
 	setprop sys.config.spcm_enable false
+  fi; fi
+  copy=$(cat $P)
+  if [ "$copy" == Enabled ]; then
+    echo Enabled
+  elif [ "$copy" == Disabled ]; then
+    echo Disabled
+  fi
+  ;;
+SystemUpdateService)
+  P=/res/synapse/SkyHigh/SystemUpdateService
+  if [ ! -z "$2" ]; then
+  if [ "$2" == Enabled ]; then
+    echo Enabled > $P
+	pm enable com.google.android.gms/.update.SystemUpdateActivity
+	pm enable com.google.android.gms/.update.SystemUpdateService
+	pm enable com.google.android.gms/.update.SystemUpdateService$ActiveReceiver
+	pm enable com.google.android.gms/.update.SystemUpdateService$Receiver
+	pm enable com.google.android.gms/.update.SystemUpdateService$SecretCodeReceiver
+	pm enable com.google.android.gsf/.update.SystemUpdateActivity
+	pm enable com.google.android.gsf/.update.SystemUpdatePanoActivity
+	pm enable com.google.android.gsf/.update.SystemUpdateService
+	pm enable com.google.android.gsf/.update.SystemUpdateService$Receiver
+	pm enable com.google.android.gsf/.update.SystemUpdateService$SecretCodeReceiver
+  elif [ "$2" == Disabled ]; then
+    echo Disabled > $P
+	# Nothing to do here
   fi; fi
   copy=$(cat $P)
   if [ "$copy" == Enabled ]; then

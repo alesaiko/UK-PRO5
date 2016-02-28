@@ -1,35 +1,55 @@
-#!/sbin/sh
+#!/sbin/busybox sh
 
 cat << CTAG
 {
     name:"A57 CPU",
     elements:[
-        { STitleBar:{
-                title:"A57 big Cores Frequency Scaling"
-        }},
-	{ SDescription:{
-		description:" Note: Settings may automatically change due to Samsung DVFS. For better control, suggest to disable DVFS using Xposed DVFS Disabler app. WARNING: Not all frequencies outside defaults may be stable for your device!"
+	{ SPane:{
+		title:"Exynos Core Control Interface",
+		description:"Set the maximum number of online CPU Cores when screen is on."
 	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+                title:"MAX A57(BIG) CPU Cores",
+                description:" Maximum number of online BIG A57 CPU Cores when screen is on. A53 Cores always online!\n",
+                default:$(cat /sys/power/cpucore_max_num_limit),
+                action:"generic /sys/power/cpucore_max_num_limit",
+		values:{
+                        "5":"1 A57 Core Online",
+                        "6":"2 A57 Cores Online",
+                        "7":"3 A57 Cores Online",
+                        "8":"4(All) A57 Cores Online - Default"
+                }
+        }},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SLiveLabel:{
-                  title:"A57 big Cores live frequency",
-                  refresh:500,
-                  action:"live LiveCPUFrequency_big"
-        }},
+		title:"A57 big Cores live frequency",
+		refresh:500,
+		action:"live LiveCPUFrequency_big"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"A57 big Cores Frequency Scaling",
+		description:"Note: Settings may automatically change due to Samsung DVFS or thermal throttling. For better DVFS control, suggest to disable DVFS using Xposed DVFS Disabler app. WARNING: Not all frequencies outside defaults may be stable for your device!"
+	}},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SSeekBar:{
-       		title:"A57 big Cores MAX frequency",
-		description:" Set the maximum frequency the CPU scales up to.\n",
+		title:"A57 big Cores MAX frequency",
+		description:"Set the maximum frequency the CPU scales up to.\n",
 		default:2100000,
 		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/ren_max_freq",
 		values:{
 `
 			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster1_freq_table); do
-				LABEL=$(expr $FREQ / 1000)
+				LABEL=$(($FREQ / 1000))
 				echo "$FREQ:\"${LABEL} MHz\", "
 			done
 `
@@ -39,14 +59,14 @@ cat << CTAG
 		height:1
 	}},
 	{ SSeekBar:{
-       		title:"A57 big Cores MIN frequency",
-		description:" Set the minimum frequency the CPU scales down to.\n",
+		title:"A57 big Cores MIN frequency",
+		description:"Set the minimum frequency the CPU scales down to.\n",
 		default:800000,
 		action:"generic /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq",
 		values:{
 `
 			for FREQ in $(cat /sys/devices/system/cpu/cpufreq/mp-cpufreq/cluster1_freq_table); do
-				LABEL=$(expr $FREQ / 1000)
+				LABEL=$(($FREQ / 1000))
 				echo "$FREQ:\"${LABEL} MHz\", "
 			done
 `

@@ -19,9 +19,9 @@ if [ "$DROP_CACHE" == 1 ]; then
 		if [ "$TYPE" = "MemTotal:" ]; then
 			TOTAL=$((MEM / 1024));
 		elif [ "$TYPE" = "MemFree:" ]; then
-			CACHED=$((MEM / 1024));
-		elif [ "$TYPE" = "Cached:" ]; then
 			FREE=$((MEM / 1024));
+		elif [ "$TYPE" = "Cached:" ]; then
+			CACHED=$((MEM / 1024));
 		fi;
  	 done < /proc/meminfo;
 		

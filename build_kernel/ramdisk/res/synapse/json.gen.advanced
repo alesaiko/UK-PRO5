@@ -4,9 +4,9 @@ cat << CTAG
 {
     name:ADVANCED,
     elements:[
-      	{ SPane:{
-		title:"Kernel Entropy"
-      	}},
+	{ SPane:{
+	title:"Kernel Entropy"
+	}},
 	{ SSpacer:{
 		height:1
 	}},
@@ -17,9 +17,9 @@ cat << CTAG
 	}},
 	{ SSeekBar:{
 		title:"Read Wakeup Threshold",
-		description:" Default is 256.\n",
+		description:"Default is 256.\n",
 		max:2048, min:64, step:64,
-		default:`cat /proc/sys/kernel/random/read_wakeup_threshold`,
+		default:$(cat /proc/sys/kernel/random/read_wakeup_threshold),
 		action:"generic /proc/sys/kernel/random/read_wakeup_threshold"
 	}},
 	{ SSpacer:{
@@ -27,23 +27,40 @@ cat << CTAG
 	}},
 	{ SSeekBar:{
 		title:"Write Wakeup Threshold",
-		description:" Default is 320.\n",
+		description:"Default is 320.\n",
 		max:2048, min:64, step:64,
-		default:`cat /proc/sys/kernel/random/write_wakeup_threshold`,
+		default:$(cat /proc/sys/kernel/random/write_wakeup_threshold),
 		action:"generic /proc/sys/kernel/random/write_wakeup_threshold"
 	}},
 	{ SSpacer:{
 		height:1
 	}},
-      	{ SPane:{
-		title:"Gentle Fair Sleepers",
-		description:" Sleeper Fairness is a concept used by CFS which treat sleeping/waiting tasks as if they were in a run queue. This implies tasks which spend most of the time waiting for an user input and such will get a fair share of CPU when they need it. Disabling Gentle Fair Sleepers could improve UI responsiveness."
-      	}},
+	{ SPane:{
+		title:"Google Play Services Battery Drain Fix",
+		description:"SystemUpdateService is basically Google's OTA update service, and when it detects that your phone need and update while running a Custom ROM, it fails and re-runs this check over and over again. It's this wakelock that drains your battery.",
+	}},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SOptionList:{
-		description:" Default is Disabled.\n",
+		title:"Google Play Services",
+		description:"Enable to apply fix on every boot. If Disable, then REBOOT required for stock behaviour. Default is Enabled.\n",
+		default:$(echo "$(/res/synapse/actions/devtools SystemUpdateService)"),
+		action:"devtools SystemUpdateService",
+		values:[Enabled, Disabled,]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SPane:{
+		title:"Gentle Fair Sleepers",
+		description:"Sleeper Fairness is a concept used by CFS which treat sleeping/waiting tasks as if they were in a run queue. This implies tasks which spend most of the time waiting for an user input and such will get a fair share of CPU when they need it. Disabling Gentle Fair Sleepers could improve UI responsiveness."
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		description:"Default is Disabled.\n",
 		default:0,
 		action:"generic /sys/kernel/sched/gentle_fair_sleepers",
 		values:{
@@ -53,15 +70,15 @@ cat << CTAG
 	{ SSpacer:{
 		height:1
 	}},
-      	{ SPane:{
+	{ SPane:{
 		title:"Arch Power",
-		description:" Arch Power uses arch dependent power functions to be used instead of generic high resolution timer ticks and double ticks to reflect the relative capacity of each core."
-      	}},
+		description:"Arch Power uses arch dependent power functions to be used instead of generic high resolution timer ticks and double ticks to reflect the relative capacity of each core."
+	}},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SOptionList:{
-		description:" Default is Enabled.\n",
+		description:"Default is Enabled.\n",
 		default:1,
 		action:"generic /sys/kernel/sched/arch_power",
 		values:{
@@ -71,47 +88,57 @@ cat << CTAG
 	{ SSpacer:{
 		height:1
 	}},
-      	{ SPane:{
-		title:"Randomisation"
-      	}},
+	{ SPane:{
+		title:"Randomisation",
+		description:"Disabling (0) virtual address randomisation may improve GUI responsiveness."
+	}},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SSeekBar:{
 		title:"randomize_va_space",
-		description:" Disabling (0) virtual address randomisation may improve GUI responsiveness. Default is Disabled.\n",
+		description:"Default is Disabled.\n",
 		max:2,
 		min:0,
 		step:1,
-		default:`cat /proc/sys/kernel/randomize_va_space`,
+		default:$(cat /proc/sys/kernel/randomize_va_space),
 		action:"generic /proc/sys/kernel/randomize_va_space"
 	}},
 	{ SSpacer:{
 		height:1
 	}},
 	{ SPane:{
-		title:"Freeze Timeout"
+		title:"PowerSuspend",
+		description:"PowerSuspend driver is a replacement for the early_suspend/late_resume driver. Hybrid uses autosleep & display panel hook. Default is Hybrid."
 	}},
 	{ SSpacer:{
 		height:1
 	}},
-	{ SSeekBar:{
-		title:"pm_freeze_timeout",
-		description:" Controls how long it will cost at most to freeze all user space processes or all freezable kernel threads. Default is 2.\n",
-		unit:" sec",
-		max:2000,
-		min:1000,
-		step:100,
-		weight:0.001,
-		default:`cat /sys/power/pm_freeze_timeout`,
-		action:"generic /sys/power/pm_freeze_timeout"
+	{ SOptionList:{
+		default:3,
+		action:"generic /sys/kernel/power_suspend/power_suspend_mode",
+		values:{
+			0:"Autosleep", 1:"Userspace", 2:"DisplayPanel", 3:"Hybrid"
+		}
 	}},
 	{ SSpacer:{
 		height:1
 	}},
-	{ SPane:{
-		title:"Wakelock control",
-		description:" Manage wakelock for drivers."
+	{ SOptionList:{
+		title:"PowerSuspend State",
+		description:"Kernel power management driver when screen is off. If using Userspace hook, enable for better battery savings. Note: You can only change this setting with Userspace mode.\n",
+		default:0,
+		action:"suspend_state /sys/kernel/power_suspend/power_suspend_state",
+		values:{
+			0:"Disabled", 1:"Enabled"
+		}
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SButton:{
+		label:"PowerSuspend version",
+		action:"show susp"
 	}},
 	{ SSpacer:{
 		height:1
