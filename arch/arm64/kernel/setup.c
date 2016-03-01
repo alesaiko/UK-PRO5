@@ -41,7 +41,6 @@
 #include <linux/memblock.h>
 #include <linux/of_fdt.h>
 #include <linux/of_platform.h>
-#include <linux/personality.h>
 
 #include <asm/fixmap.h>
 #include <asm/cputype.h>
@@ -200,19 +199,6 @@ static void __init smp_build_mpidr_hash(void)
 }
 #endif
 
-struct cpuinfo_arm64 {
-	struct cpu	cpu;
-	u32		reg_midr;
-};
-
-static DEFINE_PER_CPU(struct cpuinfo_arm64, cpu_data);
-
-void cpuinfo_store_cpu(void)
-{
-	struct cpuinfo_arm64 *info = this_cpu_ptr(&cpu_data);
-	info->reg_midr = read_cpuid_id();
-}
-
 static void __init setup_processor(void)
 {
 	struct cpu_info *cpu_info;
@@ -303,8 +289,6 @@ struct machine_desc * __init setup_machine_fdt(phys_addr_t dt_phys)
 	unsigned long dt_root;
 	struct machine_desc *mdesc, *mdesc_best = NULL;
 	unsigned int score, mdesc_score = ~1;
-
-	cpuinfo_store_cpu();
 
 	/* Check we have a non-NULL DT pointer */
 	if (!dt_phys) {
@@ -434,6 +418,8 @@ u64 __cpu_logical_map[NR_CPUS] = { [0 ... NR_CPUS-1] = INVALID_HWID };
 
 struct machine_desc *machine_desc __initdata;
 
+void __init __weak init_random_pool(void) { }
+
 void __init setup_arch(char **cmdline_p)
 {
 	struct machine_desc *mdesc;
@@ -490,6 +476,8 @@ void __init setup_arch(char **cmdline_p)
 #endif
 	if (mdesc->init_early)
 		mdesc->init_early();
+
+	init_random_pool();
 }
 
 static int __init arm64_device_init(void)
@@ -499,12 +487,14 @@ static int __init arm64_device_init(void)
 }
 arch_initcall_sync(arm64_device_init);
 
+static DEFINE_PER_CPU(struct cpu, cpu_data);
+
 static int __init topology_init(void)
 {
 	int i;
 
 	for_each_possible_cpu(i) {
-		struct cpu *cpu = &per_cpu(cpu_data.cpu, i);
+		struct cpu *cpu = &per_cpu(cpu_data, i);
 		cpu->hotpluggable = 1;
 		register_cpu(cpu, i);
 	}
@@ -525,41 +515,14 @@ static const char *hwcap_str[] = {
 	NULL
 };
 
-#ifdef CONFIG_COMPAT
-static const char *compat_hwcap_str[] = {
-	"swp",
-	"half",
-	"thumb",
-	"26bit",
-	"fastmult",
-	"fpa",
-	"vfp",
-	"edsp",
-	"java",
-	"iwmmxt",
-	"crunch",
-	"thumbee",
-	"neon",
-	"vfpv3",
-	"vfpv3d16",
-	"tls",
-	"vfpv4",
-	"idiva",
-	"idivt",
-	"vfpd32",
-	"lpae",
-	"evtstrm"
-};
-#endif /* CONFIG_COMPAT */
-
 static int c_show(struct seq_file *m, void *v)
 {
-	int i, j;
+	int i;
+
+	seq_printf(m, "Processor\t: %s rev %d (%s)\n",
+		   cpu_name, read_cpuid_id() & 15, ELF_PLATFORM);
 
 	for_each_online_cpu(i) {
-		struct cpuinfo_arm64 *cpuinfo = &per_cpu(cpu_data, i);
-		u32 midr = cpuinfo->reg_midr;
-
 		/*
 		 * glibc reads /proc/cpuinfo to determine the number of
 		 * online processors, looking for lines beginning with

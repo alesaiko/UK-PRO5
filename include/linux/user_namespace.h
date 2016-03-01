@@ -17,10 +17,6 @@ struct uid_gid_map {	/* 64 bytes -- 1 cache line */
 	} extent[UID_GID_MAP_MAX_EXTENTS];
 };
 
-#define USERNS_SETGROUPS_ALLOWED 1UL
-
-#define USERNS_INIT_FLAGS USERNS_SETGROUPS_ALLOWED
-
 struct user_namespace {
 	struct uid_gid_map	uid_map;
 	struct uid_gid_map	gid_map;
@@ -31,7 +27,6 @@ struct user_namespace {
 	kuid_t			owner;
 	kgid_t			group;
 	unsigned int		proc_inum;
-	unsigned long		flags;
 	bool			may_mount_sysfs;
 	bool			may_mount_proc;
 };

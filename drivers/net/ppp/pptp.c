@@ -420,9 +420,6 @@ static int pptp_bind(struct socket *sock, struct sockaddr *uservaddr,
 	struct pptp_opt *opt = &po->proto.pptp;
 	int error = 0;
 
-	if (sockaddr_len < sizeof(struct sockaddr_pppox))
-		return -EINVAL;
-
 	lock_sock(sk);
 
 	opt->src_addr = sp->sa_addr.pptp;
@@ -443,9 +440,6 @@ static int pptp_connect(struct socket *sock, struct sockaddr *uservaddr,
 	struct rtable *rt;
 	struct flowi4 fl4;
 	int error = 0;
-
-	if (sockaddr_len < sizeof(struct sockaddr_pppox))
-		return -EINVAL;
 
 	if (sp->sa_protocol != PX_PROTO_PPTP)
 		return -EINVAL;
@@ -512,9 +506,7 @@ static int pptp_getname(struct socket *sock, struct sockaddr *uaddr,
 	int len = sizeof(struct sockaddr_pppox);
 	struct sockaddr_pppox sp;
 
-	memset(&sp.sa_addr, 0, sizeof(sp.sa_addr));
-
-	sp.sa_family    = AF_PPPOX;
+	sp.sa_family	  = AF_PPPOX;
 	sp.sa_protocol  = PX_PROTO_PPTP;
 	sp.sa_addr.pptp = pppox_sk(sock->sk)->proto.pptp.src_addr;
 
