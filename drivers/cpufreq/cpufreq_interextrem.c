@@ -20,6 +20,7 @@
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/cpufreq.h>
+#include <linux/cpufreq_kt.h>
 #include <linux/ipa.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -75,6 +76,8 @@ struct cpufreq_interextrem_cpuinfo {
 	int prev_region;
 #endif
 };
+
+extern bool screen_on;
 
 static DEFINE_PER_CPU(struct cpufreq_interextrem_cpuinfo, cpuinfo);
 
@@ -135,6 +138,9 @@ static unsigned int cluster0_min_freq=0;
 			pm_qos_remove_request(req); \
 }
 #endif /* CONFIG_MODE_AUTO_CHANGE */
+
+#define DEFAULT_SCREEN_OFF_MAX 1000000
+static unsigned long screen_off_max = DEFAULT_SCREEN_OFF_MAX;
 
 struct cpufreq_interextrem_tunables {
 	int usage_count;
@@ -417,7 +423,7 @@ static unsigned int choose_freq(struct cpufreq_interextrem_cpuinfo *pcpu,
 
 		if (cpufreq_frequency_table_target(
 			    pcpu->policy, pcpu->freq_table, loadadjfreq / tl,
-			    CPUFREQ_RELATION_L, &index))
+			    CPUFREQ_RELATION_C, &index))
 			break;
 		freq = pcpu->freq_table[index].frequency;
 
@@ -459,7 +465,7 @@ static unsigned int choose_freq(struct cpufreq_interextrem_cpuinfo *pcpu,
 				 */
 				if (cpufreq_frequency_table_target(
 					    pcpu->policy, pcpu->freq_table,
-					    freqmin + 1, CPUFREQ_RELATION_L,
+					    freqmin + 1, CPUFREQ_RELATION_C,
 					    &index))
 					break;
 				freq = pcpu->freq_table[index].frequency;
@@ -771,7 +777,7 @@ static void cpufreq_interextrem_timer(unsigned long data)
 	}
 
 	if (cpufreq_frequency_table_target(pcpu->policy, pcpu->freq_table,
-					   new_freq, CPUFREQ_RELATION_L,
+					   new_freq, CPUFREQ_RELATION_C,
 					   &index)) {
 		spin_unlock_irqrestore(&pcpu->target_freq_lock, flags);
 		goto rearm;
@@ -1038,6 +1044,9 @@ static int cpufreq_interextrem_speedchange_task(void *data)
 				if (pjcpu->target_freq > max_freq)
 					max_freq = pjcpu->target_freq;
 			}
+			
+			if (unlikely(!screen_on))
+					if (max_freq > screen_off_max) max_freq = screen_off_max;
 
 			if (max_freq != pcpu->policy->cur) {
 				u64 now;
@@ -2499,7 +2508,7 @@ static int cpufreq_governor_interextrem(struct cpufreq_policy *policy,
 					policy->max, CPUFREQ_RELATION_H);
 		else if (policy->min > policy->cur)
 			__cpufreq_driver_target(policy,
-					policy->min, CPUFREQ_RELATION_L);
+					policy->min, CPUFREQ_RELATION_C);
 		for_each_cpu(j, policy->cpus) {
 			pcpu = &per_cpu(cpuinfo, j);
 
@@ -2773,6 +2782,7 @@ static int __init cpufreq_interextrem_init(void)
 {
 	unsigned int i;
 	struct cpufreq_interextrem_cpuinfo *pcpu;
+	screen_on = true;
 
 	/* Initalize per-cpu timers */
 	for_each_possible_cpu(i) {

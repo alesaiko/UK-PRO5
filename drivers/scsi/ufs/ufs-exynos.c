@@ -883,7 +883,7 @@ struct exynos_ufs_soc *exynos_ufs_get_drv_data(struct device *dev)
 	return ((struct ufs_hba_variant *)match->data)->vs_data;
 }
 
-inline void exynos_ufs_ctrl_hci_core_clk(struct exynos_ufs *ufs, bool en)
+extern inline void exynos_ufs_ctrl_hci_core_clk(struct exynos_ufs *ufs, bool en)
 {
 	u32 reg;
 

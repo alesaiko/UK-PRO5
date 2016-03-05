@@ -42,8 +42,9 @@ echo -n "Set build variables................................"
 export ARCH=arm64
 export SUBARCH=arm64
 export ccache=ccache
-export CROSS_COMPILE=/home/serg/aarch64-linux-gnu-Linaro-4.9-master/bin/aarch64-linux-gnu-;
+# export CROSS_COMPILE=/home/serg/aarch64-linux-gnu-Linaro-4.9-master/bin/aarch64-linux-gnu-;
 # export CROSS_COMPILE=/home/serg/aarch64-linux-gnu-5.3/bin/aarch64-;
+export CROSS_COMPILE=/home/serg/aarch64-UBERTC-linux-android-5.3-kernel/bin/aarch64-linux-android-;
 export KCONFIG_NOTIMESTAMP=true
 echo "Done"
 echo

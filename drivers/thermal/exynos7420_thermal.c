@@ -52,7 +52,7 @@
 static unsigned int HOT_NORMAL_TEMP = 95;
 static unsigned int HOT_CRITICAL_TEMP = 110;
 
-static unsigned int MIF_TH_TEMP1 = 65;
+static unsigned int MIF_TH_TEMP1 = 85;
 static unsigned int MIF_TH_TEMP2 = 95;
 
 static unsigned int GPU_TH_TEMP1 = 90;
