@@ -12,11 +12,19 @@
 #
 #
 
+# { SRUK-MALI_SYSTRACE_SUPPORT
+config MALI_SYSTRACE_SUPPORT
+       bool "systrace Debug support"
+       depends on MALI_T7XX
+       default y
+       help
+          Enable systrace marker in kernel
+# SRUK-MALI_SYSTRACE_SUPPORT }
 
 config MALI_GATOR_SUPPORT
 	bool "Streamline Debug support"
 	depends on MALI_T7XX
-	default n
+        default y
 	help
 	  Adds diagnostic support for use with the ARM Streamline Performance Analyzer.
 	  You will need the Gator device driver already loaded before loading this driver when enabling
@@ -28,13 +36,6 @@ config MALI_DVFS
 	default n
 	help
 	  Choose this option to enable DVFS on MALI T7xx DDK.
-
-config EXYNOS_GPU_PM_QOS
-       bool "Enable GPU PM QOS"
-       depends on MALI_T7XX
-       default n
-       help
-         Choose this option to enable GPU PM QOS
 
 config MALI_RT_PM
 	bool "Enable Runtime power management"

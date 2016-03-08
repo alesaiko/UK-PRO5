@@ -872,18 +872,18 @@ service dis_effect /system/bin/dis_effect
     group system
     oneshot
 
- #ad reg op sock
+#ad reg op sock
 service ad_daemon /system/bin/ad_daemon
     class main
     socket ad stream 666 system system
 
 # logkit tools
-#service logkit /system/bin/logkit /sdcard/Android/log/  50  /mnt/shell/emulated
-#    class main
-#    user root
-#    group log system sdcard_r
-#    disabled
-#    oneshot
+service logkit /system/bin/logkit /sdcard/Android/log/  50  /mnt/shell/emulated
+    class main
+    user root
+    group log system sdcard_r
+    disabled
+    oneshot
 
 #on boot
     #start logkit
@@ -989,10 +989,10 @@ service setkeydaemon /system/bin/setkeydaemon
 
 on property:persist.radio.aplog=1
     #start ro_log
-    #start logkit
+    start logkit
 on property:persist.radio.aplog=0
     #stop ro_log
-    #stop logkit
+    stop logkit
 #@}
 
 #FLYME:fanjun@SHELL.HapticFeedback.Feature {@

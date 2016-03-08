@@ -95,12 +95,6 @@ on init
     write /proc/sys/kernel/panic_on_oops 1
     write /proc/sys/kernel/hung_task_timeout_secs 0
     write /proc/cpu/alignment 4
-
-    # scheduler tunables
-    # Disable auto-scaling of scheduler tunables with hotplug. The tunables
-    # will vary across devices in unpredictable ways if allowed to scale with
-    # cpu cores.
-    write /proc/sys/kernel/sched_tunable_scaling 0
     write /proc/sys/kernel/sched_latency_ns 10000000
     write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000
     write /proc/sys/kernel/sched_compat_yield 1
@@ -197,7 +191,7 @@ service injectsu /system/bin/sh /sbin/injectsu.sh
 
 on post-fs
     # once everything is setup, no need to modify /
-    mount rootfs rootfs / rw remount
+    mount rootfs rootfs / ro remount
     # mount shared so changes propagate into child namespaces
     mount rootfs rootfs / shared rec
 
@@ -619,7 +613,7 @@ service console /system/bin/sh
     disabled
     user shell
     group shell log
-    # seclabel u:r:shell:s0
+    seclabel u:r:shell:s0
 
 on property:ro.debuggable=1
     start console

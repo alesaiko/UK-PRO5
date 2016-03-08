@@ -164,6 +164,7 @@ mkdir /system/su.d
 chmod 0700 /system/su.d
 
 
-$BB mount -t rootfs -o remount,ro rootfs
-$BB mount -o remount,ro /system /system
+$BB mount -t rootfs -o remount,rw rootfs
+$BB mount -o remount,rw /system /system
+$BB mount -o remount,rw /system
 $BB mount -o remount,rw /data

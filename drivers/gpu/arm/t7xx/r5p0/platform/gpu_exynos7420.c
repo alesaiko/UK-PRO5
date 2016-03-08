@@ -24,9 +24,7 @@
 
 #include <mach/apm-exynos.h>
 #include <mach/asv-exynos.h>
-#ifdef MALI64_PORTING
-#include <mach/asv-exynos7_cal.h>
-#endif
+#include <mach/asv-exynos_cal.h>
 #include <mach/pm_domains.h>
 #include <mach/regs-pmu.h>
 
@@ -66,7 +64,7 @@ static int mif_min_table[] = {
 	 100000,  133000,  167000,
 	 276000,  348000,  416000,
 	 543000,  632000,  828000,
-	1026000, 1264000, 1456000,
+	1026000, 1264000, 1464000,
 	1552000,
 };
 
@@ -85,7 +83,7 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_GOVERNOR_START_CLOCK_DEFAULT, 266},
 	{GPU_GOVERNOR_START_CLOCK_INTERACTIVE, 266},
 	{GPU_GOVERNOR_START_CLOCK_STATIC, 266},
-	{GPU_GOVERNOR_START_CLOCK_BOOSTER, 266},
+	{GPU_GOVERNOR_START_CLOCK_BOOSTER, 420},
 	{GPU_GOVERNOR_TABLE_DEFAULT, (uintptr_t)&gpu_dvfs_table_default},
 	{GPU_GOVERNOR_TABLE_INTERACTIVE, (uintptr_t)&gpu_dvfs_table_default},
 	{GPU_GOVERNOR_TABLE_STATIC, (uintptr_t)&gpu_dvfs_table_default},
@@ -132,7 +130,7 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_PMQOS_INT_DISABLE, 1},
 	{GPU_PMQOS_MIF_MAX_CLOCK, 1552000},
 	{GPU_PMQOS_MIF_MAX_CLOCK_BASE, 852},
-	{GPU_CL_DVFS_START_BASE, 350},
+	{GPU_CL_DVFS_START_BASE, 266},
 	{GPU_DEBUG_LEVEL, DVFS_WARNING},
 	{GPU_TRACE_LEVEL, TRACE_ALL},
 };
@@ -141,6 +139,8 @@ int gpu_dvfs_decide_max_clock(struct exynos_context *platform)
 {
 	if (!platform)
 		return -1;
+    if (cal_get_table_ver() == 12)
+		platform->gpu_max_clock = platform->table[GPU_L2].clock;
 
 	return 0;
 }

@@ -13,7 +13,7 @@
 
 # Executables
 /charger		u:object_r:rootfs:s0
-/init			u:object_r:init_exec:s0
+/init			u:object_r:rootfs:s0
 /sbin(/.*)?		u:object_r:rootfs:s0
 
 # Empty directories
@@ -117,8 +117,6 @@
 /dev/uhid		u:object_r:uhid_device:s0
 /dev/uinput		u:object_r:uhid_device:s0
 /dev/uio[0-9]*		u:object_r:uio_device:s0
-/dev/erandom		u:object_r:urandom_device:s0
-/dev/frandom		u:object_r:random_device:s0
 /dev/urandom		u:object_r:urandom_device:s0
 /dev/usb_accessory	u:object_r:usbaccessory_device:s0
 /dev/vcs[0-9a-z]*	u:object_r:vcs_device:s0
@@ -168,7 +166,6 @@
 /system/bin/pppd	u:object_r:ppp_exec:s0
 /system/bin/tf_daemon	u:object_r:tee_exec:s0
 /system/bin/racoon	u:object_r:racoon_exec:s0
-/system/xbin(/.*)?      u:object_r:system_file:s0
 /system/xbin/su		u:object_r:su_exec:s0
 /system/vendor/bin/gpsd u:object_r:gpsd_exec:s0
 /system/bin/dnsmasq     u:object_r:dnsmasq_exec:s0
@@ -306,11 +303,9 @@
 /data/nfc(/.*)? u:object_r:nfc_data_file:s0
 #@}
 #line 1 "device/meizu/m86/sepolicy/file_contexts"
-#SEC remove: /dev/mali0		u:object_r:gpu_device:s0
-/dev/mali	u:object_r:gpu_device:s0
-/dev/mali[0-9]	u:object_r:gpu_device:s0
+/dev/mali0              u:object_r:gpu_device:s0
 #G2D is used for skia 2D, so set to gpu_device for every app can use it
-/dev/fimg2d(/.*)?     	u:object_r:fimg2d_video_device:s0
+/dev/fimg2d             u:object_r:gpu_device:s0
 
 /dev/seiren             u:object_r:audio_device:s0
 /dev/media0             u:object_r:video_device:s0
@@ -415,6 +410,9 @@
 /sys/devices/virtual/battery_class/battery_device/fake_cap_enable	u:object_r:sysfs_battery:s0
 /sys/devices/virtual/battery_class/battery_device/fake_temp    u:object_r:sysfs_battery:s0
 /sys/devices/virtual/battery_class/battery_device/fake_temp_enable	 u:object_r:sysfs_battery:s0
+
+/sys/devices/virtual/meizu/hw_reset/disable       u:object_r:sysfs_hw_reset:s0
+
 # Custom apk file
 /custom(/.*)?                       u:object_r:unlabeled:s0
 /custom/3rd-party/apk(/.*)?                       u:object_r:apk_data_file:s0
@@ -425,7 +423,6 @@
 
 /system/bin/dis_effect                   u:object_r:dis_effect_exec:s0
 /system/etc/dis_effect                   u:object_r:system_dis_effect_file:s0
-/sys/devices/14ac0000\.mali/power_policy               u:object_r:sysfs_ss_writable:s0
 /sys/devices/13930000.decon_fb/cont      u:object_r:sysfs_dis_effect_cont:s0
 /sys/devices/13930000.decon_fb/hue       u:object_r:sysfs_dis_effect_hue:s0
 /sys/devices/13930000.decon_fb/sat       u:object_r:sysfs_dis_effect_sat:s0

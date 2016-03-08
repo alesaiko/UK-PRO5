@@ -26,6 +26,7 @@ mali_error exynos_gpu_hwcnt_update(struct kbase_device *kbdev)
 	mali_error err = MALI_ERROR_FUNCTION_FAILED;
 	struct exynos_context *platform = (struct exynos_context *) kbdev->platform_context;
 	static int polling_period = 0;
+
 	KBASE_DEBUG_ASSERT(kbdev);
 
 	if ((!kbdev->hwcnt.enable_for_utilization) ||(!kbdev->hwcnt.is_init)) {
@@ -43,6 +44,7 @@ mali_error exynos_gpu_hwcnt_update(struct kbase_device *kbdev)
 		err = MALI_ERROR_NONE;
 		goto out;
 	}
+
 #ifdef MALI_SEC_HWCNT_DUMP_DVFS_THREAD
 	if (kbdev->hwcnt.is_powered && kbdev->hwcnt.kctx) {
 		polling_period = platform->hwcnt_polling_speed;

@@ -209,8 +209,7 @@ mali_error kbase_instr_hwcnt_disable_sec(struct kbase_context *kctx)
 		spin_unlock_irqrestore(&kbdev->hwcnt.lock, flags);
 
 		/* Ongoing dump/setup - wait for its completion */
-		if (wait_event_timeout(kbdev->hwcnt.wait, kbdev->hwcnt.triggered != 0, kbdev->hwcnt.timeout) == 0 ||
-			kbdev->hwcnt.triggered == 1)
+		if (wait_event_timeout(kbdev->hwcnt.wait, kbdev->hwcnt.triggered != 0, kbdev->hwcnt.timeout) == 0)
 			kbdev->hwcnt.state = KBASE_INSTR_STATE_IDLE;
 	}
 
