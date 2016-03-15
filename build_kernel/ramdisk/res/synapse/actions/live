@@ -241,7 +241,22 @@ usb_status)
 	fi
   ;;
 dns)
-  $BB echo "$(getprop net.rmnet0.dns1)@n$(getprop net.rmnet0.dns2)"
+  DNS_STATUS=$(cat /res/synapse/SkyHigh/dns);
+	if [ "$DNS_STATUS" == "0" ]; then
+		$BB echo "$(getprop net.dns1)@n$(getprop net.dns2)"
+	elif [ "$DNS_STATUS" == "1" ]; then
+                echo 8.8.4.4
+	elif [ "$DNS_STATUS" == "2" ]; then
+                echo 208.67.222.222
+	elif [ "$DNS_STATUS" == "3" ]; then
+                echo 8.26.56.26
+	elif [ "$DNS_STATUS" == "4" ]; then
+                echo 209.244.0.4
+	elif [ "$DNS_STATUS" == "5" ]; then
+                echo 199.85.127.10
+	elif [ "$DNS_STATUS" == "6" ]; then
+                echo 64.6.64.6
+	fi
   ;;
 gps)
   var_gps="/system/etc/gps.conf";

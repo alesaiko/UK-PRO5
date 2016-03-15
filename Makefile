@@ -384,7 +384,8 @@ KBUILD_CFLAGS   := -DNDEBUG $(GRAPHITE) -O2 -Wall -Wundef -Wstrict-prototypes -W
 		   -Werror-implicit-function-declaration \
 		   -fivopts -funswitch-loops -fpredictive-commoning \
 		   -Werror-implicit-function-declaration -funsafe-loop-optimizations \
-		   -Wno-format-security -pipe -fno-pic \
+		   -Wno-format-security -Wno-logical-not-parentheses \
+		   -pipe -fno-pic \
 		   -fweb -ftree-loop-im -ftree-loop-ivcanon \
 		   -fno-delete-null-pointer-checks -fsingle-precision-constant \
 		   -fmodulo-sched -fmodulo-sched-allow-regmoves \

@@ -286,8 +286,8 @@
 	ipa_pdata {
 		compatible = "samsung,exynos-ipa";
 
-		control_temp = <90>;
-		temp_threshold = <10>;
+		control_temp = <100>;
+		temp_threshold = <5>;
 		enabled = <1>;
 		tdp = <3500>;
 		boost = <1>;
@@ -307,7 +307,7 @@
 		ctlr.feed_forward = <1>;
 		ctlr.integral_reset_value = <0>;
 		ctlr.integral_cutoff = <0>;
-		ctlr.integral_reset_threshold = <5>;
+		ctlr.integral_reset_threshold = <10>;
 	};
 
 	decon_0: decon_fb {
@@ -909,12 +909,12 @@
 			input_booster,cpu_freqs = <0 0 0>;
 			input_booster,hmp_boost = <1 1 1>;
 			input_booster,kfc_freqs = <1500000 1500000 1500000>;
-			input_booster,mif_freqs = <1464000 0 0>;
+			input_booster,mif_freqs = <0 0 0>;
 			input_booster,int_freqs = <0 0 0>;
 
 			/* Time table */
-			input_booster,head_times = <1000 1000 0>;
-			input_booster,tail_times = <0 0 1000>;
+			input_booster,head_times = <1000 1000 500>;
+			input_booster,tail_times = <0 0 0>;
 			input_booster,phase_times = <0 0 0>;
 		};
 		booster_key@4 { // Input Booster +
@@ -932,8 +932,8 @@
 			input_booster,int_freqs = <0 0>;
 
 			/* Time table */
-			input_booster,head_times = <1000 0>;
-			input_booster,tail_times = <0 500>;
+			input_booster,head_times = <1000 500>;
+			input_booster,tail_times = <0 0>;
 			input_booster,phase_times = <0 0>;
 		};
 		booster_key@5 {

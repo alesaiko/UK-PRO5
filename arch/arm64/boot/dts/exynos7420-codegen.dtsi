@@ -390,7 +390,7 @@
 	watchdog@10020000 {
 		compatible = "samsung,s3c2410-wdt";
 		reg = <0x10020000 0x100>;
-		interrupts = <0 111 0>;
+		interrupts = <0 101 0>;
 		clocks = <&clock 140>, <&clock 140>;
 		clock-names = "rate_watchdog", "gate_watchdog";
 		timeout-sec = <30>;
@@ -474,16 +474,6 @@
 					<10 &gic 0 122 0>,
 					<11 &gic 0 123 0>;
 		};
-	};
-
-        january_booster {
-                compatible = "samsung,january_booster";
-                #address-cells = <1>;
-                #size-cells = <0>;
-        };
-
-	input_key_booster {
-		compatible = "meizu,key_booster";
 	};
 
 	serial_0: uart@13630000 {
@@ -2990,41 +2980,41 @@
 		reference_voltage = <17 16 17 17>;
 		noise_cancel_mode = <4>;
 		cal_type = <1>;	/* 1: ONE_POINT_TRIMMING, 2: TWO_POINT_TRIMMING */
-		efuse_value = <75>;
+		efuse_value = <76>;
 		trigger_level_count = <8>;
 		throttle_count = <5>;
 		throttle_active_count = <1>;
 		throttle_passive_count = <4>;
-		hotplug_out_threshold = <90>;
-		hotplug_in_threshold = <85>;
+		hotplug_out_threshold = <96>;
+		hotplug_in_threshold = <93>;
 
 		trigger_level_table {
 			trigger_level_0 {
-				temp = <75>;
+				temp = <76>;
 				enable = <1>;
 			};
 			trigger_level_1 {
-				temp = <80>;
+				temp = <81>;
 				enable = <1>;
 			};
 			trigger_level_2 {
-				temp = <85>;
+				temp = <86>;
 				enable = <1>;
 			};
 			trigger_level_3 {
-				temp = <90>;
+				temp = <91>;
 				enable = <1>;
 			};
 			trigger_level_4 {
-				temp = <95>;
+				temp = <96>;
 				enable = <1>;
 			};
 			trigger_level_5 {
-				temp = <100>;
+				temp = <101>;
 				enable = <1>;
 			};
 			trigger_level_6 {
-				temp = <105>;
+				temp = <106>;
 				enable = <0>;
 			};
 			trigger_level_7 {
@@ -3037,27 +3027,27 @@
 
 		throttle_table {
 			throttle_tab_0 {
-				temp = <75>;
+				temp = <76>;
 				freq_max_cluster1 = <1896000>;
 				freq_max_cluster0 = <1500000>;
 			};
 			throttle_tab_1 {
-				temp = <80>;
+				temp = <81>;
 				freq_max_cluster1 = <1500000>;
 				freq_max_cluster0 = <1500000>;
 			};
 			throttle_tab_2 {
-				temp = <85>;
+				temp = <86>;
 				freq_max_cluster1 = <1100000>;
 				freq_max_cluster0 = <1200000>;
 			};
 			throttle_tab_3 {
-				temp = <90>;
+				temp = <91>;
 				freq_max_cluster1 = <800000>;
 				freq_max_cluster0 = <1000000>;
 			};
 			throttle_tab_4 {
-				temp = <95>;
+				temp = <96>;
 				freq_max_cluster1 = <800000>;
 				freq_max_cluster0 = <400000>;
 			};

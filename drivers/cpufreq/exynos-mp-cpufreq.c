@@ -84,6 +84,8 @@
 #define VOLT_RANGE_STEP		25000
 #define CLUSTER_ID(cl)		(cl ? ID_CL1 : ID_CL0)
 
+#define LIMIT_FREQ_DIVIDER	4
+
 #ifdef CONFIG_SMP
 struct lpj_info {
 	unsigned long   ref;
@@ -1136,7 +1138,7 @@ static ssize_t show_cpufreq_table(struct kobject *kobj,
 	for (i = 0; freq_table_cluster0[i].frequency != CPUFREQ_TABLE_END; i++) {
 		if (freq_table_cluster0[i].frequency != CPUFREQ_ENTRY_INVALID)
 			count += snprintf(&buf[count], pr_len, "%d ",
-					freq_table_cluster0[i].frequency / 2);
+					freq_table_cluster0[i].frequency / LIMIT_FREQ_DIVIDER);
 	}
 
 	count += snprintf(&buf[count - 1], 2, "\n");
@@ -1167,10 +1169,10 @@ static ssize_t show_cpufreq_min_limit(struct kobject *kobj,
 			cluster0_qos_min = freq_max[CL_ZERO];
 		if (cluster0_qos_min < freq_min[CL_ZERO])
 			cluster0_qos_min = freq_min[CL_ZERO];
-		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_min / 2);
+		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_min / LIMIT_FREQ_DIVIDER);
 	} else if (cluster0_qos_min == 0) {
 		cluster0_qos_min = freq_min[CL_ZERO];
-		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_min / 2);
+		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_min / LIMIT_FREQ_DIVIDER);
 	}
 
 	return nsize;
@@ -1213,7 +1215,7 @@ static ssize_t store_cpufreq_min_limit(struct kobject *kobj, struct attribute *a
 			cluster1_input = qos_min_default_value[CL_ONE];
 			cluster0_input = qos_min_default_value[CL_ZERO];
 		} else {
-			cluster0_input = cluster1_input * 2;
+			cluster0_input = cluster1_input * LIMIT_FREQ_DIVIDER;
 			if (cluster0_input > 0)
 				cluster0_input = min(cluster0_input, (int)freq_max[CL_ZERO]);
 			cluster1_input = qos_min_default_value[CL_ONE];
@@ -1246,10 +1248,10 @@ static ssize_t show_cpufreq_max_limit(struct kobject *kobj,
 			cluster0_qos_max = freq_min[CL_ZERO];
 		if (cluster0_qos_max > freq_max[CL_ZERO])
 			cluster0_qos_max = freq_max[CL_ZERO];
-		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_max / 2);
+		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_max / LIMIT_FREQ_DIVIDER);
 	} else if (cluster0_qos_max == 0) {
 		cluster0_qos_max = freq_min[CL_ZERO];
-		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_max / 2);
+		nsize = snprintf(buf, 10, "%u\n", cluster0_qos_max / LIMIT_FREQ_DIVIDER);
 	}
 
 	return nsize;
@@ -1287,7 +1289,7 @@ static ssize_t store_cpufreq_max_limit(struct kobject *kobj, struct attribute *a
 			cluster1_input = core_max_qos_const[CL_ONE].default_value;
 			cluster0_input = core_max_qos_const[CL_ZERO].default_value;
 		} else {
-			cluster0_input = cluster1_input * 2;
+			cluster0_input = cluster1_input * LIMIT_FREQ_DIVIDER;
 			if (cluster0_input > 0)
 				cluster0_input = max(cluster0_input, (int)freq_min[CL_ZERO]);
 			cluster1_input = qos_min_default_value[CL_ONE];
