@@ -4,28 +4,6 @@ cat << CTAG
 {
     name:"A57 CPU",
     elements:[
-	{ SPane:{
-		title:"Exynos Core Control Interface",
-		description:"Set the maximum number of online CPU Cores when screen is on."
-	}},
-	{ SSpacer:{
-		height:1
-	}},
-	{ SOptionList:{
-                title:"MAX A57(BIG) CPU Cores",
-                description:" Maximum number of online BIG A57 CPU Cores when screen is on. A53 Cores always online!\n",
-                default:$(cat /sys/power/cpucore_max_num_limit),
-                action:"generic /sys/power/cpucore_max_num_limit",
-		values:{
-                        "5":"1 A57 Core Online",
-                        "6":"2 A57 Cores Online",
-                        "7":"3 A57 Cores Online",
-                        "8":"4(All) A57 Cores Online - Default"
-                }
-        }},
-	{ SSpacer:{
-		height:1
-	}},
 	{ SLiveLabel:{
 		title:"A57 big Cores live frequency",
 		refresh:500,

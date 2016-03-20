@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * To be safe set these option to 1
  * @ingroup Configuration
  */
-#define VL6180X_SAFE_POLLING_ENTER  0
+#define VL6180X_SAFE_POLLING_ENTER  1
 
 
 /**

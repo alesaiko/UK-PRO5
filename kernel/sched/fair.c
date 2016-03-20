@@ -1584,11 +1584,15 @@ static inline void __update_group_entity_contrib(struct sched_entity *se) {}
  * tweaking suit particular needs.
  */
 
-unsigned int hmp_up_threshold = 524;
+unsigned int hmp_up_threshold = 479;
 unsigned int hmp_down_threshold = 214;
 
-unsigned int hmp_semiboost_up_threshold = 254;
-unsigned int hmp_semiboost_down_threshold = 164;
+unsigned int hmp_semiboost_up_threshold = 400;
+unsigned int hmp_semiboost_down_threshold = 150;
+
+#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
+extern unsigned int cluster1_hotplug_in_threshold_by_hmp;
+#endif
 
 /* Global switch between power-aware migrations and classical GTS. */
 unsigned int hmp_power_migration = 0;
@@ -3927,6 +3931,7 @@ static struct sched_entity *hmp_get_lightest_task(struct sched_entity* se, int m
  */
 static int hmp_boostpulse_duration = 1000000; /* microseconds */
 static u64 hmp_boostpulse_endtime;
+static u64 hmp_semiboostpulse_endtime;
 static int hmp_boost_val;
 static int hmp_semiboost_val;
 static int hmp_boostpulse;
@@ -4459,6 +4464,24 @@ int set_hmp_boostpulse(int duration)
 	if (boostpulse_endtime > hmp_boostpulse_endtime)
 		hmp_boostpulse_endtime = boostpulse_endtime;
 	raw_spin_unlock_irqrestore(&hmp_boost_lock, flags);
+
+	return 0;
+}
+
+int set_hmp_semiboostpulse(int duration)
+{
+	unsigned long flags;
+	u64 boostpulse_endtime;
+
+	if (duration < 0)
+		return -EINVAL;
+
+	boostpulse_endtime = ktime_to_us(ktime_get()) + duration;
+
+	raw_spin_lock_irqsave(&hmp_semiboost_lock, flags);
+	if (boostpulse_endtime > hmp_semiboostpulse_endtime)
+		hmp_semiboostpulse_endtime = boostpulse_endtime;
+	raw_spin_unlock_irqrestore(&hmp_semiboost_lock, flags);
 
 	return 0;
 }
@@ -7367,6 +7390,20 @@ static void nohz_idle_balance(int this_cpu, enum cpu_idle_type idle) { }
 
 #ifdef CONFIG_SCHED_HMP
 /* Check if task should migrate to a faster cpu */
+
+#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
+static bool up_migration_for_hotplug = false;
+static DEFINE_SPINLOCK(hmp_hotplug_migration);
+extern struct cpumask hmp_fast_cpu_mask;
+extern void event_hmp_for_heavy_task(bool detect);
+void set_up_migration_for_hotplug(bool temp)
+{
+	spin_lock(&hmp_hotplug_migration);
+	up_migration_for_hotplug = temp;
+	spin_unlock(&hmp_hotplug_migration);
+}
+#endif
+
 static unsigned int hmp_up_migration(int cpu, int *target_cpu, struct sched_entity *se)
 {
 	struct task_struct *p = task_of(se);
@@ -7389,6 +7426,25 @@ static unsigned int hmp_up_migration(int cpu, int *target_cpu, struct sched_enti
 		else
 			up_threshold = hmp_power_migration ? hmp_up_perf_threshold : hmp_up_threshold;
 
+#ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
+		if (se->avg.load_avg_ratio > cluster1_hotplug_in_threshold_by_hmp) {
+			struct cpumask big_online_cpumask;
+			int fast_online_num;
+			if (!spin_trylock(&hmp_hotplug_migration)) {
+				//trace_printk("CPU%d FAILED TO GET MIGRATION HOTPLUG SPINLOCK\n", this_cpu);
+			} else {
+				cpumask_and(&big_online_cpumask, &hmp_fast_cpu_mask, cpu_online_mask);
+				fast_online_num = cpumask_weight(&big_online_cpumask);
+				if(fast_online_num == 0 && up_migration_for_hotplug == false) {
+				    up_migration_for_hotplug = true;
+				    spin_unlock(&hmp_hotplug_migration);
+				    event_hmp_for_heavy_task(true);
+				} else {
+				    spin_unlock(&hmp_hotplug_migration);
+				}
+			}
+		}
+#else
 		if (se->avg.load_avg_ratio < up_threshold) {
 			if (hmp_power_migration) {
 				if (!((se->avg.load_avg_ratio > hmp_up_power_threshold) 
@@ -7398,6 +7454,7 @@ static unsigned int hmp_up_migration(int cpu, int *target_cpu, struct sched_enti
 				return 0;
 			}
 		}
+#endif
 	}
 
 	/* Let the task load settle before doing another up migration */

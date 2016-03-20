@@ -570,6 +570,13 @@ config MZ_NFC_PN547
 	  Say Y here to compile support for PN547 devices into the
 	  kernel or say M to compile it as module (pn547).
 
+config MEIZU_ADC
+	tristate "meizu adc consumer support"
+	depends on EXYNOS_ADC
+	help
+	  If you say yes here you get support for the adc consumer device of
+	  SAMSUNG 7420. The adc is used for battery_id and adapter_id for meizu m576.
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"

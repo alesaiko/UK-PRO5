@@ -27,8 +27,8 @@ MODULE_DEVICE_TABLE(of, key_booster_device_table);
 #endif
 
 typedef enum {
-	CL_LIT = 0,
-	CL_BIG,
+	CL_ZERO = 0,
+	CL_ONE,
 	CL_END,
 } cl_type;
 
@@ -51,7 +51,7 @@ struct p_data {
 	struct qos_perf device; 		// For PM_QOS_DEVICE_THROUGHT
 	struct qos_perf graphic;		// For PM_QOS_GPU_THROUGHT
 	struct qos_perf nrcpu[CL_END];
-	struct qos_perf big_boost;		// 0: Non, 1: SemiBoost, 2: Boost
+	struct qos_perf cluster1_boost;		// 0: Non, 1: SemiBoost, 2: Boost
 };
 
 struct booster_req {
@@ -95,42 +95,42 @@ static inline void boost_handler(struct booster_req *qos_req, struct p_data *pda
 	struct cpufreq_policy *policy;
 
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if(pdata->nrcpu[CL_BIG].perf > 0) {
-		set_qos(&(qos_req->nrcpu_pmreq[CL_BIG]),PM_QOS_CLUSTER1_NUM_MIN,
-			pdata->nrcpu[CL_BIG].perf, pdata->nrcpu[CL_BIG].pulse_timeout);
+	if(pdata->nrcpu[CL_ONE].perf > 0) {
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ONE]),PM_QOS_CLUSTER1_NUM_MIN,
+			pdata->nrcpu[CL_ONE].perf, pdata->nrcpu[CL_ONE].pulse_timeout);
 
-		if(pdata->big_boost.perf == 2) {
-			set_hmp_boostpulse(pdata->big_boost.pulse_timeout);
-		} else if(pdata->big_boost.perf == 1) {
-			set_hmp_semiboostpulse(pdata->big_boost.pulse_timeout);
+		if(pdata->cluster1_boost.perf == 2) {
+			set_hmp_boostpulse(pdata->cluster1_boost.pulse_timeout);
+		} else if(pdata->cluster1_boost.perf == 1) {
+			set_hmp_semiboostpulse(pdata->cluster1_boost.pulse_timeout);
 		}
 
-		set_qos(&(qos_req->nrcpu_pmreq[CL_LIT]),PM_QOS_CLUSTER0_NUM_MIN,
-			pdata->nrcpu[CL_LIT].perf, pdata->nrcpu[CL_LIT].pulse_timeout);
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ZERO]),PM_QOS_CLUSTER0_NUM_MIN,
+			pdata->nrcpu[CL_ZERO].perf, pdata->nrcpu[CL_ZERO].pulse_timeout);
 	}
 #endif
 
 	policy = cpufreq_cpu_get(0);
 	if (policy) {
-		if (policy->cur < pdata->cpu[CL_LIT].perf) {
-			cpufreq_driver_target(policy, pdata->cpu[CL_LIT].perf, CPUFREQ_RELATION_L);
+		if (policy->cur < pdata->cpu[CL_ZERO].perf) {
+			cpufreq_driver_target(policy, pdata->cpu[CL_ZERO].perf, CPUFREQ_RELATION_L);
 		}
 		cpufreq_cpu_put(policy);
 	}
-	set_qos(&(qos_req->cpu_pmreq[CL_LIT]),PM_QOS_CLUSTER0_FREQ_MIN,
-		pdata->cpu[CL_LIT].perf, pdata->cpu[CL_LIT].pulse_timeout);
+	set_qos(&(qos_req->cpu_pmreq[CL_ZERO]),PM_QOS_CLUSTER0_FREQ_MIN,
+		pdata->cpu[CL_ZERO].perf, pdata->cpu[CL_ZERO].pulse_timeout);
 
 	if (cpu_online(4)) {
 		policy = cpufreq_cpu_get(4);
 		if (policy) {
-			if (policy->cur < pdata->cpu[CL_BIG].perf) {
-				cpufreq_driver_target(policy, pdata->cpu[CL_BIG].perf, CPUFREQ_RELATION_L);
+			if (policy->cur < pdata->cpu[CL_ONE].perf) {
+				cpufreq_driver_target(policy, pdata->cpu[CL_ONE].perf, CPUFREQ_RELATION_L);
 			}
 			cpufreq_cpu_put(policy);
 		}
 	}
-	set_qos(&(qos_req->cpu_pmreq[CL_BIG]),PM_QOS_CLUSTER1_FREQ_MIN,
-		pdata->cpu[CL_BIG].perf, pdata->cpu[CL_BIG].pulse_timeout);
+	set_qos(&(qos_req->cpu_pmreq[CL_ONE]),PM_QOS_CLUSTER1_FREQ_MIN,
+		pdata->cpu[CL_ONE].perf, pdata->cpu[CL_ONE].pulse_timeout);
 
 	set_qos(&qos_req->bus_pmreq,PM_QOS_BUS_THROUGHPUT,
 		pdata->bus.perf, pdata->bus.pulse_timeout);
@@ -143,18 +143,18 @@ static inline void boost_handler(struct booster_req *qos_req, struct p_data *pda
 #endif
 
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if(pdata->nrcpu[CL_BIG].perf == 0) {
-		set_qos(&(qos_req->nrcpu_pmreq[CL_BIG]),PM_QOS_CLUSTER1_NUM_MIN,
-			pdata->nrcpu[CL_BIG].perf, pdata->nrcpu[CL_BIG].pulse_timeout);
+	if(pdata->nrcpu[CL_ONE].perf == 0) {
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ONE]),PM_QOS_CLUSTER1_NUM_MIN,
+			pdata->nrcpu[CL_ONE].perf, pdata->nrcpu[CL_ONE].pulse_timeout);
 
-		if(pdata->big_boost.perf == 2) {
-	 		set_hmp_boostpulse(pdata->big_boost.pulse_timeout);
-		} else if(pdata->big_boost.perf == 1) {
-	 		set_hmp_semiboostpulse(pdata->big_boost.pulse_timeout);
+		if(pdata->cluster1_boost.perf == 2) {
+	 		set_hmp_boostpulse(pdata->cluster1_boost.pulse_timeout);
+		} else if(pdata->cluster1_boost.perf == 1) {
+	 		set_hmp_semiboostpulse(pdata->cluster1_boost.pulse_timeout);
 		}
 
-		set_qos(&(qos_req->nrcpu_pmreq[CL_LIT]),PM_QOS_CLUSTER0_NUM_MIN,
-			pdata->nrcpu[CL_LIT].perf, pdata->nrcpu[CL_LIT].pulse_timeout);
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ZERO]),PM_QOS_CLUSTER0_NUM_MIN,
+			pdata->nrcpu[CL_ZERO].perf, pdata->nrcpu[CL_ZERO].pulse_timeout);
 	}
 #endif
 }
@@ -194,35 +194,35 @@ static int key_booster_boost_fn(void *data)
 static void key_booster_boost_init(void) {
 	struct sched_param key_booster_task_param = { .sched_priority = MAX_RT_PRIO - 1 };
 
-	pm_qos_add_request(&key_booster_pmreq.cpu_pmreq[CL_BIG], PM_QOS_CLUSTER1_FREQ_MIN, 0);
-	pm_qos_add_request(&key_booster_pmreq.cpu_pmreq[CL_LIT], PM_QOS_CLUSTER0_FREQ_MIN, 0);
+	pm_qos_add_request(&key_booster_pmreq.cpu_pmreq[CL_ONE], PM_QOS_CLUSTER1_FREQ_MIN, 0);
+	pm_qos_add_request(&key_booster_pmreq.cpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_FREQ_MIN, 0);
 	pm_qos_add_request(&key_booster_pmreq.bus_pmreq, PM_QOS_BUS_THROUGHPUT, 0);
 	pm_qos_add_request(&key_booster_pmreq.dev_pmreq, PM_QOS_DEVICE_THROUGHPUT, 0);
 #ifdef CONFIG_EXYNOS_GPU_PM_QOS
 	pm_qos_add_request(&key_booster_pmreq.graphic_pmreq, PM_QOS_GPU_FREQ_MIN, 0);
 #endif
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	pm_qos_add_request(&key_booster_pmreq.nrcpu_pmreq[CL_BIG], PM_QOS_CLUSTER1_NUM_MIN, 0);
-	pm_qos_add_request(&key_booster_pmreq.nrcpu_pmreq[CL_LIT], PM_QOS_CLUSTER0_NUM_MIN, 0);
+	pm_qos_add_request(&key_booster_pmreq.nrcpu_pmreq[CL_ONE], PM_QOS_CLUSTER1_NUM_MIN, 0);
+	pm_qos_add_request(&key_booster_pmreq.nrcpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_NUM_MIN, 0);
 #endif
 
-	key_booster_p_data.cpu[CL_BIG].perf   = 800000;
-	key_booster_p_data.cpu[CL_LIT].perf   = 1000000;
-	key_booster_p_data.bus.perf           = 543000;
-	key_booster_p_data.device.perf        = 200000;
-	key_booster_p_data.graphic.perf       = 266;
-	key_booster_p_data.nrcpu[CL_BIG].perf = 0;
-	key_booster_p_data.nrcpu[CL_LIT].perf = 3;
-	key_booster_p_data.big_boost.perf     = 1;
+	key_booster_p_data.cpu[CL_ONE].perf   = 800000;
+	key_booster_p_data.cpu[CL_ZERO].perf   = 1500000;
+	key_booster_p_data.bus.perf           = 1026000;
+	key_booster_p_data.device.perf        = 400000;
+	key_booster_p_data.graphic.perf       = 350;
+	key_booster_p_data.nrcpu[CL_ONE].perf = 0;
+	key_booster_p_data.nrcpu[CL_ZERO].perf = 4;
+	key_booster_p_data.cluster1_boost.perf     = 1;
 
-	key_booster_p_data.cpu[CL_BIG].pulse_timeout   = 50;
-	key_booster_p_data.cpu[CL_LIT].pulse_timeout   = 50;
-	key_booster_p_data.bus.pulse_timeout           = 50;
-	key_booster_p_data.device.pulse_timeout        = 50;
-	key_booster_p_data.graphic.pulse_timeout       = 50;
-	key_booster_p_data.nrcpu[CL_BIG].pulse_timeout = 50;
-	key_booster_p_data.nrcpu[CL_LIT].pulse_timeout = 50;
-	key_booster_p_data.big_boost.pulse_timeout     = 50;
+	key_booster_p_data.cpu[CL_ONE].pulse_timeout   = 200;
+	key_booster_p_data.cpu[CL_ZERO].pulse_timeout   = 200;
+	key_booster_p_data.bus.pulse_timeout           = 200;
+	key_booster_p_data.device.pulse_timeout        = 200;
+	key_booster_p_data.graphic.pulse_timeout       = 200;
+	key_booster_p_data.nrcpu[CL_ONE].pulse_timeout = 200;
+	key_booster_p_data.nrcpu[CL_ZERO].pulse_timeout = 200;
+	key_booster_p_data.cluster1_boost.pulse_timeout     = 200;
 
 	key_booster_info.status = KEY_BOOSTE_IDLE;
 	key_booster_info.enable = 1;

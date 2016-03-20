@@ -114,6 +114,19 @@ static struct pm_qos_object device_throughput_pm_qos = {
 	.name = "device_throughput",
 };
 
+static BLOCKING_NOTIFIER_HEAD(device_freq_max_notifier);
+static struct pm_qos_constraints device_freq_max_constraints = {
+	.list = PLIST_HEAD_INIT(device_freq_max_constraints.list),
+	.target_value = PM_QOS_DEVICE_FREQ_MAX_DEFAULT_VALUE,
+	.default_value = PM_QOS_DEVICE_FREQ_MAX_DEFAULT_VALUE,
+	.type = PM_QOS_MIN,
+	.notifiers = &device_freq_max_notifier,
+};
+static struct pm_qos_object device_freq_max_pm_qos = {
+	.constraints = &device_freq_max_constraints,
+	.name = "device_freq_max",
+};
+
 static BLOCKING_NOTIFIER_HEAD(bus_throughput_notifier);
 static struct pm_qos_constraints bus_tput_constraints = {
 	.list = PLIST_HEAD_INIT(bus_tput_constraints.list),
@@ -138,6 +151,19 @@ static struct pm_qos_constraints bus_tput_max_constraints = {
 static struct pm_qos_object bus_throughput_max_pm_qos = {
 	.constraints = &bus_tput_max_constraints,
 	.name = "bus_throughput_max",
+};
+
+static BLOCKING_NOTIFIER_HEAD(bus_freq_max_notifier);
+static struct pm_qos_constraints bus_freq_max_constraints = {
+	.list = PLIST_HEAD_INIT(bus_freq_max_constraints.list),
+	.target_value = PM_QOS_BUS_FREQ_MAX_DEFAULT_VALUE,
+	.default_value = PM_QOS_BUS_FREQ_MAX_DEFAULT_VALUE,
+	.type = PM_QOS_MIN,
+	.notifiers = &bus_freq_max_notifier,
+};
+static struct pm_qos_object bus_freq_max_pm_qos = {
+	.constraints = &bus_freq_max_constraints,
+	.name = "bus_freq_max",
 };
 
 static BLOCKING_NOTIFIER_HEAD(network_throughput_notifier);
@@ -294,6 +320,19 @@ static struct pm_qos_object display_throughput_pm_qos = {
 	.name = "display_throughput",
 };
 
+static BLOCKING_NOTIFIER_HEAD(display_freq_max_notifier);
+static struct pm_qos_constraints display_freq_max_constraints = {
+	.list = PLIST_HEAD_INIT(display_freq_max_constraints.list),
+	.target_value = PM_QOS_DISPLAY_FREQ_MAX_DEFAULT_VALUE,
+	.default_value = PM_QOS_DISPLAY_FREQ_MAX_DEFAULT_VALUE,
+	.type = PM_QOS_MIN,
+	.notifiers = &display_freq_max_notifier,
+};
+static struct pm_qos_object display_freq_max_pm_qos = {
+	.constraints = &display_freq_max_constraints,
+	.name = "display_freq_max",
+};
+
 static BLOCKING_NOTIFIER_HEAD(cam_throughput_notifier);
 static struct pm_qos_constraints cam_tput_constraints = {
 	.list = PLIST_HEAD_INIT(cam_tput_constraints.list),
@@ -307,8 +346,18 @@ static struct pm_qos_object cam_throughput_pm_qos = {
 	.name = "cam_throughput",
 };
 
-
-
+static BLOCKING_NOTIFIER_HEAD(cam_freq_max_notifier);
+static struct pm_qos_constraints cam_freq_max_constraints = {
+	.list = PLIST_HEAD_INIT(cam_freq_max_constraints.list),
+	.target_value = PM_QOS_CAM_FREQ_MAX_DEFAULT_VALUE,
+	.default_value = PM_QOS_CAM_FREQ_MAX_DEFAULT_VALUE,
+	.type = PM_QOS_MIN,
+	.notifiers = &cam_freq_max_notifier,
+};
+static struct pm_qos_object cam_freq_max_pm_qos = {
+	.constraints = &cam_freq_max_constraints,
+	.name = "cam_freq_max",
+};
 
 static struct pm_qos_object *pm_qos_array[] = {
 	&null_pm_qos,
@@ -316,8 +365,10 @@ static struct pm_qos_object *pm_qos_array[] = {
 	&network_lat_pm_qos,
 	&memory_throughput_pm_qos,
 	&device_throughput_pm_qos,
+	&device_freq_max_pm_qos,
 	&bus_throughput_pm_qos,
 	&bus_throughput_max_pm_qos,
+	&bus_freq_max_pm_qos,
 	&network_throughput_pm_qos,
 	&cluster1_freq_min_pm_qos,
 	&cluster1_freq_max_pm_qos,
@@ -334,9 +385,9 @@ static struct pm_qos_object *pm_qos_array[] = {
        &gpu_freq_max_pm_qos,
 #endif	
 	&display_throughput_pm_qos,
+	&display_freq_max_pm_qos,
 	&cam_throughput_pm_qos,
-
-
+	&cam_freq_max_pm_qos,
 };
 
 static ssize_t pm_qos_power_write(struct file *filp, const char __user *buf,

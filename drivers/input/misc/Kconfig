@@ -688,8 +688,18 @@ config JANUARY_BOOSTER
 	tristate "Specific input booster"
 	default n
 
+config FIRST_STAGE_BOOSTER
+	tristate "First stage of touch booster, part of JANUARY_BOOSTER"
+	depends on JANUARY_BOOSTER
+	default n
+
 config KEY_BOOSTER
-	tristate "Specific key booster"
+	tristate "Second stage of key booster, part of JANUARY_BOOSTER"
+	depends on JANUARY_BOOSTER
+	default n
+
+config INPUT_KEY_BOOSTER
+	tristate "Alone Key Booster EPS driver. Don't use with JANUARY_BOOSTER"
 	default n
 
 config INPUT_BOOSTER

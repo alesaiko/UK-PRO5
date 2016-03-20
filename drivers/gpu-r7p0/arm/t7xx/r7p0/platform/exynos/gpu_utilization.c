@@ -147,17 +147,16 @@ int gpu_dvfs_calculate_env_data(struct kbase_device *kbdev)
 		return 0;
 
 #ifdef MALI_SEC_HWCNT
-	if (kbdev->hwcnt.is_hwcnt_attach == true && kbdev->hwcnt.is_hwcnt_gpr_enable == false) {
+	if (kbdev->hwcnt.is_hwcnt_attach == true && kbdev->hwcnt.is_hwcnt_enable == true
+		&& kbdev->hwcnt.is_hwcnt_gpr_enable == false) {
 		polling_period = platform->hwcnt_polling_speed;
 		if (!gpu_control_is_power_on(kbdev))
 			return 0;
 		mutex_lock(&kbdev->hwcnt.mlock);
-		if (platform->cur_clock >= platform->gpu_max_clock_limit || platform->hwcnt_profile == true ) {
-			if (kbdev->vendor_callbacks->hwcnt_update) {
-				kbdev->vendor_callbacks->hwcnt_update(kbdev);
-				dvfs_hwcnt_get_resource(kbdev);
-				dvfs_hwcnt_utilization_equation(kbdev);
-			}
+		if (kbdev->vendor_callbacks->hwcnt_update) {
+			kbdev->vendor_callbacks->hwcnt_update(kbdev);
+			dvfs_hwcnt_get_resource(kbdev);
+			dvfs_hwcnt_utilization_equation(kbdev);
 		}
 		mutex_unlock(&kbdev->hwcnt.mlock);
 	}

@@ -23,29 +23,32 @@ cat << CTAG
 		style:"bold",
 		action:"echo mcaserg@4PDA.RU"
 	}},
-	{ SSpacer:{
-		height:2
-	}},
 	{ SPane:{
 		title:"Bootloader Lock/Unlock Info",
 		description:"Values: 0 - Locked Bootloader, 1 - Unlocked Bootloader.\n"
-	}},
-	{ SSpacer:{
-		height:1
 	}},
 	{ SLiveLabel:{
 		refresh:10000,
 		action:"show bootloader"
 	}},
 	{ SPane:{
-		title:"Up Time:"
+		title:"SELinux (Security-Enhanced Linux)"
 	}},
-	{ SSpacer:{
-		height:1
+	{ SLiveLabel:{
+		title:"Status",
+		description:"",
+		refresh:3000,
+		action:"live selinux_status"
+	}},
+	{ SPane:{
+		title:"Up Time:"
 	}},
 	{ SLiveLabel:{
 		refresh:1500,
 		action:"live LiveUpTime"
+	}},
+	{ SSpacer:{
+		height:1
 	}},
     ]
 }

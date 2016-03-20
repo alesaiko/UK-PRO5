@@ -333,6 +333,8 @@ int gpu_dvfs_governor_init(struct kbase_device *kbdev)
 		return -1;
 	}
 
+	//share table_size among governors, as every single governor has same table_size.
+	platform->save_cpu_max_freq = kmalloc(sizeof(int) * platform->table_size, GFP_KERNEL);
 	gpu_dvfs_update_asv_table(platform);
 	gpu_dvfs_decide_max_clock(platform);
 #if defined(CONFIG_MALI_DVFS) && defined(CONFIG_CPU_THERMAL_IPA)

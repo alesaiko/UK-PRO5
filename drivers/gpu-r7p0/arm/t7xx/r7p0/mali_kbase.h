@@ -581,4 +581,5 @@ void kbase_set_driver_inactive(struct kbase_device *kbdev, bool inactive);
 
 /* MALI_SEC_INTEGRATION */
 void gpu_dump_register_hooks(struct kbase_device *kbdev);
+
 #endif

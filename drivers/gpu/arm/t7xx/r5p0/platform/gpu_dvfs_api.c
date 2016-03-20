@@ -152,6 +152,7 @@ int gpu_set_target_clk_vol(int clk, bool pending_is_allowed)
 	exynos7420_cl_dvfs_stop(ID_G3D, level);
 #endif
 
+	gpu_sustainable_pmqos(platform, target_clk);
 	GPU_SET_CLK_VOL(kbdev, prev_clk, target_clk, target_vol);
 	ret = gpu_update_cur_level(platform);
 

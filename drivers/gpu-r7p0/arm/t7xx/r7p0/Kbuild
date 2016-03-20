@@ -35,7 +35,7 @@ MALI_MOCK_TEST ?= 0
 MALI_COVERAGE ?= 0
 MALI_INSTRUMENTATION_LEVEL ?= 0
 # MALI_SEC_SECURE_RENDERING
-MALI_SUPPORT_ASP_SECURE ?= 0
+MALI_SUPPORT_ASP_SECURE ?= 1
 # This workaround is for what seems to be a compiler bug we observed in
 # GCC 4.7 on AOSP 4.3.  The bug caused an intermittent failure compiling
 # the "_Pragma" syntax, where an error message is returned:

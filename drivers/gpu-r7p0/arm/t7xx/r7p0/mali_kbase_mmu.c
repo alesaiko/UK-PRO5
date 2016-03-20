@@ -56,6 +56,7 @@
 static void kbase_mmu_sync_pgd(struct device *dev,
 		dma_addr_t handle, size_t size)
 {
+
 	dma_sync_single_for_device(dev, handle, size, DMA_TO_DEVICE);
 }
 

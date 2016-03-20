@@ -81,9 +81,9 @@ static checksum_block checksum[] =
 	{0x5509F000+0x9da00000, 0x5509F600+0x9da00000, 0x00000003b18774cd}, /* tiler_cmdlist_1_1_highpa.hex */
 	{0x5509E000+0x9da00000, 0x5509EE00+0x9da00000, 0x0000000713fd368c}, /* tiler_cmdlist_1_2_highpa.hex */
 	{0x55075000+0x9da00000, 0x55085400+0x9da00000, 0x000003634d0d1c02}, /* output_colour_buff_1_3.hex   */
-	{0x5503A000+0x9da00000, 0x5503A200+0x9da00000, 0x00000048ecd6c4eb}, /* output_crc_buff_2_4.hex      */
-	{0x5503B000+0x9da00000, 0x5504B000+0x9da00000, 0x00003fa4160d990e}, /* output_colour_buff_2_4.hex   */
-	{0x550C0000+0x9da00000, 0x550C3000+0x9da00000, 0x000000f810fbb6d5}, /* output_crc_buff_1_2.hex   */
+	{0x5503A000+0x9da00000, 0x5503A200+0x9da00000, 0x00000046bc13f4bb}, /* output_crc_buff_2_4.hex      */
+	{0x5503B000+0x9da00000, 0x5504B000+0x9da00000, 0x00003fa41612ad18}, /* output_colour_buff_2_4.hex   */
+	{0x550C0000+0x9da00000, 0x550C3000+0x9da00000, 0x000000f810fbb6d5}, /* output_crc_buff_1_2.hex		*/
 };
 
 static int test_checksum(unsigned int *start, unsigned int *end, unsigned long golden_sum)
@@ -407,18 +407,21 @@ bool balance_init(struct kbase_device *kbdev)
 
 int exynos_gpu_init_hw(void *dev)
 {
+#ifdef USE_ACLKG3D_FEEDBACK_CLK
 	unsigned int temp;
+#endif
 	int i, count = 0;
 	static int first_call = 1;
 	struct kbase_device *kbdev = (struct kbase_device *)dev;
 	struct exynos_context * platform = (struct exynos_context *)kbdev->platform_context;
 
+#ifdef USE_ACLKG3D_FEEDBACK_CLK
 	/* G3D_CFGREG0 register bit16 set to 1.
 	 * It is change the blkg3d clock path from aclk-g3d to aclk-g3d feed-back path */
 	temp = __raw_readl(EXYNOS7420_VA_SYSREG + 0x1234);
 	temp |= (0x1 << 16);
 	__raw_writel(temp, EXYNOS7420_VA_SYSREG + 0x1234);
-
+#endif
 	/* To provide the stable SRAM power */
 	udelay(100);
 

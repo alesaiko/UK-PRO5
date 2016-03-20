@@ -440,7 +440,6 @@ void kbase_pm_update_cores_state_nolock(struct kbase_device *kbdev)
 	if (kbdev->pm.backend.desired_shader_state != desired_bitmap)
 		KBASE_TRACE_ADD(kbdev, PM_CORES_CHANGE_DESIRED, NULL, NULL, 0u,
 							(u32)desired_bitmap);
-
 	/* Are any cores being powered on? */
 	if (~kbdev->pm.backend.desired_shader_state & desired_bitmap ||
 	    kbdev->pm.backend.ca_in_transition) {

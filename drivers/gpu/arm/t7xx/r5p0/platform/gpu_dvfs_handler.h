@@ -79,6 +79,7 @@ typedef enum {
 } gpu_pmqos_state;
 
 int gpu_pm_qos_command(struct exynos_context *platform, gpu_pmqos_state state);
+int gpu_sustainable_pmqos(struct exynos_context *platform, int clock);
 int gpu_mif_pmqos(struct exynos_context *platform, int mem_freq);
 
 #endif /* _GPU_DVFS_HANDLER_H_ */

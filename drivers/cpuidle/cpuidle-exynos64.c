@@ -16,10 +16,7 @@
 #include <linux/cpu.h>
 #include <linux/reboot.h>
 #include <linux/of.h>
-#ifdef CONFIG_SEC_PM
-#include <linux/moduleparam.h>
-#endif
-
+#include <linux/fb.h>
 #include <asm/suspend.h>
 #include <asm/tlbflush.h>
 #include <asm/psci.h>
@@ -28,57 +25,6 @@
 
 #include "of_idle_states.h"
 #include "cpuidle_profiler.h"
-
-#ifdef CONFIG_SEC_PM
-#define CPUIDLE_ENABLE_MASK (ENABLE_C2 | ENABLE_C3_LPM)
-
-static enum {
-	ENABLE_C2	= BIT(0),
-	ENABLE_C3_LPM	= BIT(1),
-} enable_mask = CPUIDLE_ENABLE_MASK;
-
-DEFINE_SPINLOCK(enable_mask_lock);
-
-static int set_enable_mask(const char *val, const struct kernel_param *kp)
-{
-	int rv = param_set_uint(val, kp);
-	unsigned long flags;
-
-	pr_info("%s: enable_mask=0x%x\n", __func__, enable_mask);
-
-	if (rv)
-		return rv;
-
-	spin_lock_irqsave(&enable_mask_lock, flags);
-
-	if (!(enable_mask & ENABLE_C2)) {
-		unsigned int cpuid = smp_processor_id();
-		int i;
-		for_each_online_cpu(i) {
-			if (i == cpuid)
-				continue;
-			smp_send_reschedule(i);
-		}
-	}
-
-	spin_unlock_irqrestore(&enable_mask_lock, flags);
-
-	return 0;
-}
-
-static struct kernel_param_ops enable_mask_param_ops = {
-	.set = set_enable_mask,
-	.get = param_get_uint,
-};
-
-module_param_cb(enable_mask, &enable_mask_param_ops, &enable_mask, 0644);
-MODULE_PARM_DESC(enable_mask, "bitmask for C states - C2, C3(LPM)");
-#endif /* CONFIG_SEC_PM */
-
-#ifdef CONFIG_SEC_PM_DEBUG
-unsigned int log_en;
-module_param_named(log_en, log_en, uint, 0644);
-#endif /* CONFIG_SEC_PM_DEBUG */
 
 /*
  * Exynos cpuidle driver supports the below idle states
@@ -147,10 +93,6 @@ static int exynos_enter_c2(struct cpuidle_device *dev,
 {
 	int ret, entry_index, sub_state = 0;
 
-#ifdef CONFIG_SEC_PM_DEBUG
-	if (unlikely(log_en & ENABLE_C2))
-		pr_info("+++c2\n");
-#endif
 	prepare_idle(dev->cpu);
 
 	entry_index = enter_c2(dev->cpu, index, &sub_state);
@@ -167,10 +109,6 @@ static int exynos_enter_c2(struct cpuidle_device *dev,
 
 	post_idle(dev->cpu);
 
-#ifdef CONFIG_SEC_PM_DEBUG
-	if (unlikely(log_en & ENABLE_C2))
-		pr_info("---c2\n");
-#endif
 	return index;
 }
 
@@ -181,10 +119,6 @@ static int exynos_enter_lpm(struct cpuidle_device *dev,
 
 	mode = determine_lpm();
 
-#ifdef CONFIG_SEC_PM_DEBUG
-	if (unlikely(log_en & ENABLE_C3_LPM))
-		pr_info("+++lpm:%d\n", mode);
-#endif
 	prepare_idle(dev->cpu);
 
 	exynos_prepare_sys_powerdown(mode);
@@ -200,36 +134,56 @@ static int exynos_enter_lpm(struct cpuidle_device *dev,
 
 	post_idle(dev->cpu);
 
-#ifdef CONFIG_SEC_PM_DEBUG
-	if (unlikely(log_en & ENABLE_C3_LPM))
-		pr_info("---lpm:%d\n", mode);
-#endif
 	return index;
 }
+
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG)
+static int lcd_is_on = true;
+
+static int fb_state_change(struct notifier_block *nb,
+		unsigned long val, void *data)
+{
+	struct fb_event *evdata = data;
+	struct fb_info *info = evdata->info;
+	unsigned int blank;
+
+	if (val != FB_EVENT_BLANK &&
+		val != FB_R_EARLY_EVENT_BLANK)
+		return 0;
+
+	/*
+	 * If FBNODE is not zero, it is not primary display(LCD)
+	 * and don't need to process these scheduling.
+	 */
+	if (info->node)
+		return NOTIFY_OK;
+
+	blank = *(int *)evdata->data;
+
+	switch (blank) {
+	case FB_BLANK_POWERDOWN:
+		lcd_is_on = false;
+		break;
+
+	case FB_BLANK_UNBLANK:
+		lcd_is_on = true;
+		break;
+	default:
+		break;
+	}
+
+	return NOTIFY_OK;
+}
+
+static struct notifier_block fb_block = {
+	.notifier_call = fb_state_change,
+};
+#endif
 
 static int exynos_enter_idle_state(struct cpuidle_device *dev,
 				struct cpuidle_driver *drv, int index)
 {
 	int (*func)(struct cpuidle_device *, struct cpuidle_driver *, int);
-
-#ifdef CONFIG_SEC_PM
-	switch (index) {
-	case IDLE_C2:
-		if (unlikely(!(enable_mask & ENABLE_C2)))
-			index = IDLE_C1;
-		break;
-	case IDLE_LPM:
-		if (unlikely(!(enable_mask & ENABLE_C3_LPM))) {
-			if (enable_mask & ENABLE_C2)
-				index = IDLE_C2;
-			else
-				index = IDLE_C1;
-		}
-		break;
-	default:
-		break;
-	}
-#endif
 
 	switch (index) {
 	case IDLE_C1:
@@ -243,7 +197,11 @@ static int exynos_enter_idle_state(struct cpuidle_device *dev,
 		 * In exynos, system can enter LPM when only boot core is running.
 		 * In other words, non-boot cores should be shutdown to enter LPM.
 		 */
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG)
+		if (nonboot_cpus_working() || lcd_is_on == true) {
+#else
 		if (nonboot_cpus_working()) {
+#endif
 			index = find_available_low_state(dev, drv, index);
 			return exynos_enter_idle_state(dev, drv, index);
 		} else {
@@ -438,6 +396,10 @@ static int __init exynos_init_cpuidle(void)
 	register_pm_notifier(&exynos_cpuidle_notifier);
 	register_reboot_notifier(&exynos_cpuidle_reboot_nb);
 
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG)
+	fb_register_client(&fb_block);
+#endif
+
 	pr_info("%s, finish initialization of cpuidle\n", __func__);
 
 	return 0;
@@ -482,6 +444,10 @@ static int __init exynos_init_cpuidle(void)
 
 	register_pm_notifier(&exynos_cpuidle_notifier);
 	register_reboot_notifier(&exynos_cpuidle_reboot_nb);
+
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG)
+	fb_register_client(&fb_block);
+#endif
 
 	return 0;
 }

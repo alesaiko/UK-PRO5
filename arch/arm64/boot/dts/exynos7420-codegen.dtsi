@@ -390,7 +390,7 @@
 	watchdog@10020000 {
 		compatible = "samsung,s3c2410-wdt";
 		reg = <0x10020000 0x100>;
-		interrupts = <0 101 0>;
+		interrupts = <0 111 0>;
 		clocks = <&clock 140>, <&clock 140>;
 		clock-names = "rate_watchdog", "gate_watchdog";
 		timeout-sec = <30>;
@@ -474,6 +474,16 @@
 					<10 &gic 0 122 0>,
 					<11 &gic 0 123 0>;
 		};
+	};
+
+	january_booster {
+                compatible = "samsung,january_booster";
+                #address-cells = <1>;
+                #size-cells = <0>;
+        };
+
+	input_key_booster {
+		compatible = "meizu,key_booster";
 	};
 
 	serial_0: uart@13630000 {

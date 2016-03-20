@@ -53,8 +53,8 @@
 #define POWER_COEFF_15P		57 /* percore param */
 #define POWER_COEFF_7P		11 /* percore  param */
 #elif defined(CONFIG_SOC_EXYNOS7420)
-#define POWER_COEFF_15P		46 /* percore param */
-#define POWER_COEFF_7P		13 /* percore  param */
+#define POWER_COEFF_15P		59 /* percore param */
+#define POWER_COEFF_7P		17 /* percore  param */
 #else
 #define POWER_COEFF_15P		48 /* percore param */
 #define POWER_COEFF_7P		9 /* percore  param */
@@ -134,6 +134,11 @@ static struct pm_qos_request core_max_qos_real[CL_END];
 static struct pm_qos_request ipa_max_qos[CL_END];
 static struct pm_qos_request reboot_max_qos[CL_END];
 static struct pm_qos_request exynos_mif_qos[CL_END];
+
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+static struct pm_qos_request cpufreqdriver_cluster1_max_num_qos;
+static struct pm_qos_request cpufreqdriver_cluster1_min_num_qos;
+#endif
 
 static struct workqueue_struct *cluster_monitor_wq;
 static struct delayed_work monitor_cluster_on;
@@ -1267,11 +1272,16 @@ static ssize_t store_cpufreq_max_limit(struct kobject *kobj, struct attribute *a
 
 	if (cluster1_input >= (int)freq_min[CL_ONE]) {
 		if (cluster1_hotplugged) {
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+			pm_qos_update_request(&cpufreqdriver_cluster1_max_num_qos, NR_CLUST1_CPUS);
+			cluster1_hotplugged = false;		
+#else
 			if (cluster1_cores_hotplug(false))
 				pr_err("%s: failed cluster1 cores hotplug in\n",
 							__func__);
 			else
 				cluster1_hotplugged = false;
+#endif
 		}
 
 		cluster1_input = max(cluster1_input, (int)freq_min[CL_ONE]);
@@ -1279,11 +1289,16 @@ static ssize_t store_cpufreq_max_limit(struct kobject *kobj, struct attribute *a
 	} else if (cluster1_input < (int)freq_min[CL_ONE]) {
 		if (cluster1_input < 0) {
 			if (cluster1_hotplugged) {
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+				pm_qos_update_request(&cpufreqdriver_cluster1_max_num_qos, NR_CLUST1_CPUS);
+				cluster1_hotplugged = false;			
+#else
 				if (cluster1_cores_hotplug(false))
 					pr_err("%s: failed cluster1 cores hotplug in\n",
 							__func__);
 				else
 					cluster1_hotplugged = false;
+#endif
 			}
 
 			cluster1_input = core_max_qos_const[CL_ONE].default_value;
@@ -1295,11 +1310,16 @@ static ssize_t store_cpufreq_max_limit(struct kobject *kobj, struct attribute *a
 			cluster1_input = qos_min_default_value[CL_ONE];
 
 			if (!cluster1_hotplugged) {
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+				pm_qos_update_request(&cpufreqdriver_cluster1_max_num_qos, 0);
+				cluster1_hotplugged = true;			
+#else
 				if (cluster1_cores_hotplug(true))
 					pr_err("%s: failed cluster1 cores hotplug out\n",
 							__func__);
 				else
 					cluster1_hotplugged = true;
+#endif
 			}
 		}
 	}
@@ -1703,15 +1723,26 @@ static struct notifier_block exynos_cpufreq_reboot_notifier = {
 
 void (*disable_c3_idle)(bool disable);
 
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+extern struct cpumask hmp_fast_cpu_mask;
+#endif
 static int exynos_cluster1_min_qos_handler(struct notifier_block *b, unsigned long val, void *v)
 {
 	int ret;
 	unsigned long freq;
 	struct cpufreq_policy *policy;
 	int cpu = boot_cluster ? 0 : NR_CLUST0_CPUS;
-
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+	if (val) {
+		if (cpumask_weight(&hmp_fast_cpu_mask) == 0)
+			pm_qos_update_request(&cpufreqdriver_cluster1_min_num_qos, NR_CLUST1_CPUS);
+	}
+	else
+		pm_qos_update_request(&cpufreqdriver_cluster1_min_num_qos, 0);
+#else
 	if (val)
 		event_hotplug_in();
+#endif
 
 	freq = exynos_getspeed(cpu);
 	if (freq >= val)
@@ -1832,8 +1863,11 @@ static int exynos_cluster0_min_qos_handler(struct notifier_block *b, unsigned lo
 	threshold_freq = 1000000;	/* 1.0GHz */
 #endif
 
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)	
+#else
 	if (val > threshold_freq)
 		event_hotplug_in();
+#endif
 
 	freq = exynos_getspeed(cpu);
 	if (freq >= val)
@@ -2084,7 +2118,12 @@ static int __init exynos_cpufreq_init(void)
 		if (exynos_info[cluster]->bus_table)
 			pm_qos_add_request(&exynos_mif_qos[cluster], PM_QOS_BUS_THROUGHPUT, 0);
 	}
-
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+	pm_qos_add_request(&cpufreqdriver_cluster1_max_num_qos, PM_QOS_CLUSTER1_NUM_MAX,
+			NR_CLUST1_CPUS);
+	pm_qos_add_request(&cpufreqdriver_cluster1_min_num_qos, PM_QOS_CLUSTER1_NUM_MIN,
+			0);
+#endif
 	/* unblock frequency scale */
 #if !defined(CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE) && !defined(CONFIG_CPU_FREQ_DEFAULT_GOV_POWERSAVE)
 	mutex_lock(&cpufreq_lock);
@@ -2195,6 +2234,12 @@ err_mp_attr:
 				pm_qos_remove_request(&core_max_qos_real[cluster]);
 		}
 	}
+#if defined(CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG) && defined(CONFIG_EXYNOS_GPU_PM_QOS)
+	if (pm_qos_request_active(&cpufreqdriver_cluster1_max_num_qos))
+		pm_qos_remove_request(&cpufreqdriver_cluster1_max_num_qos);
+	if (pm_qos_request_active(&cpufreqdriver_cluster1_min_num_qos))
+		pm_qos_remove_request(&cpufreqdriver_cluster1_min_num_qos);
+#endif
 	cpufreq_unregister_driver(&exynos_driver);
 err_cpufreq:
 	unregister_reboot_notifier(&exynos_cpufreq_reboot_notifier);

@@ -99,6 +99,7 @@ on init
     write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000
     write /proc/sys/kernel/sched_compat_yield 1
     write /proc/sys/kernel/sched_child_runs_first 0
+
     write /proc/sys/kernel/randomize_va_space 0
     write /proc/sys/kernel/kptr_restrict 2
     write /proc/sys/kernel/dmesg_restrict 0
@@ -114,6 +115,10 @@ on init
 
     # set fwmark on accepted sockets
     write /proc/sys/net/ipv4/tcp_fwmark_accept 1
+
+    # disable icmp redirects
+    write /proc/sys/net/ipv4/conf/all/accept_redirects 0
+    write /proc/sys/net/ipv6/conf/all/accept_redirects 0
 
     # Create cgroup mount points for process groups
     mkdir /dev/cpuctl
@@ -365,6 +370,10 @@ on boot
     write /proc/sys/vm/dirty_expire_centisecs 200
     write /proc/sys/vm/dirty_background_ratio  5
 
+    # Set optimistic
+    write /proc/sys/net/ipv6/conf/all/optimistic_dad 1
+    write /proc/sys/net/ipv6/conf/all/use_optimistic 1
+
     # Permissions for System Server and daemons.
     chown radio system /sys/android_power/state
     chown radio system /sys/android_power/request_state
@@ -374,6 +383,20 @@ on boot
     chown system system /sys/power/autosleep
     chown system system /sys/power/state
     chown system system /sys/power/wakeup_count
+    chown media system /sys/power/perf_boost
+    chown media system /sys/power/perf_boost_hmp
+    chown media system /sys/power/perf_boost_timeout
+    chown media system /sys/power/perf_boost_hmp_timeout
+    chown media system /sys/power/perf_custom
+    chown system system /sys/power/scene_boost
+    chown media system /sys/power/perf_mode
+    chmod 0660 /sys/power/perf_boost
+    chmod 0660 /sys/power/perf_boost_hmp
+    chmod 0660 /sys/power/perf_boost_timeout
+    chmod 0660 /sys/power/perf_boost_hmp_timeout
+    chmod 0660 /sys/power/perf_custom
+    chmod 0660 /sys/power/scene_boost
+    chmod 0660 /sys/power/perf_mode
     chown radio system /sys/power/wake_lock
     chown radio system /sys/power/wake_unlock
     chmod 0660 /sys/power/state
@@ -403,93 +426,6 @@ on boot
     chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration
     chown system system /sys/devices/system/cpu/cpufreq/interactive/io_is_busy
     chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/io_is_busy
-
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_load
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_load
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_time
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_enter_time
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_load
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_load
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_time
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_exit_time
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_load
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_load
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_time
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_enter_time
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_load
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_load
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_time
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_exit_time
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/mode
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/mode
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/enforced_mode
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/enforced_mode
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/param_index
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/param_index
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/cpu_util
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/cpu_util
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_cluster0_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/multi_cluster0_min_freq
-    chown system system /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_cluster0_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu0/cpufreq/interactive/single_cluster0_min_freq
-
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_load
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_load
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_time
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_enter_time
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_load
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_load
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_time
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_exit_time
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_load
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_load
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_time
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_enter_time
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_load
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_load
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_time
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_exit_time
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/mode
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/mode
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/enforced_mode
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/param_index
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/param_index
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/cpu_util
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/cpu_util
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_cluster0_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/multi_cluster0_min_freq
-    chown system system /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_cluster0_min_freq
-    chmod 0660 /sys/devices/system/cpu/cpu4/cpufreq/interactive/single_cluster0_min_freq
-
-    # Change permission for dvfshelper
-    chown radio system /sys/power/cpufreq_table
-    chmod 0664 /sys/power/cpufreq_table
-    chown radio system /sys/power/cpufreq_min_limit
-    chmod 0664 /sys/power/cpufreq_min_limit
-    chown radio system /sys/power/cpufreq_max_limit
-    chmod 0664 /sys/power/cpufreq_max_limit
-
-    chown radio system /sys/devices/11400000.mali/dvfs_table
-    chown radio system /sys/devices/11400000.mali/dvfs_min_lock
-    chown radio system /sys/devices/11400000.mali/dvfs_max_lock
-    chmod 0664 /sys/devices/11400000.mali/dvfs_table
-    chmod 0664 /sys/devices/11400000.mali/dvfs_min_lock
-    chmod 0664 /sys/devices/11400000.mali/dvfs_max_lock
-
-    chown radio system /sys/class/devfreq/bus_mif.7/available_frequencies
-    chown radio system /sys/class/devfreq/bus_mif.7/min_freq
-    chown radio system /sys/class/devfreq/bus_mif.7/max_freq
-    chmod 0664 /sys/class/devfreq/bus_mif.7/available_frequencies
-    chmod 0664 /sys/class/devfreq/bus_mif.7/min_freq
-    chmod 0664 /sys/class/devfreq/bus_mif.7/max_freq
-
-    chown radio system /sys/class/devfreq/bus_int.6/available_frequencies
-    chown radio system /sys/class/devfreq/bus_int.6/min_freq
-    chown radio system /sys/class/devfreq/bus_int.6/max_freq
-    chmod 0664 /sys/class/devfreq/bus_int.6/available_frequencies
-    chmod 0664 /sys/class/devfreq/bus_int.6/min_freq
-    chmod 0664 /sys/class/devfreq/bus_int.6/max_freq
 
     # Assume SMP uses shared cpufreq policy for all CPUs
     chown system system /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq
@@ -525,6 +461,9 @@ on boot
     # for modem
     chown system system /sys/devices/15510000.usb/ehci_power
     class_start core
+
+    chown system system sys/devices/mif_pdata.35/hongbao
+    chmod 0666 sys/devices/mif_pdata.35/hongbao
 
 on nonencrypted
     class_start main
@@ -579,17 +518,6 @@ on property:sys.sysctl.tcp_def_init_rwnd=*
 
 ## Daemon processes to be run by init.
 ##
-# deferred initcall
-service sec-sh /system/etc/init.sec.boot.sh
-    class core
-    user root
-    oneshot
-
-service sysmon /system/bin/sysmon
-    class core
-    user root
-    oneshot
-
 service ueventd /sbin/ueventd
     class core
     critical
@@ -610,8 +538,8 @@ service healthd /sbin/healthd
 service console /system/bin/sh
     class core
     console
-    disabled
-    user shell
+#    disabled
+#    user shell
     group shell log
     seclabel u:r:shell:s0
 

@@ -50,7 +50,7 @@ struct booster_req {
 
 static bool	touched = false;
 static wait_queue_head_t waitq_input;
-static bool booster_enabled = false;
+static bool booster_enabled = true;
 
 static DEFINE_MUTEX(janeps_mtx); // Critical Section for Process.
 static spinlock_t janeps_lock;
@@ -96,42 +96,42 @@ static inline void boost_handler(struct booster_req *qos_req, struct p_data *pda
 	struct cpufreq_policy *policy;
 
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if(pdata->nrcpu[CL_BIG].perf > 0) {
-		set_qos(&(qos_req->nrcpu_pmreq[CL_BIG]),PM_QOS_CLUSTER1_NUM_MIN,
-			pdata->nrcpu[CL_BIG].perf, pdata->nrcpu[CL_BIG].pulse_timeout);
+	if(pdata->nrcpu[CL_ONE].perf > 0) {
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ONE]),PM_QOS_CLUSTER1_NUM_MIN,
+			pdata->nrcpu[CL_ONE].perf, pdata->nrcpu[CL_ONE].pulse_timeout);
 
-		if(pdata->big_boost.perf == 2) {
-			set_hmp_boostpulse(pdata->big_boost.pulse_timeout);
-		} else if(pdata->big_boost.perf == 1) {
-			set_hmp_semiboostpulse(pdata->big_boost.pulse_timeout);
+		if(pdata->cluster1_boost.perf == 2) {
+			set_hmp_boostpulse(pdata->cluster1_boost.pulse_timeout);
+		} else if(pdata->cluster1_boost.perf == 1) {
+			set_hmp_semiboostpulse(pdata->cluster1_boost.pulse_timeout);
 		}
 
-		set_qos(&(qos_req->nrcpu_pmreq[CL_LIT]),PM_QOS_CLUSTER0_NUM_MIN,
-			pdata->nrcpu[CL_LIT].perf, pdata->nrcpu[CL_LIT].pulse_timeout);
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ZERO]),PM_QOS_CLUSTER0_NUM_MIN,
+			pdata->nrcpu[CL_ZERO].perf, pdata->nrcpu[CL_ZERO].pulse_timeout);
 	}
 #endif
 
 	policy = cpufreq_cpu_get(0);
 	if (policy) {
-		if (policy->cur < pdata->cpu[CL_LIT].perf) {
-			cpufreq_driver_target(policy, pdata->cpu[CL_LIT].perf, CPUFREQ_RELATION_L);
+		if (policy->cur < pdata->cpu[CL_ZERO].perf) {
+			cpufreq_driver_target(policy, pdata->cpu[CL_ZERO].perf, CPUFREQ_RELATION_L);
 		}
 		cpufreq_cpu_put(policy);
 	}
-	set_qos(&(qos_req->cpu_pmreq[CL_LIT]),PM_QOS_CLUSTER0_FREQ_MIN,
-		pdata->cpu[CL_LIT].perf, pdata->cpu[CL_LIT].pulse_timeout);
+	set_qos(&(qos_req->cpu_pmreq[CL_ZERO]),PM_QOS_CLUSTER0_FREQ_MIN,
+		pdata->cpu[CL_ZERO].perf, pdata->cpu[CL_ZERO].pulse_timeout);
 
 	if (cpu_online(4)) {
 		policy = cpufreq_cpu_get(4);
 		if (policy) {
-			if (policy->cur < pdata->cpu[CL_BIG].perf) {
-				cpufreq_driver_target(policy, pdata->cpu[CL_BIG].perf, CPUFREQ_RELATION_L);
+			if (policy->cur < pdata->cpu[CL_ONE].perf) {
+				cpufreq_driver_target(policy, pdata->cpu[CL_ONE].perf, CPUFREQ_RELATION_L);
 			}
 			cpufreq_cpu_put(policy);
 		}
 	}
-	set_qos(&(qos_req->cpu_pmreq[CL_BIG]),PM_QOS_CLUSTER1_FREQ_MIN,
-		pdata->cpu[CL_BIG].perf, pdata->cpu[CL_BIG].pulse_timeout);
+	set_qos(&(qos_req->cpu_pmreq[CL_ONE]),PM_QOS_CLUSTER1_FREQ_MIN,
+		pdata->cpu[CL_ONE].perf, pdata->cpu[CL_ONE].pulse_timeout);
 
 	set_qos(&qos_req->bus_pmreq,PM_QOS_BUS_THROUGHPUT,
 		pdata->bus.perf, pdata->bus.pulse_timeout);
@@ -144,18 +144,18 @@ static inline void boost_handler(struct booster_req *qos_req, struct p_data *pda
 #endif
 
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	if(pdata->nrcpu[CL_BIG].perf == 0) {
-		set_qos(&(qos_req->nrcpu_pmreq[CL_BIG]),PM_QOS_CLUSTER1_NUM_MIN,
-			pdata->nrcpu[CL_BIG].perf, pdata->nrcpu[CL_BIG].pulse_timeout);
+	if(pdata->nrcpu[CL_ONE].perf == 0) {
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ONE]),PM_QOS_CLUSTER1_NUM_MIN,
+			pdata->nrcpu[CL_ONE].perf, pdata->nrcpu[CL_ONE].pulse_timeout);
 
-		if(pdata->big_boost.perf == 2) {
-	 		set_hmp_boostpulse(pdata->big_boost.pulse_timeout);
-		} else if(pdata->big_boost.perf == 1) {
-	 		set_hmp_semiboostpulse(pdata->big_boost.pulse_timeout);
+		if(pdata->cluster1_boost.perf == 2) {
+	 		set_hmp_boostpulse(pdata->cluster1_boost.pulse_timeout);
+		} else if(pdata->cluster1_boost.perf == 1) {
+	 		set_hmp_semiboostpulse(pdata->cluster1_boost.pulse_timeout);
 		}
 
-		set_qos(&(qos_req->nrcpu_pmreq[CL_LIT]),PM_QOS_CLUSTER0_NUM_MIN,
-			pdata->nrcpu[CL_LIT].perf, pdata->nrcpu[CL_LIT].pulse_timeout);
+		set_qos(&(qos_req->nrcpu_pmreq[CL_ZERO]),PM_QOS_CLUSTER0_NUM_MIN,
+			pdata->nrcpu[CL_ZERO].perf, pdata->nrcpu[CL_ZERO].pulse_timeout);
 	}
 #endif
 }
@@ -184,35 +184,35 @@ static void key_booster_handle(void) {
 }
 
 static void key_booster_init(void) {
-	pm_qos_add_request(&key_pmreq.cpu_pmreq[CL_BIG], PM_QOS_CLUSTER1_FREQ_MIN, 0);
-	pm_qos_add_request(&key_pmreq.cpu_pmreq[CL_LIT], PM_QOS_CLUSTER0_FREQ_MIN, 0);
+	pm_qos_add_request(&key_pmreq.cpu_pmreq[CL_ONE], PM_QOS_CLUSTER1_FREQ_MIN, 0);
+	pm_qos_add_request(&key_pmreq.cpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_FREQ_MIN, 0);
 	pm_qos_add_request(&key_pmreq.bus_pmreq, PM_QOS_BUS_THROUGHPUT, 0);
 	pm_qos_add_request(&key_pmreq.dev_pmreq, PM_QOS_DEVICE_THROUGHPUT, 0);
 #ifdef CONFIG_EXYNOS_GPU_PM_QOS
 	pm_qos_add_request(&key_pmreq.graphic_pmreq, PM_QOS_GPU_FREQ_MIN, 0);
 #endif
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	pm_qos_add_request(&key_pmreq.nrcpu_pmreq[CL_BIG], PM_QOS_CLUSTER1_NUM_MIN, 0);
-	pm_qos_add_request(&key_pmreq.nrcpu_pmreq[CL_LIT], PM_QOS_CLUSTER0_NUM_MIN, 0);
+	pm_qos_add_request(&key_pmreq.nrcpu_pmreq[CL_ONE], PM_QOS_CLUSTER1_NUM_MIN, 0);
+	pm_qos_add_request(&key_pmreq.nrcpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_NUM_MIN, 0);
 #endif
 
-	key_p_data.cpu[CL_BIG].perf   = 800000;
-	key_p_data.cpu[CL_LIT].perf   = 1500000;
-	key_p_data.bus.perf           = 1026000;
-	key_p_data.device.perf        = 200000;
-	key_p_data.graphic.perf       = 350;
-	key_p_data.nrcpu[CL_BIG].perf = 0;
-	key_p_data.nrcpu[CL_LIT].perf = 4;
-	key_p_data.big_boost.perf     = 1;
+	key_p_data.cpu[CL_ONE].perf   = 800000;
+	key_p_data.cpu[CL_ZERO].perf   = 1500000;
+	key_p_data.bus.perf           = 1464000;
+	key_p_data.device.perf        = 400000;
+	key_p_data.graphic.perf       = 420;
+	key_p_data.nrcpu[CL_ONE].perf = 0;
+	key_p_data.nrcpu[CL_ZERO].perf = 4;
+	key_p_data.cluster1_boost.perf     = 2;
 
-	key_p_data.cpu[CL_BIG].pulse_timeout   = 200;
-	key_p_data.cpu[CL_LIT].pulse_timeout   = 200;
-	key_p_data.bus.pulse_timeout           = 200;
-	key_p_data.device.pulse_timeout        = 200;
-	key_p_data.graphic.pulse_timeout       = 200;
-	key_p_data.nrcpu[CL_BIG].pulse_timeout = 200;
-	key_p_data.nrcpu[CL_LIT].pulse_timeout = 200;
-	key_p_data.big_boost.pulse_timeout     = 200;
+	key_p_data.cpu[CL_ONE].pulse_timeout   = 500;
+	key_p_data.cpu[CL_ZERO].pulse_timeout   = 500;
+	key_p_data.bus.pulse_timeout           = 500;
+	key_p_data.device.pulse_timeout        = 500;
+	key_p_data.graphic.pulse_timeout       = 500;
+	key_p_data.nrcpu[CL_ONE].pulse_timeout = 500;
+	key_p_data.nrcpu[CL_ZERO].pulse_timeout = 500;
+	key_p_data.cluster1_boost.pulse_timeout     = 500;
 
 	key_info.enable = 1;
 
@@ -226,16 +226,16 @@ static void key_booster_init(void) {
 	return ;
 
 out:
-	pm_qos_remove_request(&key_pmreq.cpu_pmreq[CL_BIG]);
-	pm_qos_remove_request(&key_pmreq.cpu_pmreq[CL_LIT]);
+	pm_qos_remove_request(&key_pmreq.cpu_pmreq[CL_ONE]);
+	pm_qos_remove_request(&key_pmreq.cpu_pmreq[CL_ZERO]);
 	pm_qos_remove_request(&key_pmreq.bus_pmreq);
 	pm_qos_remove_request(&key_pmreq.dev_pmreq);
 #ifdef CONFIG_EXYNOS_GPU_PM_QOS
 	pm_qos_remove_request(&key_pmreq.graphic_pmreq);
 #endif
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	pm_qos_remove_request(&key_pmreq.nrcpu_pmreq[CL_BIG]);
-	pm_qos_remove_request(&key_pmreq.nrcpu_pmreq[CL_LIT]);
+	pm_qos_remove_request(&key_pmreq.nrcpu_pmreq[CL_ONE]);
+	pm_qos_remove_request(&key_pmreq.nrcpu_pmreq[CL_ZERO]);
 #endif
 }
 #endif // end of CONFIG_KEY_BOOSTER
@@ -295,35 +295,35 @@ static int first_stage_boost_fn(void *data)
 static void first_stage_boost_init(void) {
 	struct sched_param first_stage_task_param = { .sched_priority = MAX_RT_PRIO - 1 };
 	
-	pm_qos_add_request(&first_stage_pmreq.cpu_pmreq[CL_BIG], PM_QOS_CLUSTER1_FREQ_MIN, 0);
-	pm_qos_add_request(&first_stage_pmreq.cpu_pmreq[CL_LIT], PM_QOS_CLUSTER0_FREQ_MIN, 0);
+	pm_qos_add_request(&first_stage_pmreq.cpu_pmreq[CL_ONE], PM_QOS_CLUSTER1_FREQ_MIN, 0);
+	pm_qos_add_request(&first_stage_pmreq.cpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_FREQ_MIN, 0);
 	pm_qos_add_request(&first_stage_pmreq.bus_pmreq, PM_QOS_BUS_THROUGHPUT, 0);
 	pm_qos_add_request(&first_stage_pmreq.dev_pmreq, PM_QOS_DEVICE_THROUGHPUT, 0);
 #ifdef CONFIG_EXYNOS_GPU_PM_QOS
 	pm_qos_add_request(&first_stage_pmreq.graphic_pmreq, PM_QOS_GPU_FREQ_MIN, 0);
 #endif
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	pm_qos_add_request(&first_stage_pmreq.nrcpu_pmreq[CL_BIG], PM_QOS_CLUSTER1_NUM_MIN, 0);
-	pm_qos_add_request(&first_stage_pmreq.nrcpu_pmreq[CL_LIT], PM_QOS_CLUSTER0_NUM_MIN, 0);
+	pm_qos_add_request(&first_stage_pmreq.nrcpu_pmreq[CL_ONE], PM_QOS_CLUSTER1_NUM_MIN, 0);
+	pm_qos_add_request(&first_stage_pmreq.nrcpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_NUM_MIN, 0);
 #endif
 
-	first_stage_p_data.cpu[CL_BIG].perf   = 800000;
-	first_stage_p_data.cpu[CL_LIT].perf   = 1000000;
-	first_stage_p_data.bus.perf           = 543000;
-	first_stage_p_data.device.perf        = 200000;
-	first_stage_p_data.graphic.perf       = 266;
-	first_stage_p_data.nrcpu[CL_BIG].perf = 0;
-	first_stage_p_data.nrcpu[CL_LIT].perf = 3;
-	first_stage_p_data.big_boost.perf     = 1;
+	first_stage_p_data.cpu[CL_ONE].perf   = 800000;
+	first_stage_p_data.cpu[CL_ZERO].perf   = 1500000;
+	first_stage_p_data.bus.perf           = 1464000;
+	first_stage_p_data.device.perf        = 400000;
+	first_stage_p_data.graphic.perf       = 420;
+	first_stage_p_data.nrcpu[CL_ONE].perf = 0;
+	first_stage_p_data.nrcpu[CL_ZERO].perf = 4;
+	first_stage_p_data.cluster1_boost.perf     = 2;
 
-	first_stage_p_data.cpu[CL_BIG].pulse_timeout   = 50;
-	first_stage_p_data.cpu[CL_LIT].pulse_timeout   = 50;
-	first_stage_p_data.bus.pulse_timeout           = 50;
-	first_stage_p_data.device.pulse_timeout        = 50;
-	first_stage_p_data.graphic.pulse_timeout       = 50;
-	first_stage_p_data.nrcpu[CL_BIG].pulse_timeout = 50;
-	first_stage_p_data.nrcpu[CL_LIT].pulse_timeout = 50;
-	first_stage_p_data.big_boost.pulse_timeout     = 50;
+	first_stage_p_data.cpu[CL_ONE].pulse_timeout   = 200;
+	first_stage_p_data.cpu[CL_ZERO].pulse_timeout   = 1000;
+	first_stage_p_data.bus.pulse_timeout           = 1000;
+	first_stage_p_data.device.pulse_timeout        = 500;
+	first_stage_p_data.graphic.pulse_timeout       = 500;
+	first_stage_p_data.nrcpu[CL_ONE].pulse_timeout = 1000;
+	first_stage_p_data.nrcpu[CL_ZERO].pulse_timeout = 1000;
+	first_stage_p_data.cluster1_boost.pulse_timeout     = 1000;
 
 	first_stage_info.enable = 1;
 	first_stage_info.status = FIRST_STAGE_BOOSTE_IDLE;
@@ -354,11 +354,11 @@ static void delayed_finish_off(struct work_struct *work)
 	kern_data.status = RELEASE;
 	kern_data.x = 0;
 	kern_data.y = 0;
-	kern_data.avg_load[CL_LIT] = (c_stats[CL_LIT].util)>>2; // Divided by # of Core in a Cluster
-	kern_data.avg_load[CL_BIG] = (c_stats[CL_BIG].util)>>2; // Divided by # of Core in a Cluster
+	kern_data.avg_load[CL_ZERO] = (c_stats[CL_ZERO].util)>>2; // Divided by # of Core in a Cluster
+	kern_data.avg_load[CL_ONE] = (c_stats[CL_ONE].util)>>2; // Divided by # of Core in a Cluster
 
-	kern_data.peak_load[CL_LIT] = 0; // TBC : Peak load occupancy ratio
-	kern_data.peak_load[CL_BIG] = 0; // TBC : Peak load occupancy ratio
+	kern_data.peak_load[CL_ZERO] = 0; // TBC : Peak load occupancy ratio
+	kern_data.peak_load[CL_ONE] = 0; // TBC : Peak load occupancy ratio
 
 	if(!touched) {
 		touched = true;
@@ -379,7 +379,7 @@ static int get_online_cpu_num_on_cluster(int cluster)
 {
 	struct cpumask dst_cpumask;
 
-	cpumask_and(&dst_cpumask, (cluster == CL_BIG) ? &hmp_fast_cpu_mask : &hmp_slow_cpu_mask, cpu_online_mask);
+	cpumask_and(&dst_cpumask, (cluster == CL_ONE) ? &hmp_fast_cpu_mask : &hmp_slow_cpu_mask, cpu_online_mask);
 
 	return cpumask_weight(&dst_cpumask);
 }
@@ -434,11 +434,11 @@ int janeps_input_report(event_type evt_type, Coord_t x, Coord_t y)
 		kern_data.status = evt_type;
 		kern_data.x = x;
 		kern_data.y = y;
-		kern_data.avg_load[CL_LIT] = (c_stats[CL_LIT].util)/4;;	// Divided by # of Core in a Cluster
-		kern_data.avg_load[CL_BIG] = (c_stats[CL_BIG].util)/get_online_cpu_num_on_cluster(CL_BIG);	// Divided by # of Core in a Cluster
+		kern_data.avg_load[CL_ZERO] = (c_stats[CL_ZERO].util)/4;;	// Divided by # of Core in a Cluster
+		kern_data.avg_load[CL_ONE] = (c_stats[CL_ONE].util)/get_online_cpu_num_on_cluster(CL_ONE);	// Divided by # of Core in a Cluster
 
-		kern_data.peak_load[CL_LIT] = 0; // TBC : Peak load occupancy ratio
-		kern_data.peak_load[CL_BIG] = 0; // TBC : Peak load occupancy ratio
+		kern_data.peak_load[CL_ZERO] = 0; // TBC : Peak load occupancy ratio
+		kern_data.peak_load[CL_ONE] = 0; // TBC : Peak load occupancy ratio
 	} else {
 		spin_unlock_irqrestore(&janeps_lock,flags);
 #ifdef CONFIG_SCHED_HMP
@@ -460,7 +460,7 @@ int janeps_input_report(event_type evt_type, Coord_t x, Coord_t y)
 #ifdef JANUARY_DEBUG
 		printk("[JANUARY Trace] %d (%d %d)(%d %d)\n",
 			kern_data.status, kern_data.x, kern_data.y,
-			kern_data.avg_load[CL_LIT], kern_data.avg_load[CL_BIG]);
+			kern_data.avg_load[CL_ZERO], kern_data.avg_load[CL_ONE]);
 		Itime = ktime_get();
 #endif
 		wake_up_interruptible(&waitq_input);
@@ -697,7 +697,7 @@ static ssize_t janeps_write(struct file *file, const char __user *buffer,
 		return -EFAULT;
 	}
 
-	if (boosted_data.cpu[CL_BIG].perf == MAGIC_CODE) {
+	if (boosted_data.cpu[CL_ONE].perf == MAGIC_CODE) {
 		tunables_delivered = true;
 		return count;
 	}
@@ -713,14 +713,14 @@ static ssize_t janeps_write(struct file *file, const char __user *buffer,
 	spin_unlock_irqrestore(&janeps_lock, flags);
 
 #ifdef JANUARY_DEBUG
-	printk("B:%d.%d ", boosted_data.cpu[CL_BIG].perf/1000, (unsigned int)boosted_data.cpu[CL_BIG].pulse_timeout);
-	printk("L:%d.%d ", boosted_data.cpu[CL_LIT].perf/1000, (unsigned int)boosted_data.cpu[CL_LIT].pulse_timeout);
+	printk("B:%d.%d ", boosted_data.cpu[CL_ONE].perf/1000, (unsigned int)boosted_data.cpu[CL_ONE].pulse_timeout);
+	printk("L:%d.%d ", boosted_data.cpu[CL_ZERO].perf/1000, (unsigned int)boosted_data.cpu[CL_ZERO].pulse_timeout);
 	printk("M:%d.%d ", boosted_data.bus.perf/1000, (unsigned int)boosted_data.bus.pulse_timeout);
 	printk("I:%d.%d ", boosted_data.device.perf/1000, (unsigned int)boosted_data.device.pulse_timeout);
 	printk("G:%d.%d ", boosted_data.graphic.perf/1000, (unsigned int)boosted_data.graphic.pulse_timeout);
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	printk("C:%d.%d/%d.%d\n", boosted_data.nrcpu[CL_BIG].perf, (unsigned int)boosted_data.nrcpu[CL_BIG].pulse_timeout,
-		boosted_data.nrcpu[CL_LIT].perf, (unsigned int)boosted_data.nrcpu[CL_LIT].pulse_timeout);
+	printk("C:%d.%d/%d.%d\n", boosted_data.nrcpu[CL_ONE].perf, (unsigned int)boosted_data.nrcpu[CL_ONE].pulse_timeout,
+		boosted_data.nrcpu[CL_ZERO].perf, (unsigned int)boosted_data.nrcpu[CL_ZERO].pulse_timeout);
 #endif
 #endif // JANUARY_DEBUG
 	spin_lock_irqsave(&janeps_lock, flags);
@@ -745,8 +745,8 @@ static int janeps_open(struct inode *inode, struct file *file)
 static int janeps_release(struct inode *inode, struct file *file)
 {
 
-	remove_qos(&(booster_qos_req.cpu_pmreq[CL_BIG]));
-	remove_qos(&(booster_qos_req.cpu_pmreq[CL_LIT]));
+	remove_qos(&(booster_qos_req.cpu_pmreq[CL_ONE]));
+	remove_qos(&(booster_qos_req.cpu_pmreq[CL_ZERO]));
 
 	remove_qos(&booster_qos_req.bus_pmreq);
 	remove_qos(&booster_qos_req.dev_pmreq);
@@ -756,8 +756,8 @@ static int janeps_release(struct inode *inode, struct file *file)
 #endif
 
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
-	remove_qos(&(booster_qos_req.nrcpu_pmreq[CL_BIG]));
-	remove_qos(&(booster_qos_req.nrcpu_pmreq[CL_LIT]));
+	remove_qos(&(booster_qos_req.nrcpu_pmreq[CL_ONE]));
+	remove_qos(&(booster_qos_req.nrcpu_pmreq[CL_ZERO]));
 #endif
 
 	return 0;
@@ -838,10 +838,10 @@ static int janeps_probe(struct platform_device *pdev)
 
 	/* Default parameter settings */
 	default_param.big_perf  = 800000;
-	default_param.little_perf = 1000000;
-	default_param.bus_perf = 500000;
-	default_param.device_perf = 100000;
-	default_param.graphics_perf = 133;
+	default_param.little_perf = 1500000;
+	default_param.bus_perf = 1464000;
+	default_param.device_perf = 400000;
+	default_param.graphics_perf = 420;
 	default_param.big_core_count = 0;
 	default_param.little_core_count = 4;
 
@@ -851,8 +851,8 @@ static int janeps_probe(struct platform_device *pdev)
 	default_param.upper_threshold = 99;
 	default_param.default_threshold = 90;
 	default_param.bottom_threshold = 70;
-	default_param.upper_cnt[CL_BIG] = 100;
-	default_param.upper_cnt[CL_LIT] = 10;
+	default_param.upper_cnt[CL_ONE] = 100;
+	default_param.upper_cnt[CL_ZERO] = 10;
 	default_param.down_differential = 90;
 
 	default_param.big_margin = 400000;

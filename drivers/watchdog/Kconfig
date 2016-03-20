@@ -200,6 +200,37 @@ config S3C2410_WATCHDOG
 	  The driver can be built as a module by choosing M, and will
 	  be called s3c2410_wdt
 
+config S3C2410_WATCHDOG_DEFAULT_TIME
+	int "Set the default expire time for watchdog"
+	depends on S3C2410_WATCHDOG
+	range 3 21
+	default 15
+	help
+	  Set the expire time for watchdog.
+
+	  If unsure, keep default.
+
+config S3C2410_WATCHDOG_ATBOOT
+	int "Start the watchdog at boot"
+	depends on S3C2410_WATCHDOG
+	range 0 1
+	default 1
+	help
+	  1 for start watchdog at boot, which is helpful to monitor
+	  the boot hang.
+
+	  If unsure, keep default.
+
+config S3C2410_WATCHDOG_IRQ
+	int "Reboot(0) or irq(1) when the watchdog timer expired"
+	depends on S3C2410_WATCHDOG
+	range 0 1
+	default 0
+	help
+	  0 for reboot, 1 for irq when the watchdog timer expired.
+
+	  If unsure, keep default.
+
 config SA1100_WATCHDOG
 	tristate "SA1100/PXA2xx watchdog"
 	depends on ARCH_SA1100 || ARCH_PXA

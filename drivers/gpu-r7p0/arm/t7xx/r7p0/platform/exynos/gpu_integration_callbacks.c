@@ -141,28 +141,6 @@ void gpu_destroy_context(void *ctx)
 #endif
 	}
 
-#ifdef MALI_SEC_HWCNT_REFACT
-	if ((kbdev->hwcnt.kctx != kctx) && (kbdev->hwcnt.kctx_gpr == kctx)) {
-		if (kbdev->hwcnt.is_init) {
-			kbdev->hwcnt.triggered = 1;
-			kbdev->hwcnt.trig_exception = 1;
-			wake_up(&kbdev->hwcnt.wait);
-
-			mutex_lock(&kbdev->hwcnt.mlock);
-
-			if (kbdev->hwcnt.kctx) {
-				kbdev->hwcnt.state = KBASE_INSTR_STATE_IDLE;
-				hwcnt_stop(kbdev);
-			}
-
-			kbdev->hwcnt.enable_for_gpr = false;
-			kbdev->hwcnt.enable_for_utilization = kbdev->hwcnt.s_enable_for_utilization;
-			kbdev->hwcnt.kctx_gpr = NULL;
-
-			mutex_unlock(&kbdev->hwcnt.mlock);
-		}
-	}
-#endif
 	kctx->ctx_status = CTX_DESTROYED;
 
 	if (kctx->ctx_need_qos)
@@ -253,7 +231,7 @@ int gpu_vendor_dispatch(struct kbase_context *kctx, void * const args, u32 args_
 	case KBASE_FUNC_SET_MIN_LOCK :
 		{
 #ifdef CONFIG_MALI_DVFS
-			struct kbase_uk_custom_command *kgp = (struct kbase_uk_custom_command *)args;
+			struct exynos_context *platform;
 #endif /* CONFIG_MALI_DVFS */
 			if (!kctx->ctx_need_qos) {
 				kctx->ctx_need_qos = true;
@@ -263,14 +241,8 @@ int gpu_vendor_dispatch(struct kbase_context *kctx, void * const args, u32 args_
 				set_hmp_aggressive_yield(true);
 #endif
 #ifdef CONFIG_MALI_DVFS
-				if (kgp->padding) {
-					struct exynos_context *platform;
-					platform = (struct exynos_context *) kbdev->platform_context;
-					platform->boost_egl_min_lock = kgp->padding;
-					gpu_pm_qos_command(platform, GPU_CONTROL_PM_QOS_EGL_SET);
-				} else {
-					gpu_dvfs_boost_lock(GPU_DVFS_BOOST_SET);
-				}
+				platform = (struct exynos_context *) kbdev->platform_context;
+				gpu_pm_qos_command(platform, GPU_CONTROL_PM_QOS_EGL_SET);
 #endif /* CONFIG_MALI_DVFS */
 			}
 			break;
@@ -279,7 +251,7 @@ int gpu_vendor_dispatch(struct kbase_context *kctx, void * const args, u32 args_
 	case KBASE_FUNC_UNSET_MIN_LOCK :
 		{
 #ifdef CONFIG_MALI_DVFS
-			struct kbase_uk_custom_command *kgp = (struct kbase_uk_custom_command*)args;
+			struct exynos_context *platform;
 #endif /* CONFIG_MALI_DVFS */
 			if (kctx->ctx_need_qos) {
 				kctx->ctx_need_qos = false;
@@ -289,14 +261,8 @@ int gpu_vendor_dispatch(struct kbase_context *kctx, void * const args, u32 args_
 				set_hmp_aggressive_yield(false);
 #endif /* CONFIG_SCHED_HMP */
 #ifdef CONFIG_MALI_DVFS
-				if (kgp->padding) {
-					struct exynos_context *platform;
-					platform = (struct exynos_context *) kbdev->platform_context;
-					platform->boost_egl_min_lock = 0;
-					gpu_pm_qos_command(platform, GPU_CONTROL_PM_QOS_EGL_RESET);
-				} else {
-					gpu_dvfs_boost_lock(GPU_DVFS_BOOST_UNSET);
-				}
+				platform = (struct exynos_context *) kbdev->platform_context;
+				gpu_pm_qos_command(platform, GPU_CONTROL_PM_QOS_EGL_RESET);
 #endif /* CONFIG_MALI_DVFS */
 			}
 			break;
@@ -426,10 +392,10 @@ int gpu_vendor_dispatch(struct kbase_context *kctx, void * const args, u32 args_
 int gpu_memory_seq_show(struct seq_file *sfile, void *data)
 {
 	ssize_t ret = 0;
+#ifdef R7P0_EAC_BLOCK
 	struct list_head *entry;
 	const struct list_head *kbdev_list;
 	size_t free_size = 0;
-	size_t each_free_size = 0;
 
 	kbdev_list = kbase_dev_list_get();
 	list_for_each(entry, kbdev_list) {
@@ -440,9 +406,7 @@ int gpu_memory_seq_show(struct seq_file *sfile, void *data)
 		/* output the total memory usage and cap for this device */
 		mutex_lock(&kbdev->kctx_list_lock);
 		list_for_each_entry(element, &kbdev->kctx_list, link) {
-			spin_lock(&(element->kctx->mem_pool.pool_lock));
-			free_size += element->kctx->mem_pool.cur_size;
-			spin_unlock(&(element->kctx->mem_pool.pool_lock));
+			free_size += atomic_read(&(element->kctx->mem_pool.cur_size));
 		}
 		mutex_unlock(&kbdev->kctx_list_lock);
 		ret = seq_printf(sfile, "===========================================================\n");
@@ -468,19 +432,17 @@ int gpu_memory_seq_show(struct seq_file *sfile, void *data)
 			/* output the memory usage and cap for each kctx
 			* opened on this device */
 
-			spin_lock(&(element->kctx->mem_pool.pool_lock));
-			each_free_size = element->kctx->mem_pool.cur_size;
-			spin_unlock(&(element->kctx->mem_pool.pool_lock));
-			ret = seq_printf(sfile, "  (%24s), %s-0x%p    %12u  %10zu\n", \
-					element->kctx->name, \
-					"kctx", \
-					element->kctx, \
-					atomic_read(&(element->kctx->used_pages)),
-					each_free_size );
+			ret = seq_printf(sfile, "  (%24s), %s-0x%p    %12u  %10u\n", \
+				element->kctx->name, \
+				"kctx", \
+				element->kctx, \
+				atomic_read(&(element->kctx->used_pages)),
+				atomic_read(&(element->kctx->mem_pool.cur_size)) );
 		}
 		mutex_unlock(&kbdev->kctx_list_lock);
 	}
 	kbase_dev_list_put(kbdev_list);
+#endif
 	return ret;
 }
 
@@ -1057,10 +1019,8 @@ static bool gpu_mem_profile_check_kctx(void *ctx)
 	mutex_lock(&kbdev->kctx_list_lock);
 	list_for_each_entry_safe(element, tmp, &kbdev->kctx_list, link) {
 		if (element->kctx == kctx) {
-			if (kctx->destroying_context == false) {
-				found_element = true;
-				break;
-			}
+			found_element = true;
+			break;
 		}
 	}
 	mutex_unlock(&kbdev->kctx_list_lock);
@@ -1085,7 +1045,7 @@ struct kbase_vendor_callbacks exynos_callbacks = {
 	.fence_timer_init = NULL,
 	.fence_del_timer = NULL,
 #endif
-#if defined(CONFIG_SOC_EXYNOS7420)
+#if defined(CONFIG_SOC_EXYNOS7420) || defined(CONFIG_SOC_EXYNOS7890)
 	.init_hw = exynos_gpu_init_hw,
 #else
 	.init_hw = NULL,
@@ -1108,7 +1068,7 @@ struct kbase_vendor_callbacks exynos_callbacks = {
 	.hwcnt_force_stop = NULL,
 #endif
 #ifdef CONFIG_MALI_DVFS
-#ifdef CONFIG_MALI_DVFS_USER
+#ifdef CONFIG_MALI_DVFS_USER_GOVERNOR
 	.pm_metrics_init = NULL,
 	.pm_metrics_term = NULL,
 #else

@@ -21,6 +21,9 @@
 #include <mach/apm-exynos.h>
 #include <mach/asv-exynos.h>
 
+#include <linux/pm_qos.h>
+
+
 #include "mali_kbase_platform.h"
 #include "gpu_dvfs_handler.h"
 #include "gpu_notifier.h"
@@ -318,6 +321,56 @@ kbase_pm_callback_conf pm_callbacks = {
 };
 #endif /* CONFIG_MALI_RT_PM */
 
+
+
+
+#ifdef CONFIG_EXYNOS_GPU_PM_QOS
+static int exynos_gpu_min_qos_handler(struct notifier_block *b, unsigned long val, void *v)
+{
+        struct exynos_context *platform = (struct exynos_context *)pkbdev->platform_context;
+
+        if (!platform) {
+                GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "%s: platform context is not initialized\n", __func__);
+                return -ENODEV;
+        }
+
+       if (val)
+       {
+               gpu_dvfs_clock_lock(GPU_DVFS_MIN_LOCK, PMQOS_LOCK, val);
+       }
+       else
+       {
+               gpu_dvfs_clock_lock(GPU_DVFS_MIN_UNLOCK, PMQOS_LOCK, 0);
+       }
+       return NOTIFY_OK;
+}
+
+static struct notifier_block exynos_gpu_min_qos_notifier = {
+       .notifier_call = exynos_gpu_min_qos_handler,
+};
+
+static int exynos_gpu_max_qos_handler(struct notifier_block *b, unsigned long val, void *v)
+{
+        struct exynos_context *platform = (struct exynos_context *)pkbdev->platform_context;
+
+        if (!platform) {
+                GPU_LOG(DVFS_ERROR, DUMMY, 0u, 0u, "%s: platform context is not initialized\n", __func__);
+                return -ENODEV;
+        }
+
+       if (val == platform->gpu_max_clock)
+               gpu_dvfs_clock_lock(GPU_DVFS_MAX_UNLOCK, SYSFS_LOCK, 0);
+       else
+               gpu_dvfs_clock_lock(GPU_DVFS_MAX_LOCK, SYSFS_LOCK, val);
+
+       return NOTIFY_OK;
+}
+
+static struct notifier_block exynos_gpu_max_qos_notifier = {
+       .notifier_call = exynos_gpu_max_qos_handler,
+};
+#endif
+
 int gpu_notifier_init(struct kbase_device *kbdev)
 {
 	struct exynos_context *platform = (struct exynos_context *)kbdev->platform_context;
@@ -339,11 +392,22 @@ int gpu_notifier_init(struct kbase_device *kbdev)
 #endif
 	pm_runtime_enable(kbdev->dev);
 
+#if (defined CONFIG_EXYNOS_GPU_PM_QOS)
+	pm_qos_add_notifier(PM_QOS_GPU_FREQ_MIN, &exynos_gpu_min_qos_notifier);
+	pm_qos_add_notifier(PM_QOS_GPU_FREQ_MAX, &exynos_gpu_max_qos_notifier);
+#endif
+
 	return 0;
 }
 
 void gpu_notifier_term(void)
 {
+#if (defined CONFIG_EXYNOS_GPU_PM_QOS)
+	pm_qos_remove_notifier(PM_QOS_GPU_FREQ_MIN, &exynos_gpu_min_qos_notifier);
+	pm_qos_remove_notifier(PM_QOS_GPU_FREQ_MAX, &exynos_gpu_max_qos_notifier);
+#endif
+
+
 #ifdef CONFIG_MALI_RT_PM
 	unregister_pm_notifier(&gpu_pm_nb);
 #endif /* CONFIG_MALI_RT_PM */

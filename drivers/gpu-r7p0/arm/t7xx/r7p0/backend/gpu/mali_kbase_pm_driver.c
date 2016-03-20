@@ -926,11 +926,11 @@ void kbase_pm_clock_on(struct kbase_device *kbdev, bool is_resume)
 	if (is_resume && kbdev->pm.backend.callback_power_resume) {
 		kbdev->pm.backend.callback_power_resume(kbdev);
 	} else if (kbdev->pm.backend.callback_power_on) {
-		/* MALI_SEC_INTEGRATION */
 		/* If your platform properly keeps the GPU state you may use the
 		 * return value of the callback_power_on function to
-		 * conditionally reset the GPU on power up.
-		 * SAMSUNG doesn't reset the GPU always. Always reset can hurt the performance */
+		 * conditionally reset the GPU on power up. Currently we are
+		 * conservative and always reset the GPU. */
+		/* MALI_SEC_INTEGRATION */
 		if (kbdev->pm.backend.callback_power_on(kbdev))
 			reset_required = true;
 	}
@@ -1033,6 +1033,10 @@ bool kbase_pm_clock_off(struct kbase_device *kbdev, bool is_suspend)
 /* MALI_SEC_INTEGRATION */
 #ifdef MALI_SEC_HWCNT
 	mutex_lock(&kbdev->hwcnt.mlock);
+	if (kbdev->vendor_callbacks->hwcnt_update) {
+		kbdev->vendor_callbacks->hwcnt_update(kbdev);
+		dvfs_hwcnt_get_resource(kbdev);
+	}
 	if (kbdev->vendor_callbacks->hwcnt_disable)
 		kbdev->vendor_callbacks->hwcnt_disable(kbdev);
 	mutex_unlock(&kbdev->hwcnt.mlock);
@@ -1220,6 +1224,7 @@ static void kbase_pm_hw_issues_apply(struct kbase_device *kbdev)
 
 	kbase_reg_write(kbdev, GPU_CONTROL_REG(L2_MMU_CONFIG),
 			kbdev->hw_quirks_mmu, NULL);
+
 
 	if (kbdev->hw_quirks_jm != KBASE_JM_CONFIG_UNUSED)
 		kbase_reg_write(kbdev, GPU_CONTROL_REG(JM_CONFIG),

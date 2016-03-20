@@ -31,8 +31,8 @@ typedef int x_coord;
 typedef int y_coord;
 
 typedef enum {
-	CL_LIT = 0,
-	CL_BIG,
+	CL_ZERO = 0,
+	CL_ONE,
 	CL_END,
 } cl_type;
 
@@ -75,7 +75,7 @@ struct p_data {
 	struct qos_perf device; 		// For PM_QOS_DEVICE_THROUGHT
 	struct qos_perf graphic;		// For PM_QOS_GPU_THROUGHT
 	struct qos_perf nrcpu[CL_END];
-	struct qos_perf big_boost;		// 0: Non, 1: SemiBoost, 2: Boost
+	struct qos_perf cluster1_boost;		// 0: Non, 1: SemiBoost, 2: Boost
 };
 
 /*

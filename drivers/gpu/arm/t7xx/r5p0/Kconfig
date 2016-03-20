@@ -37,6 +37,13 @@ config MALI_DVFS
 	help
 	  Choose this option to enable DVFS on MALI T7xx DDK.
 
+config EXYNOS_GPU_PM_QOS
+       bool "Enable GPU PM QOS"
+       depends on MALI_T7XX
+       default n
+       help
+         Choose this option to enable GPU PM QOS
+
 config MALI_RT_PM
 	bool "Enable Runtime power management"
 	depends on MALI_T7XX

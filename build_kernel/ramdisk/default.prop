@@ -1,23 +1,13 @@
 #
 # ADDITIONAL_DEFAULT_PROPERTIES
 #
-ro.secure=0
+ro.secure=1
 ro.allow.mock.location=0
 ro.debuggable=0
-persist.sys.usb.config=mtp,adb
+persist.sys.usb.config=mtp
 ro.zygote=zygote64_32
 dalvik.vm.dex2oat-Xms=64m
 dalvik.vm.dex2oat-Xmx=512m
 dalvik.vm.image-dex2oat-Xms=64m
 dalvik.vm.image-dex2oat-Xmx=64m
 ro.dalvik.vm.native.bridge=0
-
-# START OVERRIDE (arter97 kernel)
-# SELinux & Knox related
-persist.cne.feature=0
-persist.security.ams.enforcing=0
-androidboot.selinux=0
-ro.securestorage.knox=false
-ro.securestorage.support=false
-ro.security.mdpp.ux=Disabled
-wlan.wfd.hdcp=disable

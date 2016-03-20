@@ -94,6 +94,7 @@ typedef enum {
 	THROTTLING2,
 	THROTTLING3,
 	THROTTLING4,
+	THROTTLING5,
 	TRIPPING,
 	TMU_LOCK_CLK_END,
 } tmu_lock_clk;
@@ -128,6 +129,7 @@ typedef enum {
 	GPU_TEMP_THROTTLING2,
 	GPU_TEMP_THROTTLING3,
 	GPU_TEMP_THROTTLING4,
+	GPU_TEMP_THROTTLING5,
 	GPU_TEMP_TRIPPING,
 	GPU_BOOST_MIN_LOCK,
 	GPU_BOOST_EGL_MIN_LOCK,
@@ -161,11 +163,15 @@ typedef enum {
 	GPU_CL_DVFS_START_BASE,
 	GPU_DEBUG_LEVEL,
 	GPU_TRACE_LEVEL,
-	GPU_CONFIG_LIST_END,
 #ifdef CONFIG_MALI_DVFS_USER
 	GPU_UDVFS_ENABLE,
 	GPU_UHWCNT_ENABLE,
 #endif
+	GPU_MO_MIN_CLOCK,
+	GPU_SUSTAINABLE_GPU_CLOCK,
+	GPU_THRESHOLD_MAXLOCK,
+	GPU_LOW_POWER_CPU_MAX_LOCK,
+	GPU_CONFIG_LIST_END,
 } gpu_config_list;
 
 typedef struct _gpu_attribute {
@@ -185,6 +191,7 @@ typedef struct _gpu_dvfs_info {
 	int int_freq;
 	int cpu_freq;
 	int cpu_max_freq;
+	int g3dm_voltage;
 } gpu_dvfs_info;
 
 typedef struct _gpu_dvfs_governor_info {
@@ -314,6 +321,8 @@ struct exynos_context {
 	int gpu_min_clock;
 	int gpu_dvfs_start_clock;
 	int gpu_dvfs_config_clock;
+	int user_max_lock_input;
+	int user_min_lock_input;
 
 	/* gpu boost lock */
 	int boost_gpu_min_lock;
@@ -325,6 +334,14 @@ struct exynos_context {
 	int int_min_step;
 	int apollo_min_step;
 	int atlas_min_step;
+	int *mif_table;
+	int *int_table;
+	int *atlas_table;
+	int *apollo_table;
+	int mif_table_size;
+	int int_table_size;
+	int atlas_table_size;
+	int apollo_table_size;
 #endif
 	bool tmu_status;
 	int tmu_lock_clk[TMU_LOCK_CLK_END];
@@ -356,7 +373,6 @@ struct exynos_context {
 
 	bool hwcnt_bt_clk;
 	int hwcnt_allow_vertex_throttle;
-	bool hwcnt_profile;
 #endif
 
 	int polling_speed;
@@ -382,6 +398,14 @@ struct exynos_context {
 	gpu_dvfs_hwc_data hwc_data;
 #endif
 	gpu_attribute *attrib;
+	int mo_min_clock;
+	struct {
+		int sustainable_gpu_clock;
+		int threshold;
+		int low_power_cluster1_maxlock;
+		int low_power_cluster1_clock;
+	} sustainable;
+	int *save_cpu_max_freq;
 };
 
 struct kbase_device *gpu_get_device_structure(void);
@@ -406,5 +430,8 @@ unsigned int gpu_get_config_attr_size(void);
 void gpu_dvfs_notify_poweron(void);
 void gpu_dvfs_notify_poweroff(void);
 void gpu_dvfs_check_destroy_context(struct kbase_context *kctx);
+#ifdef CONFIG_PWRCAL
+bool update_cal_table(void);
+#endif
 #endif
 #endif /* _GPU_PLATFORM_H_ */

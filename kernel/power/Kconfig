@@ -42,12 +42,12 @@ config POWERSUSPEND_DEBUG
 config POWER_MODE
 	bool
 	depends on !CHARGE_KERNEL
-	default n
+	default y
 
 config PERF_MODE
 	bool
 	depends on !CHARGE_KERNEL && !RECOVERY_KERNEL
-	default n
+	default y
 
 config HIBERNATE_CALLBACKS
 	bool

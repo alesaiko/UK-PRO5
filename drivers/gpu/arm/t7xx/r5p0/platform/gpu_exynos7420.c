@@ -50,11 +50,11 @@ void __iomem *g3d1_outstanding_regs;
 
 /*  clk,vol,abb,min,max,down stay, pm_qos mem, pm_qos int, pm_qos cpu_kfc_min, pm_qos cpu_egl_max */
 static gpu_dvfs_info gpu_dvfs_table_default[] = {
-	{852, 900000, 0, 98, 100, 5, 0, 1552000, 413000, 1500000, 1500000},
-	{772, 900000, 0, 98, 100, 9, 0, 1552000, 413000, 1500000, 1500000},
-	{700, 900000, 0, 78,  99, 1, 0, 1552000, 413000, 1296000, CPU_MAX},
-	{600, 900000, 0, 78,  85, 1, 0, 1552000, 413000, 1200000, CPU_MAX},
-	{544, 900000, 0, 78,  85, 1, 0, 1026000, 413000, 1104000, CPU_MAX},
+	{852, 900000, 0, 98, 100, 1, 0, 1552000, 413000, 1500000, 1300000},
+	{772, 900000, 0, 78,  99, 1, 0, 1552000, 413000, 1500000, 1300000},
+	{700, 900000, 0, 78,  99, 1, 0, 1552000, 413000, 1500000, 1300000},
+	{600, 900000, 0, 78,  85, 1, 0, 1552000, 413000, 1500000, 1300000},
+	{544, 900000, 0, 78,  85, 1, 0, 1026000, 413000, 1500000, CPU_MAX},
 	{420, 900000, 0, 78,  85, 1, 0, 1026000, 267000,  900000, CPU_MAX},
 	{350, 900000, 0, 78,  85, 1, 0,  543000, 200000,       0, CPU_MAX},
 	{266, 900000, 0, 78,  85, 1, 0,  416000, 160000,       0, CPU_MAX},
@@ -64,7 +64,7 @@ static int mif_min_table[] = {
 	 100000,  133000,  167000,
 	 276000,  348000,  416000,
 	 543000,  632000,  828000,
-	1026000, 1264000, 1456000,
+	1026000, 1264000, 1464000,
 	1552000,
 };
 
@@ -83,7 +83,7 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_GOVERNOR_START_CLOCK_DEFAULT, 266},
 	{GPU_GOVERNOR_START_CLOCK_INTERACTIVE, 266},
 	{GPU_GOVERNOR_START_CLOCK_STATIC, 266},
-	{GPU_GOVERNOR_START_CLOCK_BOOSTER, 266},
+	{GPU_GOVERNOR_START_CLOCK_BOOSTER, 420},
 	{GPU_GOVERNOR_TABLE_DEFAULT, (uintptr_t)&gpu_dvfs_table_default},
 	{GPU_GOVERNOR_TABLE_INTERACTIVE, (uintptr_t)&gpu_dvfs_table_default},
 	{GPU_GOVERNOR_TABLE_STATIC, (uintptr_t)&gpu_dvfs_table_default},
@@ -130,9 +130,12 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_PMQOS_INT_DISABLE, 1},
 	{GPU_PMQOS_MIF_MAX_CLOCK, 1464000},
 	{GPU_PMQOS_MIF_MAX_CLOCK_BASE, 852},
-	{GPU_CL_DVFS_START_BASE, 420},
+	{GPU_CL_DVFS_START_BASE, 266},
 	{GPU_DEBUG_LEVEL, DVFS_WARNING},
 	{GPU_TRACE_LEVEL, TRACE_ALL},
+	{GPU_SUSTAINABLE_GPU_CLOCK, 420},
+	{GPU_THRESHOLD_MAXLOCK, 10},
+	{GPU_LOW_POWER_CPU_MAX_LOCK, 900000},
 };
 
 int gpu_dvfs_decide_max_clock(struct exynos_context *platform)

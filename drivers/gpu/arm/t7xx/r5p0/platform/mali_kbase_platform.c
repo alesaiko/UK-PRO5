@@ -277,6 +277,14 @@ static int gpu_validate_attrib_data(struct exynos_context *platform)
 	gpu_set_trace_level(data == 0 ? TRACE_ALL : (u32) data);
 #endif /* CONFIG_MALI_EXYNOS_TRACE */
 
+	data = gpu_get_attrib_data(attrib, GPU_SUSTAINABLE_GPU_CLOCK);
+	platform->sustainable.sustainable_gpu_clock = data == 0 ? 0 : (u32) data;
+
+	data = gpu_get_attrib_data(attrib, GPU_LOW_POWER_CPU_MAX_LOCK);
+	platform->sustainable.low_power_cluster1_maxlock = data == 0 ? 0 : (u32) data;
+
+	data = gpu_get_attrib_data(attrib, GPU_THRESHOLD_MAXLOCK);
+	platform->sustainable.threshold = data == 0 ? 0 : (u32) data;
 	return 0;
 }
 extern void preload_balance_init(struct kbase_device *kbdev);

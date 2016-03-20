@@ -1367,8 +1367,6 @@ static int kbase_release(struct inode *inode, struct file *filp)
 			list_del(&element->link);
 			kfree(element);
 			found_element = true;
-			/* MALI_SEC_INTEGRATION */
-			kctx->destroying_context = true;
 		}
 	}
 	mutex_unlock(&kbdev->kctx_list_lock);
@@ -3067,6 +3065,7 @@ static DEVICE_ATTR(mem_pool_max_size, S_IRUGO | S_IWUSR, show_mem_pool_max_size,
 
 static int kbasep_secure_mode_init(struct kbase_device *kbdev)
 {
+
 #ifdef SECURE_CALLBACKS
 	kbdev->secure_ops = SECURE_CALLBACKS;
 	kbdev->secure_mode_support = false;

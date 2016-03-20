@@ -963,6 +963,7 @@ struct hmp_domain {
 extern int set_hmp_boost(int enable);
 extern int set_hmp_semiboost(int enable);
 extern int set_hmp_boostpulse(int duration);
+extern int set_hmp_semiboostpulse(int duration);
 extern int get_hmp_boost(void);
 extern int get_hmp_semiboost(void);
 extern int set_hmp_up_threshold(int value);

@@ -142,6 +142,7 @@
 # System files
 #
 /system(/.*)?		u:object_r:system_file:s0
+/system/bin/logcat	--	u:object_r:logcat_exec:s0
 /system/bin/sh		--	u:object_r:shell_exec:s0
 /system/bin/run-as	--	u:object_r:runas_exec:s0
 /system/bin/bootanimation u:object_r:bootanim_exec:s0
@@ -306,7 +307,7 @@
 /data/nfc(/.*)? u:object_r:nfc_data_file:s0
 #@}
 #line 1 "device/meizu/m86/sepolicy/file_contexts"
-/dev/mali0              u:object_r:gpu_device:s0
+#SEC remove: /dev/mali0		u:object_r:gpu_device:s0
 #G2D is used for skia 2D, so set to gpu_device for every app can use it
 /dev/fimg2d             u:object_r:gpu_device:s0
 
@@ -330,6 +331,15 @@
 
 #jpeg
 /dev/m2m1shot_jpeg      u:object_r:jpeg_device:s0
+
+/dev/bL.*			u:object_r:ap_device:s0
+/dev/cpu.*			u:object_r:ap_device:s0
+/dev/exynos-mem		u:object_r:graphics_device:s0
+/dev/kfc_freq_min	u:object_r:ap_device:s0
+/dev/mali	u:object_r:gpu_device:s0
+/dev/mali[0-9]	u:object_r:gpu_device:s0
+/dev/mbin[0-9]	u:object_r:mbin_device:s0
+/dev/sw_sync	u:object_r:sync_device:s0
 
 #record_panic
 /dev/panic_msg          u:object_r:log_device:s0

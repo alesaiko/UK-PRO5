@@ -74,6 +74,7 @@ struct kbase_vendor_callbacks {
 	void (* set_poweron_dbg)(bool enable_dbg);
 	bool (* get_poweron_dbg)(void);
 	void (* debug_pagetable_info)(void *ctx, u64 vaddr);
+	void (* jd_done_worker)(void *dev);
 	void (* update_status)(void *dev, char *str, u32 val);
 	bool (* mem_profile_check_kctx)(void *ctx);
 	void (* pm_record_state)(void *kbdev, bool is_active);

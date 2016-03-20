@@ -74,7 +74,7 @@ static int stmvl6180_set_enable(struct i2c_client *client, unsigned int enable)
 
 }
 
-#ifdef MZ_LAER_FACTORY_TEST
+#ifdef MZ_LASER_FACTORY_TEST
 #define VL6180_OFFSET_CALIB	0x02
 #define VL6180_XTALK_CALIB		0x03
 
@@ -699,7 +699,7 @@ static int stmvl6180_ioctl_handler(struct file *file,
 
 	case VL6180_IOCTL_SETXTALK:
 	{
-		#ifndef MZ_LAER_FACTORY_TEST
+		#ifndef MZ_LASER_FACTORY_TEST
 		client = i2c_getclient();
 		if (client)
 		{
@@ -809,7 +809,7 @@ static int stmvl6180_ioctl_handler(struct file *file,
 
 	case VL6180_IOCTL_SETOFFSET:
 	{
-		#ifndef MZ_LAER_FACTORY_TEST
+		#ifndef MZ_LASER_FACTORY_TEST
 		client = i2c_getclient();
 		if (client)
 		{
@@ -1052,7 +1052,7 @@ static int stmvl6180_init_client(struct i2c_client *client)
 	return 0;
 }
 
-#ifdef MZ_LAER_FACTORY_TEST
+#ifdef MZ_LASER_FACTORY_TEST
 static u8 flight_mode = 0;
 
 static ssize_t flight_show(struct device *dev,
@@ -1243,7 +1243,7 @@ static int __devinit stmvl6180_probe(struct i2c_client *client,
 	}
 
 	mz_ranging_power_enable(client, false);
-	#ifdef MZ_LAER_FACTORY_TEST
+	#ifdef MZ_LASER_FACTORY_TEST
 	spin_lock_init(&g_Laser_SpinLock);
 	device_create_file(&client->dev, &dev_attr_ctrl);
 	meizu_sysfslink_register(&client->dev, "laser");

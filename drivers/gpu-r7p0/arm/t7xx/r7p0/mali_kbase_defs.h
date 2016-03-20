@@ -802,13 +802,18 @@ typedef struct sec_sr_resources {
 	phys_addr_t     secure_crc_phys;
 	size_t          secure_crc_sizes;
 } sec_sr_resources;
-
 #ifdef MALI_SEC_HWCNT
 typedef struct hwc_resources {
-	u32 arith_words;
-	u32 ls_issues;
-	u32 tex_issues;
-	u32 tripipe_active;
+	u64 arith_words;
+	u64 ls_issues;
+	u64 tex_issues;
+	u64 tripipe_active;
+#ifdef MALI_SEC_HWCNT_VERT
+	u64 gpu_active;
+	u64 js0_active;
+	u64 tiler_active;
+	u64 external_read_bits;
+#endif
 } hwc_resources;
 #endif
 
@@ -1112,12 +1117,6 @@ struct kbase_device {
 	 */
 	bool secure_mode_support;
 
-
-#ifdef CONFIG_MALI_DEBUG
-	wait_queue_head_t driver_inactive_wait;
-	bool driver_inactive;
-#endif /* CONFIG_MALI_DEBUG */
-
 	/*
 	 * MALI_SEC_SECURE_RENDERING
 	 *
@@ -1125,6 +1124,11 @@ struct kbase_device {
 	 *
 	 */
 	sec_sr_resources sec_sr_info;
+
+#ifdef CONFIG_MALI_DEBUG
+	wait_queue_head_t driver_inactive_wait;
+	bool driver_inactive;
+#endif /* CONFIG_MALI_DEBUG */
 
 #ifdef CONFIG_MALI_FPGA_BUS_LOGGER
 	/*
@@ -1308,8 +1312,6 @@ struct kbase_context {
 
 	/* MALI_SEC_INTEGRATION */
 	bool destroying_context;
-	atomic_t mem_profile_showing_state;
-	wait_queue_head_t mem_profile_wait;
 };
 
 enum kbase_reg_access_type {

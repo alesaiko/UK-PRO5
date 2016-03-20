@@ -50,8 +50,7 @@ void __iomem *g3d1_outstanding_regs;
 
 /*  clk,vol,abb,min,max,down stay, pm_qos mem, pm_qos int, pm_qos cpu_kfc_min, pm_qos cpu_egl_max */
 static gpu_dvfs_info gpu_dvfs_table_default[] = {
-	{852, 900000, 0, 98, 100, 1, 0, 1552000, 400000, 1500000, 1300000},
-	{772, 900000, 0, 98,  99, 1, 0, 1552000, 400000, 1500000, 1300000},
+	{772, 900000, 0, 98, 100, 1, 0, 1552000, 400000, 1500000, 1300000},
 	{700, 900000, 0, 98,  99, 1, 0, 1552000, 400000, 1500000, 1300000},
 	{600, 900000, 0, 78,  85, 1, 0, 1552000, 413000, 1500000, 1300000},
 	{544, 900000, 0, 78,  85, 1, 0, 1026000, 413000, 1500000, 1800000},
@@ -69,13 +68,13 @@ static int mif_min_table[] = {
 };
 
 static int hpm_freq_table[] = {
-	/* 852, 772, 700, 600, 544, 420, 350, 266, */
-	3, 3, 3, 3, 3, 2, 2, 2,
+	/* 772, 700, 600, 544, 420, 350, 266 */
+	3, 3, 3, 3, 2, 2, 2,
 };
 
 static gpu_attribute gpu_config_attributes[] = {
-	{GPU_MAX_CLOCK, 852},
-	{GPU_MAX_CLOCK_LIMIT, 852},
+	{GPU_MAX_CLOCK, 772},
+	{GPU_MAX_CLOCK_LIMIT, 700},
 	{GPU_MIN_CLOCK, 266},
 	{GPU_DVFS_START_CLOCK, 266},
 	{GPU_DVFS_BL_CONFIG_CLOCK, 266},
@@ -99,10 +98,10 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_COLD_MINIMUM_VOL, 0},
 	{GPU_VOLTAGE_OFFSET_MARGIN, 37500},
 	{GPU_TMU_CONTROL, 1},
-	{GPU_TEMP_THROTTLING1, 600},
-	{GPU_TEMP_THROTTLING2, 544},
-	{GPU_TEMP_THROTTLING3, 420},
-	{GPU_TEMP_THROTTLING4, 350},
+	{GPU_TEMP_THROTTLING1, 544},
+	{GPU_TEMP_THROTTLING2, 350},
+	{GPU_TEMP_THROTTLING3, 266},
+	{GPU_TEMP_THROTTLING4, 266},
 	{GPU_TEMP_TRIPPING, 266},
 	{GPU_POWER_COEFF, 443}, /* all core on param */
 	{GPU_DVFS_TIME_INTERVAL, 5},
@@ -129,8 +128,8 @@ static gpu_attribute gpu_config_attributes[] = {
 	{GPU_RUNTIME_PM_DELAY_TIME, 50},
 	{GPU_DVFS_POLLING_TIME, 30},
 	{GPU_PMQOS_INT_DISABLE, 1},
-	{GPU_PMQOS_MIF_MAX_CLOCK, 1552000},
-	{GPU_PMQOS_MIF_MAX_CLOCK_BASE, 852},
+	{GPU_PMQOS_MIF_MAX_CLOCK, 1464000},
+	{GPU_PMQOS_MIF_MAX_CLOCK_BASE, 700},
 	{GPU_CL_DVFS_START_BASE, 266},
 	{GPU_DEBUG_LEVEL, DVFS_WARNING},
 	{GPU_TRACE_LEVEL, TRACE_ALL},

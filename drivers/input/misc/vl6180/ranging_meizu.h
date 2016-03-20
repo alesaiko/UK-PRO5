@@ -17,7 +17,7 @@
 #define __H_RANGING_MEIZU_H__
 #include <linux/meizu-sys.h>
 
-#define MZ_LAER_FACTORY_TEST
+#define MZ_LASER_FACTORY_TEST
 #define MZ_LASER_DEBUG
 //#define MZ_LASER_SAVE_CALI
 

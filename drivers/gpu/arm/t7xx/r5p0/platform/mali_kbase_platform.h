@@ -157,6 +157,9 @@ typedef enum {
 	GPU_CL_DVFS_START_BASE,
 	GPU_DEBUG_LEVEL,
 	GPU_TRACE_LEVEL,
+	GPU_SUSTAINABLE_GPU_CLOCK,
+	GPU_THRESHOLD_MAXLOCK,
+	GPU_LOW_POWER_CPU_MAX_LOCK,
 	GPU_CONFIG_LIST_END,
 } gpu_config_list;
 
@@ -314,6 +317,13 @@ struct exynos_context {
 	int balance_retry_count[BMAX_RETRY_CNT];
 
 	gpu_attribute *attrib;
+	struct {
+		int sustainable_gpu_clock;
+		int threshold;
+		int low_power_cluster1_maxlock;
+		int low_power_cluster1_clock;
+	} sustainable;
+	int *save_cpu_max_freq;
 };
 
 struct kbase_device *gpu_get_device_structure(void);
