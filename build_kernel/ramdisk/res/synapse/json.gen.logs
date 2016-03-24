@@ -1,4 +1,4 @@
-#!/sbin/busybox sh
+#!/system/bin/sh
 
 cat << CTAG
 {
@@ -6,7 +6,7 @@ cat << CTAG
     elements:[
 	{ SPane:{
 		title:"Android Logger",
-		description:"You must set 'Enabled' or 'Auto-Suspend' to save the latest logcat (app/system debug output) to file. Auto-Suspend mode will enable logcat whilst screen-ON & auto disable whilst screen-OFF."
+		description:""
 	}},
 	{ SSpacer:{
 		height:1

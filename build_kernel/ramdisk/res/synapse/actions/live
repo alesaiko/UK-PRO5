@@ -219,12 +219,7 @@ UKSMStats)
 	fi
   ;;
 selinux_status)
-  SELINUX_STATUS=$(cat /sys/fs/selinux/enforce);
-	if [ "$SELINUX_STATUS" == 0 ]; then
-                echo PERMISSIVE MODE
-	else
-                echo ENFORCING MODE
-	fi
+  $BB echo "$(/system/bin/getenforce)"
   ;;
 usb_status)
   USB_STATUS=$(cat /sys/class/android_usb/android0/functions);

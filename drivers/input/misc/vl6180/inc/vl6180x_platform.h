@@ -111,7 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * To be safe set these option to 1
  * @ingroup api_platform
  */
-#define VL6180X_SAFE_POLLING_ENTER  1
+#define VL6180X_SAFE_POLLING_ENTER  0
 
 /**
  * @brief Enable start/end logging facilities. It can generates traces log to help problem tracking analysis and solving 
