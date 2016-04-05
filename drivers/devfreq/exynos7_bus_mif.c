@@ -292,7 +292,6 @@ static int exynos7_init_mif_table(struct device *dev,
 			opp_disable(dev, devfreq_mif_opp_list[3].freq);
 			break;
 		case 4 :
-		case 12 :
 			opp_disable(dev, devfreq_mif_opp_list[0].freq);
 			opp_disable(dev, devfreq_mif_opp_list[1].freq);
 			break;

@@ -53,8 +53,8 @@
 #define POWER_COEFF_15P		57 /* percore param */
 #define POWER_COEFF_7P		11 /* percore  param */
 #elif defined(CONFIG_SOC_EXYNOS7420)
-#define POWER_COEFF_15P		59 /* percore param */
-#define POWER_COEFF_7P		17 /* percore  param */
+#define POWER_COEFF_15P		46 /* percore param */
+#define POWER_COEFF_7P		13 /* percore  param */
 #else
 #define POWER_COEFF_15P		48 /* percore param */
 #define POWER_COEFF_7P		9 /* percore  param */
@@ -76,7 +76,7 @@
 #define CL0_MIN_FREQ		400000
 #define CL0_MAX_FREQ		1500000
 #define CL1_MIN_FREQ		800000
-#define CL1_MAX_FREQ		2100000
+#define CL1_MAX_FREQ		2200000
 #else
 #error "Please define core frequency ranges for current SoC."
 #endif

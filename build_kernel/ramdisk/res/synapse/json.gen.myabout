@@ -61,7 +61,7 @@ cat << CTAG
 		height:1
 	}},
 	{ SPane:{
-		title:"SU Binary Version"
+		title:"SuperSU Version"
 	}},
 	{ SLiveLabel:{
 		refresh:10000,

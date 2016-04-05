@@ -28,9 +28,9 @@ struct power_pm_qos {
 	struct pm_qos_request cluster0_max_freq_qos;	/* freqs */
 	struct pm_qos_request cluster1_max_freq_qos;
 	struct pm_qos_request gpu_max_freq_qos;
-	struct pm_qos_request mif_max_freq_qos;
-	struct pm_qos_request int_max_freq_qos;
-	struct pm_qos_request disp_max_freq_qos;
+	struct pm_qos_request gpu_min_freq_qos;
+	struct pm_qos_request cluster0_min_freq_qos;
+	struct pm_qos_request cluster1_min_freq_qos;
 	struct pm_qos_request cluster1_min_num_qos;
 	struct pm_qos_request cluster1_max_num_qos;		/* number */
 	struct pm_qos_request cluster0_max_num_qos;
@@ -47,13 +47,13 @@ static struct power_pm_qos power_pm_qos[PM_QOS_END];
 /* For the available freqs, please see: kernel/power/perf_mode.c */
 
 static struct power_mode_info power_mode_info[POWER_MODE_END] = {
-	/* name,       cluster1_max_freq, cluster0_max_freq, gpu_max_freq, mif_max_freq, int_max_freq, disp_max_freq, cluster1_min_num, cluster0_max_num, cluster1_max_num*/
-	{ "low",       1200000,  1500000,     540,      1464000,   560000,   267000,         0,   4,          0 },
-	{ "normal",    1704000,  1500000,     700,      1552000,   560000,   267000,         0,   4,          2 },
-	{ "high",      2400000,  1500000,     852,      1552000,   560000,   267000,         4,   4,          4 },
-	{ "benchmark", 2400000,  1500000,     852,      1552000,   560000,   267000,         4,   4,          4 },
-	{ "custom",    2400000,  1500000,     852,      1552000,   560000,   267000,         4,   4,          4 },
-	{ "thermal",   2400000,  1500000,     852,      1552000,   560000,   267000,         4,   4,          4 },
+	/* name,       cluster1_max_freq, cluster0_max_freq, gpu_max_freq, gpu_min_freq, cluster0_min_freq, cluster1_min_freq, cluster1_min_num, cluster0_max_num, cluster1_max_num*/
+	{ "low",       1200000,  1500000,     544,        0,         0,   	0,         0,   4,          0 },
+	{ "normal",    1704000,  1500000,     700,        0,         0,   	0,         0,   4,          2 },
+	{ "high",      2400000,  1800000,     852,        0,   	     0,   	0,         4,   4,          4 },
+	{ "benchmark", 2400000,  1800000,     852,      420,   1800000,   2400000,         4,   4,          4 },
+	{ "custom",    2400000,  1800000,     852,        0,         0,         0,         4,   4,          4 },
+	{ "thermal",   2400000,  1800000,     852,      420,   1800000,   2400000,         4,   4,          4 },
 };
 
 /* add power mode notify service*/
@@ -100,64 +100,64 @@ static void request_power_mode_unlocked(unsigned int mode, int qos, unsigned lon
 	q = &power_pm_qos[qos];
 
 	if (timeout) {
-		/* Lock cluster0 cpus: 0~3 */
+		/* Lock Cluster0_MAX_FREQ cpus: 0~3 */
 		pm_qos_update_request_timeout(&q->cluster0_max_freq_qos, p->cluster0_max_freq, timeout);
 
-		/* Lock cluster1 cpus: 4~7 */
+		/* Lock Cluster1_MAX_FREQ cpus: 4~7 */
 		pm_qos_update_request_timeout(&q->cluster1_max_freq_qos, p->cluster1_max_freq, timeout);
 
-		/* Lock GPU */
+		/* Lock GPU_MAX_FREQ */
 		pm_qos_update_request_timeout(&q->gpu_max_freq_qos, p->gpu_max_freq, timeout);
 
-		/* Lock MIF */
-		pm_qos_update_request_timeout(&q->mif_max_freq_qos, p->mif_max_freq, timeout);
+		/* Lock GPU_MIN_FREQ */
+		pm_qos_update_request_timeout(&q->gpu_min_freq_qos, p->gpu_min_freq, timeout);
 
-		/* Lock INT */
-		pm_qos_update_request_timeout(&q->int_max_freq_qos, p->int_max_freq, timeout);
+		/* Lock Cluster0_MIN_FREQ cpus: 0~3 */
+		pm_qos_update_request_timeout(&q->cluster0_min_freq_qos, p->cluster0_min_freq, timeout);
 
-		/* Lock DISP */
-		pm_qos_update_request_timeout(&q->disp_max_freq_qos, p->disp_max_freq, timeout);
+		/* Lock Cluster1_MIN_FREQ cpus: 4~7 */
+		pm_qos_update_request_timeout(&q->cluster1_min_freq_qos, p->cluster1_min_freq, timeout);
 
-		/* Lock ISP */
+		/* Lock Cluster1_MIN_NUM */
 		pm_qos_update_request_timeout(&q->cluster1_min_num_qos, p->cluster1_min_num, timeout);
 
-		/* Lock CLUSTER1 */
+		/* Lock CLUSTER1_MAX_NUM */
 		pm_qos_update_request_timeout(&q->cluster1_max_num_qos, p->cluster1_max_num, timeout);
 
-		/* Lock CLUSTER0 */
+		/* Lock CLUSTER0_MAX_NUM */
 		pm_qos_update_request_timeout(&q->cluster0_max_num_qos, p->cluster0_max_num, timeout);
 	} else {
-		/* Lock cluster0 cpus: 0~3 */
+		/* Lock Cluster0_MAX_FREQ cpus: 0~3 */
 		pm_qos_update_request(&q->cluster0_max_freq_qos, p->cluster0_max_freq);
 
-		/* Lock cluster1 cpus: 4~7 */
+		/* Lock Cluster1_MAX_FREQ cpus: 4~7 */
 		pm_qos_update_request(&q->cluster1_max_freq_qos, p->cluster1_max_freq);
 
-		/* Lock MIF */
-		pm_qos_update_request(&q->mif_max_freq_qos, p->mif_max_freq);
-
-		/* Lock INT */
-		pm_qos_update_request(&q->int_max_freq_qos, p->int_max_freq);
-
-		/* Lock DISP */
-		pm_qos_update_request(&q->disp_max_freq_qos, p->disp_max_freq);
-
-		/* Lock ISP */
-		pm_qos_update_request(&q->cluster1_min_num_qos, p->cluster1_min_num);
-
-		/* Lock GPU */
+		/* Lock GPU_MAX_FREQ */
 		pm_qos_update_request(&q->gpu_max_freq_qos, p->gpu_max_freq);
 
-		/* Lock CLUSTER1 */
+		/* Lock GPU_MIN_FREQ */
+		pm_qos_update_request(&q->gpu_min_freq_qos, p->gpu_min_freq);
+
+		/* Lock Cluster0_MIN_FREQ cpus: 0~3 */
+		pm_qos_update_request(&q->cluster0_min_freq_qos, p->cluster0_min_freq);
+
+		/* Lock Cluster1_MIN_FREQ cpus: 4~7 */
+		pm_qos_update_request(&q->cluster1_min_freq_qos, p->cluster1_min_freq);
+
+		/* Lock Cluster1_MIN_NUM */
+		pm_qos_update_request(&q->cluster1_min_num_qos, p->cluster1_min_num);
+
+		/* Lock CLUSTER1_MAX_NUM */
 		pm_qos_update_request(&q->cluster1_max_num_qos, p->cluster1_max_num);
 
-		/* Lock CLUSTER0 */
+		/* Lock CLUSTER0_MAX_NUM */
 		pm_qos_update_request(&q->cluster0_max_num_qos, p->cluster0_max_num);
 	}
 
 	if (power_mode_debug)
 		pr_info("%s: cluster0: %u cluster1: %u gpu: %u mif: %u int: %u disp: %u isp: %u cpu: %d kfc: %d timeout: %lu (ms)\n", __func__,
-			p->cluster0_max_freq, p->cluster1_max_freq, p->gpu_max_freq, p->mif_max_freq, p->int_max_freq, p->disp_max_freq, p->cluster1_min_num,
+			p->cluster0_max_freq, p->cluster1_max_freq, p->gpu_max_freq, p->gpu_min_freq, p->cluster0_min_freq, p->cluster1_min_freq, p->cluster1_min_num,
 			p->cluster1_max_num, p->cluster0_max_num, timeout ? timeout / 1000 : 0);
 }
 
@@ -169,8 +169,8 @@ void __request_power_mode(unsigned int mode, int qos, unsigned long timeout)
 }
 
 static void request_power_mode(unsigned int cluster1_max_freq, unsigned int cluster0_max_freq,
-		unsigned int gpu_max_freq, unsigned int mif_max_freq, unsigned int int_max_freq,
-		unsigned int disp_max_freq, unsigned int cluster1_min_num,
+		unsigned int gpu_max_freq, unsigned int gpu_min_freq, unsigned int cluster0_min_freq,
+		unsigned int cluster1_min_freq, unsigned int cluster1_min_num,
 		unsigned int cluster0_max_num, unsigned int cluster1_max_num, int mode, int qos)
 {
 	struct power_mode_info *p;
@@ -181,9 +181,9 @@ static void request_power_mode(unsigned int cluster1_max_freq, unsigned int clus
 	p->cluster1_max_freq = cluster1_max_freq;
 	p->cluster0_max_freq = cluster0_max_freq;
 	p->gpu_max_freq = gpu_max_freq;
-	p->mif_max_freq = mif_max_freq;
-	p->int_max_freq = int_max_freq;
-	p->disp_max_freq = disp_max_freq;
+	p->gpu_min_freq = gpu_min_freq;
+	p->cluster0_min_freq = cluster0_min_freq;
+	p->cluster1_min_freq = cluster1_min_freq;
 	p->cluster1_min_num = cluster1_min_num;
 	p->cluster0_max_num = cluster0_max_num;
 	p->cluster1_max_num = cluster1_max_num;
@@ -194,23 +194,23 @@ static void request_power_mode(unsigned int cluster1_max_freq, unsigned int clus
 }
 
 void request_thermal_power_mode(unsigned int cluster1_max_freq, unsigned int cluster0_max_freq,
-		unsigned int gpu_max_freq, unsigned int mif_max_freq, unsigned int int_max_freq,
-		unsigned int disp_max_freq, unsigned int cluster1_min_num,
+		unsigned int gpu_max_freq, unsigned int gpu_min_freq, unsigned int cluster0_min_freq,
+		unsigned int cluster1_min_freq, unsigned int cluster1_min_num,
 		unsigned int cluster0_max_num, unsigned int cluster1_max_num)
 {
 	if (!power_mode_init_flag)
 		return;
 
-	request_power_mode(cluster1_max_freq, cluster0_max_freq, gpu_max_freq, mif_max_freq, int_max_freq, disp_max_freq, cluster1_min_num,
+	request_power_mode(cluster1_max_freq, cluster0_max_freq, gpu_max_freq, gpu_min_freq, cluster0_min_freq, cluster1_min_freq, cluster1_min_num,
 		cluster0_max_num, cluster1_max_num, POWER_MODE_THERMAL, PM_QOS_THERMAL);
 }
 
 void request_custom_power_mode(unsigned int cluster1_max_freq, unsigned int cluster0_max_freq,
-		unsigned int gpu_max_freq, unsigned int mif_max_freq, unsigned int int_max_freq,
-		unsigned int disp_max_freq, unsigned int cluster1_min_num,
+		unsigned int gpu_max_freq, unsigned int gpu_min_freq, unsigned int cluster0_min_freq,
+		unsigned int cluster1_min_freq, unsigned int cluster1_min_num,
 		unsigned int cluster0_max_num, unsigned int cluster1_max_num)
 {
-	request_power_mode(cluster1_max_freq, cluster0_max_freq, gpu_max_freq, mif_max_freq, int_max_freq, disp_max_freq, cluster1_min_num,
+	request_power_mode(cluster1_max_freq, cluster0_max_freq, gpu_max_freq, gpu_min_freq, cluster0_min_freq, cluster1_min_freq, cluster1_min_num,
 		cluster0_max_num, cluster1_max_num, POWER_MODE_CUSTOM, PM_QOS_POWER_MODE);
 }
 
@@ -220,14 +220,14 @@ static void show_power_mode_list(void)
 
 	pr_debug("================== power mode ====================\n");
 
-	pr_debug("%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n", "name", "cluster1_max_freq", "cluster0_max_freq", "gpu_max_freq", "mif_max_freq", "int_max_freq", "disp_max_freq", "cluster1_min_num", "cluster0_max_num", "cluster1_max_num");
+	pr_debug("%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s\n", "name", "cluster1_max_freq", "cluster0_max_freq", "gpu_max_freq", "gpu_min_freq", "cluster0_min_freq", "cluster1_min_freq", "cluster1_min_num", "cluster0_max_num", "cluster1_max_num");
 	for (i = 0; i < POWER_MODE_END; i++) {
 		if (i == POWER_MODE_BENCHMARK)
 			continue;
 		pr_debug("%10s %10u %10u %10u %10u %10u %10u %10u %10u %10u\n",
 			power_mode_info[i].name, power_mode_info[i].cluster1_max_freq, power_mode_info[i].cluster0_max_freq,
-			power_mode_info[i].gpu_max_freq, power_mode_info[i].mif_max_freq, power_mode_info[i].int_max_freq,
-			power_mode_info[i].disp_max_freq, power_mode_info[i].cluster1_min_num,
+			power_mode_info[i].gpu_max_freq, power_mode_info[i].gpu_min_freq, power_mode_info[i].cluster0_min_freq,
+			power_mode_info[i].cluster1_min_freq, power_mode_info[i].cluster1_min_num,
 			power_mode_info[i].cluster0_max_num, power_mode_info[i].cluster1_max_num);
 	}
 }
@@ -325,7 +325,7 @@ static ssize_t show_power_custom(struct kobject *kobj, struct attribute *attr, c
 	mutex_lock(&power_lock);
 	p = &power_mode_info[POWER_MODE_CUSTOM];
 	ret = sprintf(buf, "cluster1: %u cluster0: %u gpu: %u mif: %u int: %u disp: %u isp: %u kfc: %u cpu: %u\n",
-		p->cluster1_max_freq, p->cluster0_max_freq, p->gpu_max_freq, p->mif_max_freq, p->int_max_freq, p->disp_max_freq, p->cluster1_min_num,
+		p->cluster1_max_freq, p->cluster0_max_freq, p->gpu_max_freq, p->gpu_min_freq, p->cluster0_min_freq, p->cluster1_min_freq, p->cluster1_min_num,
 		p->cluster0_max_num, p->cluster1_max_num);
 	mutex_unlock(&power_lock);
 
@@ -335,12 +335,12 @@ static ssize_t show_power_custom(struct kobject *kobj, struct attribute *attr, c
 static ssize_t store_power_custom(struct kobject *kobj, struct attribute *attr, const char *buf, size_t count)
 {
 	int ret;
-	unsigned int cluster1_max_freq, cluster0_max_freq, gpu_max_freq, mif_max_freq, int_max_freq, disp_max_freq, cluster1_min_num, cluster0_max_num, cluster1_max_num;
+	unsigned int cluster1_max_freq, cluster0_max_freq, gpu_max_freq, gpu_min_freq, cluster0_min_freq, cluster1_min_freq, cluster1_min_num, cluster0_max_num, cluster1_max_num;
 	struct power_mode_info *p;
 
 	mutex_lock(&power_lock);
 
-	ret = sscanf(buf, "%u %u %u %u %u %u %u %u %u", &cluster1_max_freq, &cluster0_max_freq, &gpu_max_freq, &mif_max_freq, &int_max_freq, &disp_max_freq,
+	ret = sscanf(buf, "%u %u %u %u %u %u %u %u %u", &cluster1_max_freq, &cluster0_max_freq, &gpu_max_freq, &gpu_min_freq, &cluster0_min_freq, &cluster1_min_freq,
 			&cluster1_min_num, &cluster0_max_num, &cluster1_max_num);
 	if (ret != 9)
 		goto fail;
@@ -349,16 +349,16 @@ static ssize_t store_power_custom(struct kobject *kobj, struct attribute *attr, 
 	p->cluster1_max_freq = cluster1_max_freq;
 	p->cluster0_max_freq = cluster0_max_freq;
 	p->gpu_max_freq = gpu_max_freq;
-	p->mif_max_freq = mif_max_freq;
-	p->int_max_freq = int_max_freq;
-	p->disp_max_freq = disp_max_freq;
+	p->gpu_min_freq = gpu_min_freq;
+	p->cluster0_min_freq = cluster0_min_freq;
+	p->cluster1_min_freq = cluster1_min_freq;
 	p->cluster1_min_num = cluster1_min_num;
 	p->cluster0_max_num = cluster0_max_num;
 	p->cluster1_max_num = cluster1_max_num;
 
 	if (power_mode_debug)
 		pr_info("custom:\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\n",
-			p->cluster1_max_freq, p->cluster0_max_freq, p->gpu_max_freq, p->mif_max_freq, p->int_max_freq, p->disp_max_freq, p->cluster1_min_num,
+			p->cluster1_max_freq, p->cluster0_max_freq, p->gpu_max_freq, p->gpu_min_freq, p->cluster0_min_freq, p->cluster1_min_freq, p->cluster1_min_num,
 			p->cluster0_max_num, p->cluster1_max_num);
 
 	mutex_unlock(&power_lock);
@@ -366,7 +366,7 @@ static ssize_t store_power_custom(struct kobject *kobj, struct attribute *attr, 
 	return count;
 
 fail:
-	pr_err("usage: echo cluster1_max_freq cluster0_max_freq gpu_max_freq mif_max_freq int_max_freq disp_max_freq cluster1_min_num cluster0_max_num cluster1_max_num > /sys/power/power_custom\n\n");
+	pr_err("usage: echo cluster1_max_freq cluster0_max_freq gpu_max_freq gpu_min_freq cluster0_min_freq cluster1_min_freq cluster1_min_num cluster0_max_num cluster1_max_num > /sys/power/power_custom\n\n");
 	mutex_unlock(&power_lock);
 
 	return -EINVAL;
@@ -391,23 +391,23 @@ static int power_mode_init(void)
 {
 	int error, i;
 
-	pr_err("M86 Power mode init, default POWER_MODE_NORMAL\n");
+	pr_err("M86 Power mode init, default POWER_MODE_HIGH\n");
 
 	error = sysfs_create_group(power_kobj, &attr_group);
 	if (error)
 		return error;
 
 	mutex_init(&power_lock);
-	cur_power_mode = &power_mode_info[POWER_MODE_NORMAL];
+	cur_power_mode = &power_mode_info[POWER_MODE_HIGH];
 	/* show_power_mode_list(); */
 
 	for (i = PM_QOS_POWER_MODE; i < PM_QOS_END; i++) {
 		pm_qos_add_request(&power_pm_qos[i].cluster0_max_freq_qos, PM_QOS_CLUSTER0_FREQ_MAX, MAX_CLUSTER0_FREQ);
 		pm_qos_add_request(&power_pm_qos[i].cluster1_max_freq_qos, PM_QOS_CLUSTER1_FREQ_MAX, MAX_CLUSTER1_FREQ);
 		pm_qos_add_request(&power_pm_qos[i].gpu_max_freq_qos, PM_QOS_GPU_FREQ_MAX, MAX_GPU_FREQ);
-		pm_qos_add_request(&power_pm_qos[i].mif_max_freq_qos, PM_QOS_BUS_THROUGHPUT_MAX, PM_QOS_BUS_THROUGHPUT_MAX_DEFAULT_VALUE);
-		pm_qos_add_request(&power_pm_qos[i].int_max_freq_qos, PM_QOS_DEVICE_FREQ_MAX, PM_QOS_DEVICE_FREQ_MAX_DEFAULT_VALUE);
-		pm_qos_add_request(&power_pm_qos[i].disp_max_freq_qos, PM_QOS_DISPLAY_FREQ_MAX, PM_QOS_DISPLAY_FREQ_MAX_DEFAULT_VALUE);
+		pm_qos_add_request(&power_pm_qos[i].gpu_min_freq_qos, PM_QOS_GPU_FREQ_MIN, 0);
+		pm_qos_add_request(&power_pm_qos[i].cluster0_min_freq_qos, PM_QOS_CLUSTER0_FREQ_MIN, PM_QOS_CLUSTER0_FREQ_MIN_DEFAULT_VALUE);
+		pm_qos_add_request(&power_pm_qos[i].cluster1_min_freq_qos, PM_QOS_CLUSTER1_FREQ_MIN, PM_QOS_CLUSTER1_FREQ_MIN_DEFAULT_VALUE);
 		pm_qos_add_request(&power_pm_qos[i].cluster1_min_num_qos, PM_QOS_CLUSTER1_NUM_MIN, 0);
 		pm_qos_add_request(&power_pm_qos[i].cluster1_max_num_qos, PM_QOS_CLUSTER1_NUM_MAX, NR_CLUST1_CPUS);
 		pm_qos_add_request(&power_pm_qos[i].cluster0_max_num_qos, PM_QOS_CLUSTER0_NUM_MAX, NR_CLUST0_CPUS);

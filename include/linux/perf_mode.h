@@ -14,15 +14,15 @@
 
 #include <mach/cpufreq.h>
 
-#define PERF_MODE_LEN   (15)
+#define PERF_MODE_LEN   (11)
 
 struct perf_mode_info {
 	char		*name;
 	unsigned int	cluster1_max_freq;
 	unsigned int	cluster0_max_freq;
 	unsigned int	gpu_max_freq;
-	unsigned int	mif_max_freq;
-	unsigned int	int_max_freq;
+	unsigned int	gpu_min_freq;
+	unsigned int	cluster0_min_freq;
 	unsigned int	cluster0_max_num;
 	unsigned int	cluster1_max_num;
 };

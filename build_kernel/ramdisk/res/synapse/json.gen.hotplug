@@ -1,0 +1,75 @@
+#!/sbin/busybox sh
+
+cat << CTAG
+{
+    name:HOTPLUG,
+    elements:[
+	{ SPane:{
+		title:"MARCH-HOTPLUG Thresholds",
+		description:""
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SOptionList:{
+		description:"A57 cores Hotplug_In by HMP Threshold. Default is 840.\n",
+		default:$(echo "$(/res/synapse/actions/march_hmp march_hmp)"),
+		action:"march_hmp march_hmp",
+		values:[999, 900, 840, 700, 600, 500, 400, 300, 200, 100]
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+		title:"A57 cores Hotplug_In_Load Threshold",
+		description:"Default is 240.\n",
+		min:1, max:1000, unit:"", step:1,
+		default:$(cat /sys/devices/system/march-hotplug/cl1_hotplug_in_load_threshold),
+		action:"generic /sys/devices/system/march-hotplug/cl1_hotplug_in_load_threshold"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+		title:"A57 cores Hotplug_Out_Load Threshold",
+		description:"Default is 240.\n",
+		min:1, max:1000, unit:"", step:1,
+		default:$(cat /sys/devices/system/march-hotplug/cl1_hotplug_out_load_threshold),
+		action:"generic /sys/devices/system/march-hotplug/cl1_hotplug_out_load_threshold"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+		title:"A57 cores Stay_Count Normal",
+		description:"Default is 20. Each value = 100 milliseconds. 20 = 2 second.\n",
+		min:1, max:50, unit:"", step:1,
+		default:$(cat /sys/devices/system/march-hotplug/cl1_stay_cnt_normal),
+		action:"generic /sys/devices/system/march-hotplug/cl1_stay_cnt_normal"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+		title:"A57 cores Stay_Count HMP Migration",
+		description:"Default is 20. Each value = 100 milliseconds. 20 = 2 second.\n",
+		min:1, max:50, unit:"", step:1,
+		default:$(cat /sys/devices/system/march-hotplug/cl1_stay_cnt_hmp_migration),
+		action:"generic /sys/devices/system/march-hotplug/cl1_stay_cnt_hmp_migration"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+	{ SSeekBar:{
+		title:"A57 cores Stay_Count Lowpower",
+		description:"Default is 3. Each value = 100 milliseconds. 3 = 300 milliseconds.\n",
+		min:1, max:10, unit:"", step:1,
+		default:$(cat /sys/devices/system/march-hotplug/cl1_stay_cnt_lowpower),
+		action:"generic /sys/devices/system/march-hotplug/cl1_stay_cnt_lowpower"
+	}},
+	{ SSpacer:{
+		height:1
+	}},
+    ]
+}
+CTAG

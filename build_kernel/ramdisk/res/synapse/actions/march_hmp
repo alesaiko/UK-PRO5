@@ -1,0 +1,67 @@
+BB=/sbin/busybox;
+
+if [ "$($BB mount | grep rootfs | cut -c 26-27 | grep -c ro)" -eq "1" ]; then
+	$BB mount -o remount,rw /;
+fi;
+
+case $1 in
+march_hmp)
+  P=/res/synapse/SkyHigh/march_hmp
+  if [ ! -z "$2" ]; then
+  if [ "$2" == 999 ]; then
+    echo "999" > $P
+    echo "999" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 900 ]; then
+    echo "900" > $P
+    echo "900" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 840 ]; then
+    echo "840" > $P
+    echo "840" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 700 ]; then
+    echo "700" > $P
+    echo "700" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 600 ]; then
+    echo "600" > $P
+    echo "600" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 500 ]; then
+    echo "500" > $P
+    echo "500" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 400 ]; then
+    echo "400" > $P
+    echo "400" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 300 ]; then
+    echo "300" > $P
+    echo "300" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 200 ]; then
+    echo "200" > $P
+    echo "200" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  elif [ "$2" == 100 ]; then
+    echo "100" > $P
+    echo "100" > /sys/devices/system/march-hotplug/cl1_hotplug_in_threshold_by_hmp
+  fi; fi
+  copy=$(cat $P)
+  if [ "$copy" == 999 ]; then
+    echo 999
+  elif [ "$copy" == 900 ]; then
+    echo 900
+  elif [ "$copy" == 840 ]; then
+    echo 840
+  elif [ "$copy" == 700 ]; then
+    echo 700
+  elif [ "$copy" == 600 ]; then
+    echo 600
+  elif [ "$copy" == 500 ]; then
+    echo 500
+  elif [ "$copy" == 400 ]; then
+    echo 400
+  elif [ "$copy" == 300 ]; then
+    echo 300
+  elif [ "$copy" == 200 ]; then
+    echo 200
+  elif [ "$copy" == 100 ]; then
+    echo 100
+  fi
+  ;;
+esac
+
+$BB mount -t rootfs -o remount,ro rootfs;

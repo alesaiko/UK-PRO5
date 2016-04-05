@@ -2,10 +2,10 @@
 
 cat << CTAG
 {
-    name:"CPU GOV",
+    name:"CPU GOVERNORS",
     elements:[
 	{ SPane:{
-		title:"CPU Governor",
+		title:"CPU Governors",
 		description:" The CPU governor determines how the CPU behaves in response to changes in workload."
         }},
 	{ SSpacer:{

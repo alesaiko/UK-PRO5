@@ -196,14 +196,14 @@ static void key_booster_init(void) {
 	pm_qos_add_request(&key_pmreq.nrcpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_NUM_MIN, 0);
 #endif
 
-	key_p_data.cpu[CL_ONE].perf   = 1300000;
+	key_p_data.cpu[CL_ONE].perf   = 800000;
 	key_p_data.cpu[CL_ZERO].perf   = 1500000;
 	key_p_data.bus.perf           = 1552000;
 	key_p_data.device.perf        = 200000;
-	key_p_data.graphic.perf       = 420;
-	key_p_data.nrcpu[CL_ONE].perf = 2;
+	key_p_data.graphic.perf       = 350;
+	key_p_data.nrcpu[CL_ONE].perf = 0;
 	key_p_data.nrcpu[CL_ZERO].perf = 4;
-	key_p_data.cluster1_boost.perf     = 2;
+	key_p_data.cluster1_boost.perf     = 1;
 
 	key_p_data.cpu[CL_ONE].pulse_timeout   = 200;
 	key_p_data.cpu[CL_ZERO].pulse_timeout   = 200;
@@ -307,11 +307,11 @@ static void first_stage_boost_init(void) {
 	pm_qos_add_request(&first_stage_pmreq.nrcpu_pmreq[CL_ZERO], PM_QOS_CLUSTER0_NUM_MIN, 0);
 #endif
 
-	first_stage_p_data.cpu[CL_ONE].perf   = 0;
+	first_stage_p_data.cpu[CL_ONE].perf   = 800000;
 	first_stage_p_data.cpu[CL_ZERO].perf   = 1500000;
 	first_stage_p_data.bus.perf           = 1464000;
 	first_stage_p_data.device.perf        = 200000;
-	first_stage_p_data.graphic.perf       = 420;
+	first_stage_p_data.graphic.perf       = 350;
 	first_stage_p_data.nrcpu[CL_ONE].perf = 0;
 	first_stage_p_data.nrcpu[CL_ZERO].perf = 4;
 	first_stage_p_data.cluster1_boost.perf     = 1;
