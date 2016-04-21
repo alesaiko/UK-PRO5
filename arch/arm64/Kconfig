@@ -461,9 +461,7 @@ config ARCH_NR_GPIO
 	  Maximum number of GPIOs in the system.
 	  If unsure, leave the default value.
 
-config HZ
-	int
-	default 300
+source kernel/Kconfig.hz
 
 config ARCH_HAS_HOLES_MEMORYMODEL
 	def_bool y if SPARSEMEM

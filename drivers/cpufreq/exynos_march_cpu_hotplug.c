@@ -517,7 +517,7 @@ static int __ref change_core_num_cluster0(int target_num, int use_target)
 	return ret;
 }
 
-static __ref int change_core_num_cluster1(int cluster_on_off, int hmp_boost)
+static __ref int change_core_num_cluster1(int cluster_on_off, int hmp_booster)
 {
 	int ret = 0;
 	int cur_num, val, i = 0;
@@ -530,7 +530,7 @@ static __ref int change_core_num_cluster1(int cluster_on_off, int hmp_boost)
 	max_limit = (int)pm_qos_request(PM_QOS_CLUSTER1_NUM_MAX);
 	min_limit = (int)pm_qos_request(PM_QOS_CLUSTER1_NUM_MIN);
 
-	if (hmp_boost != 0 &&  max_limit > 0) {
+	if (hmp_booster != 0 &&  max_limit > 0) {
 		target_num = max_limit;
 	}
 	else if (cluster_on_off == 1 ) {

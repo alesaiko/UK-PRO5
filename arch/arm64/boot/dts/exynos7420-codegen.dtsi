@@ -415,6 +415,16 @@
 		clock-names = "gate_adcif";
 	};
 
+	plat_adc {
+		compatible = "meizu,simple_adc";
+		io-channels = <7 0>,
+			      <7 1>,
+			      <7 2>,
+			      <7 3>,
+			      <7 4>;
+		io-channel-names = "ntc_top", "ntc_bottom", "ntc_right", "ntc_left", "ntc_back";
+	};
+
 	gic: interrupt-controller@11001000 {
 		compatible = "arm,cortex-a15-gic", "arm,cortex-a9-gic";
 		#interrupt-cells = <3>;

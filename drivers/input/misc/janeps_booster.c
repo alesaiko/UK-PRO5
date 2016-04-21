@@ -198,21 +198,21 @@ static void key_booster_init(void) {
 
 	key_p_data.cpu[CL_ONE].perf   = 800000;
 	key_p_data.cpu[CL_ZERO].perf   = 1500000;
-	key_p_data.bus.perf           = 1552000;
+	key_p_data.bus.perf           = 1464000;
 	key_p_data.device.perf        = 200000;
 	key_p_data.graphic.perf       = 350;
 	key_p_data.nrcpu[CL_ONE].perf = 0;
-	key_p_data.nrcpu[CL_ZERO].perf = 4;
+	key_p_data.nrcpu[CL_ZERO].perf = 3;
 	key_p_data.cluster1_boost.perf     = 1;
 
-	key_p_data.cpu[CL_ONE].pulse_timeout   = 200;
-	key_p_data.cpu[CL_ZERO].pulse_timeout   = 200;
-	key_p_data.bus.pulse_timeout           = 200;
-	key_p_data.device.pulse_timeout        = 200;
-	key_p_data.graphic.pulse_timeout       = 200;
-	key_p_data.nrcpu[CL_ONE].pulse_timeout = 200;
-	key_p_data.nrcpu[CL_ZERO].pulse_timeout = 200;
-	key_p_data.cluster1_boost.pulse_timeout     = 200;
+	key_p_data.cpu[CL_ONE].pulse_timeout   = 500;
+	key_p_data.cpu[CL_ZERO].pulse_timeout   = 500;
+	key_p_data.bus.pulse_timeout           = 500;
+	key_p_data.device.pulse_timeout        = 500;
+	key_p_data.graphic.pulse_timeout       = 500;
+	key_p_data.nrcpu[CL_ONE].pulse_timeout = 500;
+	key_p_data.nrcpu[CL_ZERO].pulse_timeout = 500;
+	key_p_data.cluster1_boost.pulse_timeout     = 500;
 
 	key_info.enable = 1;
 
@@ -309,12 +309,12 @@ static void first_stage_boost_init(void) {
 
 	first_stage_p_data.cpu[CL_ONE].perf   = 800000;
 	first_stage_p_data.cpu[CL_ZERO].perf   = 1500000;
-	first_stage_p_data.bus.perf           = 1464000;
+	first_stage_p_data.bus.perf           = 1264000;
 	first_stage_p_data.device.perf        = 200000;
 	first_stage_p_data.graphic.perf       = 350;
 	first_stage_p_data.nrcpu[CL_ONE].perf = 0;
-	first_stage_p_data.nrcpu[CL_ZERO].perf = 4;
-	first_stage_p_data.cluster1_boost.perf     = 1;
+	first_stage_p_data.nrcpu[CL_ZERO].perf = 3;
+	first_stage_p_data.cluster1_boost.perf     = 2;
 
 	first_stage_p_data.cpu[CL_ONE].pulse_timeout   = 1000;
 	first_stage_p_data.cpu[CL_ZERO].pulse_timeout   = 1000;
@@ -838,12 +838,12 @@ static int janeps_probe(struct platform_device *pdev)
 
 	/* Default parameter settings */
 	default_param.big_perf  = 800000;
-	default_param.little_perf = 1400000;
+	default_param.little_perf = 1500000;
 	default_param.bus_perf = 1464000;
-	default_param.device_perf = 400000;
-	default_param.graphics_perf = 420;
+	default_param.device_perf = 200000;
+	default_param.graphics_perf = 350;
 	default_param.big_core_count = 0;
-	default_param.little_core_count = 4;
+	default_param.little_core_count = 3;
 
 	default_param.repeativity = 100;
 	default_param.renew_period = 20;

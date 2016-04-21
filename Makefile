@@ -243,8 +243,8 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = $(CCACHE) gcc
 HOSTCXX      = $(CCACHE) g++
-HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -Ofast -fomit-frame-pointer -std=gnu89 -floop-nest-optimize
-HOSTCXXFLAGS = -Ofast -floop-nest-optimize
+HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+HOSTCXXFLAGS = -O2
 
 # Decide whether to build built-in, modular, or both.
 # Normally, just do built-in.
@@ -349,13 +349,15 @@ endif
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
 		  -Wbitwise -Wno-return-void $(CF)
-
-GRAPHITE = -fgraphite-identity -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block -floop-flatten -floop-nest-optimize
-
-CFLAGS_MODULE   =
-AFLAGS_MODULE   = 
-LDFLAGS_MODULE  =
-CFLAGS_KERNEL	= -DNDEBUG $(GRAPHITE)
+KERNEL_FLAGS	= -fgcse-after-reload -fgcse-sm \
+		  -fgcse-las -ftree-loop-im -ftree-loop-ivcanon -fweb \
+		  -frename-registers -ftree-loop-linear -ftree-vectorize \
+		  -fmodulo-sched -ffast-math \
+		  -funsafe-math-optimizations
+CFLAGS_MODULE   = -DMODULE $(KERNEL_FLAGS)
+AFLAGS_MODULE   = -DMODULE $(KERNEL_FLAGS)
+LDFLAGS_MODULE  = --strip-debug
+CFLAGS_KERNEL	= $(KERNEL_FLAGS)
 AFLAGS_KERNEL	=
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
@@ -379,19 +381,19 @@ LINUXINCLUDE    := \
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
-KBUILD_CFLAGS   := -DNDEBUG $(GRAPHITE) -O2 -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
+KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
-		   -Werror-implicit-function-declaration \
-		   -fivopts -funswitch-loops -fpredictive-commoning \
-		   -Werror-implicit-function-declaration -funsafe-loop-optimizations \
-		   -Wno-format-security -Wno-logical-not-parentheses \
-		   -pipe -fno-pic \
-		   -fweb -ftree-loop-im -ftree-loop-ivcanon \
-		   -fno-delete-null-pointer-checks -fsingle-precision-constant \
-		   -fmodulo-sched -fmodulo-sched-allow-regmoves \
-		   -Wno-error=declaration-after-statement \
-		   -march=armv8-a+crc \
-		   -mtune=cortex-a57.cortex-a53
+		   -Wno-format-security \
+		   -fno-delete-null-pointer-checks \
+		   -fdiagnostics-show-option \
+		   -Wno-error=sequence-point \
+		   $(KERNEL_FLAGS)
+
+# arter97's optimizations
+KBUILD_CFLAGS	+= -pipe -mno-android -fno-pic -O2 -march=armv8-a+crc -mcpu=cortex-a57.cortex-a53 -mtune=cortex-a57.cortex-a53
+# Other unnecessary warnings
+KBUILD_CFLAGS	+= -Wno-unused -Wno-maybe-uninitialized
+
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
@@ -591,7 +593,7 @@ all: vmlinux
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS	+= -Ofast
+KBUILD_CFLAGS	+= -O2
 endif
 
 include $(srctree)/arch/$(SRCARCH)/Makefile

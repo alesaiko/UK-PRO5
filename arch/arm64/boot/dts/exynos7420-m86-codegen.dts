@@ -116,12 +116,10 @@
 	ramoops {
 		status = "okay";
 		compatible = "samsung,exynos_ramoops";
-
-		//ramoops,mem_address = <???>;
-		//ramoops,mem_size = <???>;
-		ramoops,record_size = <0x40000>;
-		ramoops,console_size = <0x40000>;
-		ramoops,ftrace_size = <0x40000>;
+		memory-region = <206>;
+		ramoops,record_size = <0x80000>;
+		ramoops,console_size = <0x80000>;
+		ramoops,ftrace_size = <0x80000>;
 		ramoops,dump_oops = <1>;
 		ramoops,ecc_info_block_size = <0>;
 		ramoops,ecc_info_ecc_size = <32>;
@@ -286,7 +284,7 @@
 	ipa_pdata {
 		compatible = "samsung,exynos-ipa";
 
-		control_temp = <100>;
+		control_temp = <90>;
 		temp_threshold = <5>;
 		enabled = <1>;
 		tdp = <3500>;

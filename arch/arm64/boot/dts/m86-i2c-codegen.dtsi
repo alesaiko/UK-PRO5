@@ -3,16 +3,16 @@
 #define ti_motor_i2c		hsi2c_2
 #define st_touchscreen_i2c	hsi2c_4
 #define s2mps15_pmic_i2c	hsi2c_5
-#define ti_charger2_i2c	hsi2c_6
+#define ti_charger2_i2c		hsi2c_6
 #define ess9018_i2c		hsi2c_7
 #define ti_muic_i2c 		hsi2c_8
 #define nxp_nfc_i2c		hsi2c_9
 #define ps_als_i2c		hsi2c_10
 #define ti_charger1_i2c 	hsi2c_11
-
 #define led_lp5562_i2c		gpioi2c_0
 #define flash_lm3644_i2c	gpioi2c_1
-#define rear_module_i2c	gpioi2c_2
+#define isp_i2c0		i2c0_isp
+#define rear_module_i2c		gpioi2c_2
 #define vl6180_i2c		gpioi2c_3
 
 &s2mps15_pmic_i2c {
@@ -126,7 +126,7 @@
 };
 
 /*motor begin*/
-&ti_motor_i2c{
+&ti_motor_i2c {
 	status = "okay";
 		drv2605_motor@5a {
 		compatible = "ti,drv2605-haptic";
@@ -138,11 +138,11 @@
 /*motor end*/
 
 /*muic begin*/
-&ti_muic_i2c{
+&ti_muic_i2c {
 	status = "okay";
 	clock-frequency = <400000>;
 
-	fusb302_typec@22{
+	fusb302_typec@22 {
 		compatible = "fusb302";
 		reg = <0x22>;
 		int-ccd = <&gpa1 5 0xf>;
@@ -151,7 +151,7 @@
 		pinctrl-0 = <&ccd_int  &pd_on>;
 	};
 
-	tsu6721_muic@25{
+	tsu6721_muic@25 {
 		compatible = "ti,tsu6721-muic";
 		reg = <0x25>;
 		int-muic = <&gpa0 1 0xf>;
@@ -161,10 +161,10 @@
 };
 /*muic end*/
 
-&ti_charger2_i2c{
+&ti_charger2_i2c {
 	status = "okay";
 	/*fuel gauge begin*/
-	bq27532_gauge@55{
+	bq27532_gauge@55 {
 		compatible = "bq2753x";
 		reg = <0x55>;
 		int-gauge = <&gpa0 5 0xf>;
@@ -173,7 +173,7 @@
 	};
 	/*fuelgauge end*/
 	/*charger2 begin*/
-	bq25892_charger1@6b{
+	bq25892_charger1@6b {
 		compatible = "ti,bq2589x-2";
 		reg = <0x6b>;
 		chg2-int = <&gpa0 2 0xf>;
@@ -184,10 +184,10 @@
 	/*charger2 end*/
 };
 
-&ti_charger1_i2c{
+&ti_charger1_i2c {
 	status = "okay";
 	/*charger1 begin*/
-	bq25892_charger1@6b{
+	bq25892_charger1@6b {
 		compatible = "ti,bq2589x-1";
 		reg = <0x6b>;
 		chg1-int = <&gpa0 3 0xf>;
@@ -330,29 +330,7 @@
 	};
 };
 
-#if 0
-&rear_module_i2c {
-	status = "okay";
-	gpios = <&gpc2 0 0 /* sda */
-		 &gpc2 1 0 /* scl */
-		 >;
-	i2c-gpio,delay-us = <2>; /* 250KHz */
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	bu63165@0e {
-		compatible = "meizu,rhom-ois-bu63165";
-		reg = <0x0e>;
-		gpio_vcm_en = <&gpc3 1 0x1>;
-	};
-
-	otp_primax@50 {
-		compatible = "meizu,otp-primax";
-		reg = <0x50>;
-	};
-};
-#else
-&i2c0_isp {
+&isp_i2c0 {
 	status = "okay";
 	samsung,i2c-sda-delay = <100>;
 	samsung,i2c-max-bus-freq = <400000>;
@@ -368,7 +346,6 @@
 		reg = <0x50>;
 	};
 };
-#endif
 
 &rear_module_i2c {
 	status = "okay";
