@@ -746,9 +746,9 @@ service logkit /system/bin/logkit /sdcard/Android/log/  50  /mnt/shell/emulated
 #on charger
 #    start logkit
 
-# Enable Booster -- BOBO
-service january_booster /system/bin/january_booster
-    class late_start
+# Disable Booster -- BOBO
+# service january_booster /system/bin/january_booster
+#    class late_start
 
 service march_hotplug /system/bin/march_hotplug
     class late_start

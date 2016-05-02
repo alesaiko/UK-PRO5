@@ -1,10 +1,13 @@
-ui_print("Mounting Data...");
+ui_print("Mounting System & Data...");
 run_program("/sbin/mount", "/dev/block/platform/15570000.ufs/by-name/userdata", "/data");
-ui_print("");
-ui_print("Clear Synapse Data for clean install...");
+run_program("/sbin/mount", "/dev/block/platform/15570000.ufs/by-name/system", "/system");
+
+ui_print(" ");
+ui_print("Clear Synapse data for clean install...");
 delete("/data/dalvik-cache/arm64/data@app@com.af.synapse@base.apk@classes.dex", "/data/dalvik-cache/arm64/data@app@com.af.synapse-1@base.apk@classes.dex", "/data/dalvik-cache/arm64/data@app@com.af.synapse-2@base.apk@classes.dex");
 delete("/data/dalvik-cache/profiles/com.af.synapse");
 delete_recursive("/data/data/com.af.synapse");
+
 ui_print("");
 ui_print("updateing boot...");
 show_progress(0.700000, 25);
@@ -13,22 +16,25 @@ ui_print("updateing bootloader...");
 package_extract_file("bootloader", "/dev/block/sdb");
 ui_print("updateing dtb...");
 package_extract_file("dtb", "/dev/block/platform/15570000.ufs/by-name/dtb");
-ui_print("Mounting System...");
+
+ui_print(" ");
+ui_print("Clean up busybox & applets...");
+package_extract_dir("busybox", "/tmp/busybox");
+run_program("/sbin/busybox", "unzip", "/tmp/busybox/BusyBox-Cleaner-YDS.zip", "META-INF/com/google/android/*", "-d", "/tmp/busybox");
+run_program("/sbin/busybox", "sh", "/tmp/busybox/META-INF/com/google/android/update-binary", "dummy", "1", "/tmp/busybox/BusyBox-Cleaner-YDS.zip");
+
+ui_print(" ");
+ui_print("Re-mounting System...");
 run_program("/sbin/mount", "/dev/block/platform/15570000.ufs/by-name/system", "/system");
-ui_print("");
-ui_print("Removing old kernel modules & busybox");
-delete_recursive("/system/lib/modules");
-delete("/system/xbin/busybox", "/system/bin/busybox");
-ui_print("");
-ui_print("Extracting Kernel modules & busybox...");
+
+ui_print(" ");
+ui_print("Extracting busybox...");
 package_extract_dir("system", "/system");
-set_perm_recursive(0, 0, 0755, 0755, "/system/lib/modules");
-ui_print("");
-set_perm(0, 2000, 0755, "/sbin/busybox");
-run_program("/sbin/busybox", "--install", "-s", "/system/xbin");
-ui_print("Unmounting System...");
+set_perm(0, 2000, 0755, "/system/xbin/busybox");
+run_program("/system/xbin/busybox", "--install", "-s", "/system/xbin");
+
+ui_print(" ");
+ui_print("Unmounting system & data...");
 unmount("/system");
-ui_print("");
-ui_print("Unmounting Data...");
 unmount("/data");
 ui_print("");
