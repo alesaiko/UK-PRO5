@@ -201,18 +201,18 @@ static void key_booster_init(void) {
 	key_p_data.bus.perf           = 1464000;
 	key_p_data.device.perf        = 200000;
 	key_p_data.graphic.perf       = 350;
-	key_p_data.nrcpu[CL_ONE].perf = 0;
+	key_p_data.nrcpu[CL_ONE].perf = 4;
 	key_p_data.nrcpu[CL_ZERO].perf = 4;
-	key_p_data.cluster1_boost.perf     = 1;
+	key_p_data.cluster1_boost.perf     = 2;
 
-	key_p_data.cpu[CL_ONE].pulse_timeout   = 500;
-	key_p_data.cpu[CL_ZERO].pulse_timeout   = 500;
-	key_p_data.bus.pulse_timeout           = 500;
-	key_p_data.device.pulse_timeout        = 500;
-	key_p_data.graphic.pulse_timeout       = 500;
-	key_p_data.nrcpu[CL_ONE].pulse_timeout = 500;
-	key_p_data.nrcpu[CL_ZERO].pulse_timeout = 500;
-	key_p_data.cluster1_boost.pulse_timeout     = 500;
+	key_p_data.cpu[CL_ONE].pulse_timeout   = 300;
+	key_p_data.cpu[CL_ZERO].pulse_timeout   = 300;
+	key_p_data.bus.pulse_timeout           = 300;
+	key_p_data.device.pulse_timeout        = 300;
+	key_p_data.graphic.pulse_timeout       = 300;
+	key_p_data.nrcpu[CL_ONE].pulse_timeout = 300;
+	key_p_data.nrcpu[CL_ZERO].pulse_timeout = 300;
+	key_p_data.cluster1_boost.pulse_timeout     = 300;
 
 	key_info.enable = 1;
 
@@ -308,22 +308,22 @@ static void first_stage_boost_init(void) {
 #endif
 
 	first_stage_p_data.cpu[CL_ONE].perf   = 800000;
-	first_stage_p_data.cpu[CL_ZERO].perf   = 1500000;
+	first_stage_p_data.cpu[CL_ZERO].perf   = 1296000;
 	first_stage_p_data.bus.perf           = 1464000;
 	first_stage_p_data.device.perf        = 200000;
 	first_stage_p_data.graphic.perf       = 350;
-	first_stage_p_data.nrcpu[CL_ONE].perf = 0;
+	first_stage_p_data.nrcpu[CL_ONE].perf = 4;
 	first_stage_p_data.nrcpu[CL_ZERO].perf = 4;
-	first_stage_p_data.cluster1_boost.perf     = 1;
+	first_stage_p_data.cluster1_boost.perf     = 2;
 
-	first_stage_p_data.cpu[CL_ONE].pulse_timeout   = 1000;
-	first_stage_p_data.cpu[CL_ZERO].pulse_timeout   = 1000;
-	first_stage_p_data.bus.pulse_timeout           = 1000;
-	first_stage_p_data.device.pulse_timeout        = 1000;
-	first_stage_p_data.graphic.pulse_timeout       = 1000;
-	first_stage_p_data.nrcpu[CL_ONE].pulse_timeout = 1000;
-	first_stage_p_data.nrcpu[CL_ZERO].pulse_timeout = 1000;
-	first_stage_p_data.cluster1_boost.pulse_timeout     = 1000;
+	first_stage_p_data.cpu[CL_ONE].pulse_timeout   = 2000;
+	first_stage_p_data.cpu[CL_ZERO].pulse_timeout   = 2000;
+	first_stage_p_data.bus.pulse_timeout           = 2000;
+	first_stage_p_data.device.pulse_timeout        = 2000;
+	first_stage_p_data.graphic.pulse_timeout       = 2000;
+	first_stage_p_data.nrcpu[CL_ONE].pulse_timeout = 2000;
+	first_stage_p_data.nrcpu[CL_ZERO].pulse_timeout = 2000;
+	first_stage_p_data.cluster1_boost.pulse_timeout     = 2000;
 
 	first_stage_info.enable = 1;
 	first_stage_info.status = FIRST_STAGE_BOOSTE_IDLE;
