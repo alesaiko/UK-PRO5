@@ -1584,11 +1584,11 @@ static inline void __update_group_entity_contrib(struct sched_entity *se) {}
  * tweaking suit particular needs.
  */
 
-unsigned int hmp_up_threshold = 700;
-unsigned int hmp_down_threshold = 256;
+unsigned int hmp_up_threshold = 524;
+unsigned int hmp_down_threshold = 214;
 
-unsigned int hmp_semiboost_up_threshold = 400;
-unsigned int hmp_semiboost_down_threshold = 150;
+unsigned int hmp_semiboost_up_threshold = 254;
+unsigned int hmp_semiboost_down_threshold = 163;
 
 #ifdef CONFIG_EXYNOS_MARCH_DYNAMIC_CPU_HOTPLUG
 extern unsigned int cluster1_hotplug_in_threshold_by_hmp;
